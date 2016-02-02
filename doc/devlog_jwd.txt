@@ -1,0 +1,58 @@
+
+#####
+# create activitysim development package
+#####
+
+cd ~/work
+
+git clone https://github.com/toliwaga/activitysim.git ./activitysim
+
+# install anaconda with python 2.7
+
+conda update conda
+
+~/anaconda/bin/conda create --name ampo --clone root
+
+source ~/anaconda/bin/activate ampo
+
+python setup.py develop
+
+
+#####
+# clone RSGInc/bca-abm
+#####
+
+cd ~/work
+git clone https://github.com/RSGInc/bca4abm.git ./bca4abm
+
+
+#####
+# install activitysim as development package
+#####
+
+source ~/anaconda/bin/activate bca
+cd ~/work/activitysim
+python setup.py develop
+
+
+
+#####
+# tutorials
+#####
+
+
+cd ~/work/bca4abm/tutorials
+jupyter notebook
+
+http://http://localhost:8889/tree
+
+
+cd ~/work/bca4abm/tutorials/orca_tutorial
+python orca_tutorial.py
+
+
+
+def is_interactive():
+    import __main__ as main
+    return not hasattr(main, '__file__')
+
