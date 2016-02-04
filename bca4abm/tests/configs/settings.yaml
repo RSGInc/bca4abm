@@ -1,0 +1,12 @@
+
+answer: 42
+
+person_type_map:
+    1: full
+    2: part
+    3: university
+    4: nonwork
+    5: retired
+    6: driving
+    7: school
+    8: preschool

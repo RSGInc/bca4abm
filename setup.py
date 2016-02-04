@@ -3,7 +3,7 @@ setup(
     name = "bca4abm",
     version = "0.1",
     author='RSG Inc',
-    packages = find_packages('bca4abm',),
+    packages = find_packages('bca4abm',exclude=['*.tests']),
     install_requires=[
         'numpy >= 1.8.0',
         'openmatrix >= 0.2.2',

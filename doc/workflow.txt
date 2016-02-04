@@ -1,0 +1,106 @@
+
+# Forking Workflow
+# https://www.atlassian.com/git/tutorials/comparing-workflows/forking-workflow
+
+#####
+# create activitysim development package
+#####
+
+cd ~/work
+
+git clone https://github.com/toliwaga/activitysim.git ./activitysim
+
+# install anaconda with python 2.7
+
+conda update conda
+
+~/anaconda/bin/conda create --name ampo --clone root
+
+source ~/anaconda/bin/activate ampo
+
+python setup.py develop
+
+
+#####
+# developer git setup
+#####
+
+# first fork the rsg repo in github
+https://help.github.com/articles/fork-a-repo/
+
+# now, on your local development machine
+# clone YOUR fork which will be (conventionaly and automatically) be named 'origin'
+cd ~/work
+git clone https://github.com/toliwaga/bca4abm.git ./bca4abm
+
+# and add the RSGInc repo as remote named (conventionally) 'upstream'
+git remote add rsg https://github.com/RSGInc/bca4abm.git
+
+# that way you can pull updates from the official repository
+git pull rsg master
+
+# if you accidentally cloned the RSGInc repo instead of your fork, all is not lost
+# (untested)
+git remote rename origin rsg
+git remote add origin https://github.com/toliwaga/bca4abm.git
+git branch --set-upstream-to=origin/master master
+
+# now things should look something like this:
+# $ git remote -v
+# origin	https://github.com/toliwaga/bca4abm.git (fetch)
+# origin	https://github.com/toliwaga/bca4abm.git (push)
+# rsg	https://github.com/RSGInc/bca4abm.git (fetch)
+# rsg	https://github.com/RSGInc/bca4abm.git (push)
+
+#####
+# developer workflow
+#####
+
+### create/checkout feature-branch
+git branch feature-branch
+git checkout feature-branch
+# or
+git checkout -b feature-branch
+
+# at this point master will be tracking origin/master
+# but the new branch is local (necessarily not a tracking branch)
+
+### work...
+echo "book" > dog.txt
+git add .
+git commit -a -m 'created book inside of a dog'
+
+### push branch to origin
+git push origin feature-branch
+
+# origin/feature-branch has now been pushed, but local branch is NOT a tracking branch
+
+# $ git pull
+# There is no tracking information for the current branch.
+# Please specify which branch you want to merge with.
+
+### push branch to origin
+
+
+
+# submit pull request
+# bring up to date
+git checkout master
+git pull upstream master
+
+# delete feature-branch locally and on remote
+git checkout master
+git branch -d feature-branch
+git push origin --delete feature-branch
+
+
+
+#####
+# maintainer workflow
+#####
+
+
+
+
+
+
