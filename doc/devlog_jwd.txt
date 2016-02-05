@@ -1,20 +1,33 @@
-
 #####
 # create activitysim development package
 #####
-
-cd ~/work
-
-git clone https://github.com/toliwaga/activitysim.git ./activitysim
 
 # install anaconda with python 2.7
 
 conda update conda
 
-~/anaconda/bin/conda create --name ampo --clone root
+~/anaconda/bin/conda create --name bca --clone root
 
-source ~/anaconda/bin/activate ampo
 
+
+
+#####
+# create activitysim development package
+#####
+
+# install anaconda with python 2.7
+
+conda update conda
+
+~/anaconda/bin/conda create --name bca --clone root
+
+source ~/anaconda/bin/activate bca
+
+cd ~/work
+
+git clone https://github.com/toliwaga/activitysim.git ./activitysim
+
+cd activitysim
 python setup.py develop
 
 
@@ -22,8 +35,23 @@ python setup.py develop
 # clone RSGInc/bca-abm
 #####
 
+# I am using push.default simple
+git config --global push.default simple
+
 cd ~/work
-git clone https://github.com/RSGInc/bca4abm.git ./bca4abm
+git clone https://github.com/toliwaga/bca4abm.git ./bca4abm
+
+cd bca4abm
+
+git remote rename origin rsg
+
+git remote add rsg https://github.com/RSGInc/bca4abm.git
+
+git remote -v
+rsg	https://github.com/RSGInc/bca4abm.git (fetch)
+rsg	https://github.com/RSGInc/bca4abm.git (push)
+origin	https://github.com/toliwaga/bca4abm.git (fetch)
+origin	https://github.com/toliwaga/bca4abm.git (push)
 
 
 #####
@@ -33,6 +61,14 @@ git clone https://github.com/RSGInc/bca4abm.git ./bca4abm
 source ~/anaconda/bin/activate bca
 cd ~/work/activitysim
 python setup.py develop
+
+
+#####
+# testing
+#####
+
+cd ~/work/bca4abm
+py.test ./bca4abm/tests/test_bca.py
 
 
 
