@@ -16,6 +16,8 @@ from .. import bca4abm as bca
 
 def test_read_settings():
 
+    orca.add_injectable("configs_dir", os.path.join(os.path.dirname(__file__)))
+
     settings = orca.eval_variable('settings')
     assert settings.get('answer') == 42
 

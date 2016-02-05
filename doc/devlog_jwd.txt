@@ -1,5 +1,5 @@
 #####
-# create activitysim development package
+# create anaconda bca env
 #####
 
 # install anaconda with python 2.7
@@ -9,58 +9,50 @@ conda update conda
 ~/anaconda/bin/conda create --name bca --clone root
 
 
-
-
 #####
-# create activitysim development package
+# clone activitysim and create activitysim development package
 #####
-
-# install anaconda with python 2.7
-
-conda update conda
-
-~/anaconda/bin/conda create --name bca --clone root
-
-source ~/anaconda/bin/activate bca
-
-cd ~/work
 
 git clone https://github.com/toliwaga/activitysim.git ./activitysim
+
+source ~/anaconda/bin/activate bca
 
 cd activitysim
 python setup.py develop
 
+# or for now just copy in the source (for travis)
+
 
 #####
-# clone RSGInc/bca-abm
+# developer git repo setup - fork and clone bca4abm
 #####
 
-# I am using push.default simple
-git config --global push.default simple
+# first fork the rsg repo in github
+https://help.github.com/articles/fork-a-repo/
 
+# now, on your local development machine
+# clone YOUR fork which will be (conventionaly and automatically) be named 'origin'
 cd ~/work
 git clone https://github.com/toliwaga/bca4abm.git ./bca4abm
 
-cd bca4abm
-
-git remote rename origin rsg
-
+# and add the RSGInc repo as remote named (conventionally) 'upstream'
 git remote add rsg https://github.com/RSGInc/bca4abm.git
 
-git remote -v
-rsg	https://github.com/RSGInc/bca4abm.git (fetch)
-rsg	https://github.com/RSGInc/bca4abm.git (push)
-origin	https://github.com/toliwaga/bca4abm.git (fetch)
-origin	https://github.com/toliwaga/bca4abm.git (push)
+# that way you can pull updates from the official repository
+git pull rsg master
 
+# if you accidentally cloned the RSGInc repo instead of your fork, all is not lost
+# (untested)
+git remote rename origin rsg
+git remote add origin https://github.com/toliwaga/bca4abm.git
+git branch --set-upstream-to=origin/master master
 
-#####
-# install activitysim as development package
-#####
-
-source ~/anaconda/bin/activate bca
-cd ~/work/activitysim
-python setup.py develop
+# now things should look something like this:
+# $ git remote -v
+# origin	https://github.com/toliwaga/bca4abm.git (fetch)
+# origin	https://github.com/toliwaga/bca4abm.git (push)
+# rsg	https://github.com/RSGInc/bca4abm.git (fetch)
+# rsg	https://github.com/RSGInc/bca4abm.git (push)
 
 
 #####
@@ -69,7 +61,6 @@ python setup.py develop
 
 cd ~/work/bca4abm
 py.test ./bca4abm/tests/test_bca.py
-
 
 
 #####

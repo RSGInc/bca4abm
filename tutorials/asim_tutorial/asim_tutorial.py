@@ -69,16 +69,18 @@ orca.eval_variable('pet_spec')
 @orca.step()
 def pet_activity_simple_simulate(set_random_seed, pets_merged, pet_spec):
 
-    # choosers: the choice model will be applied to each row of the choosers table (a pandas.DataFrame)
+    # the choice model will be applied to each row of the choosers table (a pandas.DataFrame)
     choosers = pets_merged.to_frame()
 
-    # spec: table of variable specifications and coefficient values of alternatives (a pandas.DataFrame table
+    # table of variable specifications and coefficient values of alternatives (a pandas.DataFrame)
     spec = pet_spec
 
-    # locals whose values will be accessible to the execution context  when the expressions in spec are applied to choosers
+    # locals whose values will be accessible to the execution context
+    # when the expressions in spec are applied to choosers
     locals_d=None
 
-    # eval_variables evaluates each of the expressions in spec in the context of each row in of the choosers dataframe
+    # eval_variables evaluates each of the expressions in spec
+    # in the context of each row in of the choosers dataframe
     model_design = asim.eval_variables(spec.index, choosers, locals_d)
 
     print "\n### model_design - results of the expressions for each row in choosers"
@@ -108,13 +110,14 @@ orca.run(["pet_activity_simple_simulate"])
 @orca.step()
 def pet_activity_simulate(set_random_seed, pets_merged, pet_spec):
 
-    # choosers: the choice model will be applied to each row of the choosers table (a pandas.DataFrame)
+    # the choice model will be applied to each row of the choosers table (a pandas.DataFrame)
     choosers = pets_merged.to_frame()
 
-    # spec: table of variable specifications and coefficient values of alternatives (a pandas.DataFrame table
+    # pandas.DataFrame table of variable specifications and coefficient values of alternatives
     spec = pet_spec
 
-    # locals whose values will be accessible to the execution context  when the expressions in spec are applied to choosers
+    # locals whose values will be accessible to the execution context
+    # when the expressions in spec are applied to choosers
     locals_d=None
 
     choices, model_design = asim.simple_simulate(choosers, spec)
@@ -141,7 +144,7 @@ orca.run(["pet_activity_simulate"])
 # pets_merged with pet_activity and pet_activity_names columns assigned by pet_activity_simulate
 orca.get_table('pets_merged').to_frame()
 
-# note that these new columns were added to the orca.DataFrameWrapper table, not the df_pet dataframe
+# note that the new columns were added to the orca.DataFrameWrapper table, not the df_pet dataframe
 df_pet
 
 ##########################################################################
@@ -211,13 +214,16 @@ history = orca.get_table('history').to_frame()
 history
 
 # the history table pivoted with counts by year of activities across pets
-pd.pivot_table(history, index='timestamp', columns=['pet_activity_names'], values='age', fill_value=0, aggfunc='count')
+pd.pivot_table(history, index='timestamp',
+               columns=['pet_activity_names'], values='age', fill_value=0, aggfunc='count')
 
 # the update ages are are visible in the orca registered pets_merged table
 orca.get_table('pets_merged').to_frame()[['pet_name', 'init_age', 'age']]
 
-# because we used orca.DataFrameWrapper.update_col_from_series to update age, it wrote through to the underlying df_pets dataframe
-# if you are mixing dataframe access within and outside orca, you need to be mindful of how orca references tables
+# because we used orca.DataFrameWrapper.update_col_from_series to update age,
+# it wrote through to the underlying df_pets dataframe
+# if you are mixing dataframe access within and outside orca,
+# you need to be mindful of how orca references tables
 df_pet
 
 # to re-run, we need to reinitialize tables changed by the simulation
