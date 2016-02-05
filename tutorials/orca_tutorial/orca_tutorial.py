@@ -41,7 +41,9 @@ orca.add_table('pets', df_pet)
 orca.broadcast(cast='species', onto='pets', cast_index=True, onto_on='species_id')
 
 ### this is the merged table
-orca.merge_tables('pets', tables=['pets', 'species'], columns=['pet_name', 'age', 'species_name', 'age_rate'])
+orca.merge_tables('pets',
+                  tables=['pets', 'species'],
+                  columns=['pet_name', 'age', 'species_name', 'age_rate'])
 
 # this is a common merge so might as well define it once here and use it
 @orca.table()
@@ -77,7 +79,8 @@ def summarize(pets, iter_var):
 
 # now lets run an orca pipeline
 
-# data_out (optional) is the filename of pandas HDF data store to which all tables injected into any step will be saved
+# data_out (optional) is the filename of pandas HDF data store
+# to which all tables injected into any step will be saved
 hdf_output_filename = '../output/run.md5'
 orca.run(['age_simulate', 'summarize'], iter_vars=range(2010, 2015), data_out=hdf_output_filename)
 
