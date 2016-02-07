@@ -17,11 +17,7 @@ git clone https://github.com/toliwaga/activitysim.git ./activitysim
 
 source ~/anaconda/bin/activate bca
 
-cd activitysim
-python setup.py develop
-
-# or for now just copy in the source (for travis)
-
+pip install pep8
 
 #####
 # developer git repo setup - fork and clone bca4abm

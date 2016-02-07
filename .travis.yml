@@ -1,0 +1,32 @@
+language: python
+sudo: false
+python:
+- '2.7'
+install:
+- if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then wget http://repo.continuum.io/miniconda/Miniconda-3.7.0-Linux-x86_64.sh
+  -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.7.0-Linux-x86_64.sh
+  -O miniconda.sh; fi
+- bash miniconda.sh -b -p $HOME/miniconda
+- export PATH="$HOME/miniconda/bin:$PATH"
+- hash -r
+- conda config --set always_yes yes --set changeps1 no
+- conda update -q conda
+- conda info -a
+- |
+  conda create -q -c synthicity -n test-environment python=$TRAVIS_PYTHON_VERSION cytoolz ipython-notebook jinja2 matplotlib numpy pandas pandana patsy pip pytables pytest pyyaml scipy statsmodels toolz
+- source activate test-environment
+- pip install bottle orca prettytable simplejson zbox
+- pip install openmatrix
+- pip install pytest-cov coveralls pep8
+- pip install git+https://github.com/RSGInc/activitysim.git@master
+script:
+- pep8 bca4abm
+- py.test --cov bca4abm --cov-report term-missing
+after_success:
+- coveralls
+notifications:
+  slack:
+    secure: ssVfG9qhvZ3BkLCypS2zgCu0qE5z0shSp4WTBXft+Ra/t6p1UPfQP3x1cZt41K7Qd1biqlfhWgTOgC82DZpTjg98QkSZTNH0UEbo/5wnBUFrRxxa5U59GP4lQ48wFFYe+BlPPKY4dnw9UOCbpRM82ZXMQcBa0/WPS/ZFMP0clHluioPBXpQMsUmsv6W9LLRVuk+gshdmu1ASzIUw4UZK/fZP4pgtatonFzIVsHXeqWZueJBkUTAW3jc9BB9z9KYaP0EHwg6DxIt8kjmB3E4cQVhEolDIMf1DuC8O5tx+xC/GZRBFg4gBtYaqBulNuCUkkA1krFjN2H8LBZCmxCVx1o36DsEWfgQJxqNQyscxT7s+SGdmb5xNHhZZ56VaS7mxdE9cJmfAUpiBZbxL+WrLkzMuJUHZuZSJ8gyyp4UXYcPLqVOKDraAcH2xXJq5NU7J9ZcRTbhEsEoiyxG0WOlwjgO7s0lNYqJyJo39B6jP2x1ld05ydXU+xOcIVVatIfS/arozXodgrhV7kZP2xMVXGJlWy4I+11EBbGjrhvoFl82gHdUjALXoj8sMbz+JjT9t83ZWZojgQQV7LdPQbjN0Nq3MBTzL80SGiGZUYoaDU0BO5M0vj+Tw6jtYRngue4za2QLn/udainmkuJ09T7tDifJ7FXYgpdpuniHJPKKatvw=
+  email:
+    recipients:
+      - toliwaga@gmail.com
