@@ -3,27 +3,46 @@
 # https://www.atlassian.com/git/tutorials/comparing-workflows/forking-workflow
 
 #####
-# create activitysim development package
+# create local development environment
 #####
 
 cd ~/work
 
-git clone https://github.com/toliwaga/activitysim.git ./activitysim
-
 # install anaconda with python 2.7
 
+source ~/anaconda/bin/activate root
 conda update conda
 
-~/anaconda/bin/conda create --name ampo --clone root
-
-source ~/anaconda/bin/activate ampo
-
-python setup.py develop
+conda create -q -c synthicity -n bca python=2.7 cytoolz ipython-notebook jinja2 matplotlib numpy pandas pandana patsy pip pytables pytest pyyaml scipy statsmodels toolz
+source activate bca
+pip install bottle orca prettytable simplejson zbox
+pip install openmatrix
+pip install pytest-cov coveralls pep8
+pip install git+https://github.com/RSGInc/activitysim.git@master
 
 ################################################################################
 
+
 #####
-# developer git repo setup - fork and clone bca4abm
+# maintainer setup -  clone RSGInc/bca4abm
+#####
+
+# clone the repo which will be (conventionally and automatically) be named 'origin'
+cd ~/work
+git clone https://github.com/RSGInc/bca4abm.git ./bca4abm
+
+# add the RSGInc repo as remote 'rsg' so we can speak the same language as contibutors
+git remote add rsg https://github.com/RSGInc/bca4abm.git
+
+# now things should look like this:
+# $ git remote -v
+# origin	https://github.com/RSGInc/bca4abm.git (fetch)
+# origin	https://github.com/RSGInc/bca4abm.git (push)
+# rsg	https://github.com/RSGInc/bca4abm.git (fetch)
+# rsg	https://github.com/RSGInc/bca4abm.git (push)
+
+#####
+# contributor setup - fork RSGInc/bca4abm and clone <CONTRIBUTOR_USER>/bca4abm
 #####
 
 # first fork the rsg repo in github
@@ -32,36 +51,36 @@ https://help.github.com/articles/fork-a-repo/
 # now, on your local development machine
 # clone YOUR fork which will be (conventionaly and automatically) be named 'origin'
 cd ~/work
-git clone https://github.com/toliwaga/bca4abm.git ./bca4abm
+git clone https://github.com/_CONTRIBUTOR_USER_/bca4abm.git ./bca4abm
 
-# and add the RSGInc repo as remote named (conventionally) 'upstream'
+# and add the RSGInc repo as remote named 'rsg'
 git remote add rsg https://github.com/RSGInc/bca4abm.git
 
-# that way you can pull updates from the official repository
-git pull rsg master
-
-# if you accidentally cloned the RSGInc repo instead of your fork, all is not lost
-# (untested)
+# or, if you accidentally cloned the RSGInc repo instead of your fork, all is not lost
 git remote rename origin rsg
-git remote add origin https://github.com/toliwaga/bca4abm.git
+git remote add origin https://github.com/_CONTRIBUTOR_USER_/bca4abm.git
 git branch --set-upstream-to=origin/master master
 
-# now things should look something like this:
+# now things should look like this:
 # $ git remote -v
-# origin	https://github.com/toliwaga/bca4abm.git (fetch)
-# origin	https://github.com/toliwaga/bca4abm.git (push)
+# origin	https://github.com/_CONTRIBUTOR_USER_/bca4abm.git (fetch)
+# origin	https://github.com/_CONTRIBUTOR_USER_/bca4abm.git (push)
 # rsg	https://github.com/RSGInc/bca4abm.git (fetch)
 # rsg	https://github.com/RSGInc/bca4abm.git (push)
+
 
 ################################################################################
 
 #####
-# developer workflow
+# feature development workflow
 #####
 
 #####
-# create/checkout testing
+# create/checkout development branch
 #####
+
+git pull rsg master
+
 
 git branch _BRANCH_NAME_
 git checkout _BRANCH_NAME_
@@ -72,25 +91,26 @@ git checkout -b _BRANCH_NAME_
 # but the new branch is local (necessarily not a tracking branch)
 
 #####
-# develop
+# develop in development branch
 #####
 
 cd ~/work/bca4abm
+
+source ~/anaconda/bin/activate bca
 
 echo "book" > dog.txt
 git add .
 git commit -a -m 'created book inside of a dog'
 
 # run tests
-py.test ./bca4abm/tests/test_bca.py
+py.test bca4abm
 
 # run tests
 git pull --rebase rsg master
 
 #####
-# push branch to origin
+# push development branch to origin
 #####
-
 
 # bring up to date with rsg master
 git pull --rebase rsg master
@@ -105,7 +125,6 @@ git push origin _BRANCH_NAME_
 ###---------------------------------------------------------------------------
 # if you are collaborating with another developer on this branch
 # you might want to use a remote  tracking branch
-#####
 
 # $ git branch -vv
 #   master        d453418 [origin/master] commit message a
@@ -126,39 +145,32 @@ git push
 # submit pull request
 #####
 
+# squash multiple commits into on in order to keep master history clean
+
 git status
 git pull --rebase rsg master
 
 git log
-
 git rebase --interactive <hash-of-last-commit-before-branch>
 # Squash (s) all but your first commit.
 # Update comment for commit
 
 git push -u origin _BRANCH_NAME_ --force
 
-git commit --amend
+# log in to github and submit pull request
 
-# new pull request
+# without waiting for pull request to be processed, you can checkout master and bring up to date
+git checkout master
+git pull rsg master
+git push
 
 ###---------------------------------------------------------------------------
-
-#####
 # maintainer workflow for handling pull request
-#####
-
-
 # https://help.github.com/articles/using-pull-requests/
 # https://help.github.com/articles/checking-out-pull-requests-locally/
+###---------------------------------------------------------------------------
 
-
-#####---------------------------------------------------------------------------
-
-
-#####
-# cleanup branch and start again
-#####
-
+# once the pull request has been processed, cleanup branch and start again
 
 # bring up to date
 git checkout master
@@ -170,3 +182,4 @@ git checkout master
 git branch -d _BRANCH_NAME_
 git push origin --delete _BRANCH_NAME_
 
+################################################################################
