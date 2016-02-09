@@ -8,56 +8,34 @@ conda update conda
 
 ~/anaconda/bin/conda create --name bca --clone root
 
-
-#####
-# clone activitysim and create activitysim development package
-#####
-
-git clone https://github.com/toliwaga/activitysim.git ./activitysim
-
 source ~/anaconda/bin/activate bca
 
-pip install pep8
+python setup.py develop
 
-#####
-# developer git repo setup - fork and clone bca4abm
-#####
 
-# first fork the rsg repo in github
-https://help.github.com/articles/fork-a-repo/
-
-# now, on your local development machine
-# clone YOUR fork which will be (conventionaly and automatically) be named 'origin'
 cd ~/work
-git clone https://github.com/toliwaga/bca4abm.git ./bca4abm
+git clone https://github.com/RSGInc/activitysim.git ./activitysim
+~/anaconda/bin/conda create --name asim --clone root
+source ~/anaconda/bin/activate asim
 
-# and add the RSGInc repo as remote named (conventionally) 'upstream'
-git remote add rsg https://github.com/RSGInc/bca4abm.git
-
-# that way you can pull updates from the official repository
-git pull rsg master
-
-# if you accidentally cloned the RSGInc repo instead of your fork, all is not lost
-# (untested)
-git remote rename origin rsg
-git remote add origin https://github.com/toliwaga/bca4abm.git
-git branch --set-upstream-to=origin/master master
-
-# now things should look something like this:
-# $ git remote -v
-# origin	https://github.com/toliwaga/bca4abm.git (fetch)
-# origin	https://github.com/toliwaga/bca4abm.git (push)
-# rsg	https://github.com/RSGInc/bca4abm.git (fetch)
-# rsg	https://github.com/RSGInc/bca4abm.git (push)
-
+git clone https://github.com/RSGInc/orca.git ./orca
+~/anaconda/bin/conda create --name orca --clone root
+source ~/anaconda/bin/activate orca
 
 #####
 # testing
 #####
 
 cd ~/work/bca4abm
+
+cd example
+python run_bca.py
+
+py.test ./bca4abm
+
 py.test ./bca4abm/tests/test_bca.py
 
+pep8 ./bca4abm
 
 #####
 # tutorials

@@ -41,7 +41,7 @@ orca.add_table('pets', df_pet)
 orca.broadcast(cast='species', onto='pets', cast_index=True, onto_on='species_id')
 
 ### this is the merged table
-orca.merge_tables('pets',
+orca.merge_tables(target='pets',
                   tables=['pets', 'species'],
                   columns=['pet_name', 'age', 'species_name', 'age_rate'])
 
@@ -81,7 +81,7 @@ def summarize(pets, iter_var):
 
 # data_out (optional) is the filename of pandas HDF data store
 # to which all tables injected into any step will be saved
-hdf_output_filename = '../output/run.md5'
+hdf_output_filename = '../output/run.h5'
 orca.run(['age_simulate', 'summarize'], iter_vars=range(2010, 2015), data_out=hdf_output_filename)
 
 # lets inspect the output
@@ -89,7 +89,7 @@ store = pd.HDFStore(hdf_output_filename)
 
 
 # <class 'pandas.io.pytables.HDFStore'>
-# File path: ./output/run.md5
+# File path: ./output/run.h5
 # /2011/pets            frame        (shape->[5,3])
 # /2012/pets            frame        (shape->[5,3])
 # /2013/pets            frame        (shape->[5,3])

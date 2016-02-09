@@ -582,7 +582,7 @@ div#notebook {
 <div class=" highlight hl-ipython2"><pre><span class="c"># now lets run an orca pipeline</span>
 
 <span class="c"># data_out (optional) is the filename of pandas HDF data store to which all tables injected into any step will be saved</span>
-<span class="n">hdf_output_filename</span> <span class="o">=</span> <span class="s">&#39;run_orca.md5&#39;</span>
+<span class="n">hdf_output_filename</span> <span class="o">=</span> <span class="s">&#39;run_orca.h5&#39;</span>
 <span class="n">orca</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s">&#39;age_simulate&#39;</span><span class="p">,</span> <span class="s">&#39;summarize&#39;</span><span class="p">],</span> <span class="n">iter_vars</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">2010</span><span class="p">,</span> <span class="mi">2015</span><span class="p">),</span> <span class="n">data_out</span><span class="o">=</span><span class="n">hdf_output_filename</span><span class="p">)</span>
 </pre></div>
 
@@ -692,7 +692,7 @@ Total time to execute iteration 5 with iteration value 2014: 0.01 s
 
 <div class="output_text output_subarea output_execute_result">
 <pre>&lt;class &apos;pandas.io.pytables.HDFStore&apos;&gt;
-File path: run_orca.md5
+File path: run_orca.h5
 /2011/pets            frame        (shape-&gt;[5,3])
 /2012/pets            frame        (shape-&gt;[5,3])
 /2013/pets            frame        (shape-&gt;[5,3])
