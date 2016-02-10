@@ -1,6 +1,10 @@
 
 #store: store.h5
-#output_store: store.h5
+
+output_store: store.h5
+output_store_tables:
+  - bca_households
+  - bca_persons
 
 bca_households: households.csv
 bca_households_column_map:
@@ -12,16 +16,21 @@ bca_persons: persons.csv
 bca_persons_column_map:
   pno: person_idx
   hhno: hh_id
-  pptype: person_type
+  pptyp: person_type
   pgend: person_gender
   pagey: person_age
 
 person_type_map:
     1: full
     2: part
-    3: university
+    3: retired
     4: nonwork
-    5: retired
-    6: driving
+    5: university
+    6: highschool
     7: school
     8: preschool
+
+gender_map:
+    1: male
+    2: female
+

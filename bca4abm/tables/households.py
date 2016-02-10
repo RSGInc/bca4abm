@@ -3,7 +3,7 @@ import numpy as np
 import orca
 import pandas as pd
 
-from ..util.misc import read_bca_table
+from bca4abm import bca4abm as bca
 
 
 # this caches things so you don't have to read in the file from disk again
@@ -11,7 +11,7 @@ from ..util.misc import read_bca_table
 def bca_households_internal(data_dir, store, settings):
 
     if "bca_households" in settings:
-        df = read_bca_table("bca_households", 'hh_id', data_dir, settings)
+        df = bca.read_bca_table("bca_households", 'hh_id', data_dir, settings)
     else:
         df = store["bca_households"]
 
