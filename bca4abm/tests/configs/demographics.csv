@@ -1,0 +1,3 @@
+Description,Target,Expression
+"is_adult",is_adult, person_age > 18
+"is_rich_girl",is_rich_girl, person_age < 18 and hh_income > 100000
