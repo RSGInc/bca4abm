@@ -33,10 +33,10 @@ def demographics_processor(bca_persons_merged, demographics_spec):
     # in the context of each row in of the choosers dataframe
     results = bca.assign_variables(demographics_spec, persons_merged, locals_d)
 
-    print "\n### demographics_processor - results of the expressions for each row in table"
-    print results
-
-    print "\n### demographics_processor - demographics_spec"
-    print demographics_spec
+    # print "\n### demographics_processor - results of the expressions for each row in table"
+    # print results
+    #
+    # print "\n### demographics_processor - demographics_spec"
+    # print demographics_spec
 
     add_assigned_columns("bca_persons", results)

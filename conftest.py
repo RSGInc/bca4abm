@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+
 @pytest.fixture
 def random_seed(request):
     current = np.random.get_state()

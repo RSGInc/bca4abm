@@ -4,21 +4,23 @@ import orca
 import pandas as pd
 
 from bca4abm import bca4abm as bca
+from bca4abm.util.misc import expect_columns
 
 
 # this caches things so you don't have to read in the file from disk again
 @orca.table(cache=True)
 def bca_persons_internal(data_dir, store, settings):
 
-    if "bca_persons" in settings:
+    if store is None:
         df = bca.read_bca_table("bca_persons", 'person_id', data_dir, settings)
     else:
-        df = store["bca_persons"]
+        df = store["bca_persons_internal"]
 
-    bca.expect_columns(df, ["hh_id",
-                            "person_type",
-                            "person_age",
-                            "person_gender"])
+    expect_columns(df, ["hh_id",
+                        "person_idx",
+                        "person_type",
+                        "person_age",
+                        "person_gender"])
 
     return df
 

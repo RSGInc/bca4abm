@@ -13,7 +13,7 @@ def bca_households_internal(data_dir, store, settings):
     if "bca_households" in settings:
         df = bca.read_bca_table("bca_households", 'hh_id', data_dir, settings)
     else:
-        df = store["bca_households"]
+        df = store["bca_households_internal"]
 
     return df
 

@@ -24,8 +24,13 @@ def output_dir():
 
 
 @orca.injectable()
-def settings(configs_dir):
-    with open(os.path.join(configs_dir, "configs", "settings.yaml")) as f:
+def settings_file_name():
+    return 'settings.yaml'
+
+
+@orca.injectable()
+def settings(configs_dir, settings_file_name):
+    with open(os.path.join(configs_dir, "configs", settings_file_name)) as f:
         return yaml.load(f)
 
 
@@ -48,10 +53,11 @@ def store(data_dir, settings):
 @orca.step()
 def write_output_store(output_store, settings):
 
-    if output_store:
+    if output_store is not None:
 
         table_names = settings.get("output_store_tables", [])
 
         for table_name in table_names:
             print "   writing %s..." % table_name
+            print "      columns: %s" % orca.eval_variable(table_name).to_frame().columns.values
             output_store[table_name] = orca.eval_variable(table_name).to_frame()
