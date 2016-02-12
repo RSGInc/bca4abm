@@ -17,11 +17,11 @@ install:
 - source activate test-environment
 - pip install bottle orca prettytable simplejson zbox
 - pip install openmatrix
-- pip install pytest-cov coveralls pep8
+- pip install pytest-cov coveralls pep8 pytest-xdist
 - pip install git+https://github.com/RSGInc/activitysim.git@master
 script:
 - pep8 bca4abm
-- py.test --cov bca4abm --cov-report term-missing
+- py.test --boxed --cov bca4abm --cov-report term-missing
 after_success:
 - coveralls
 notifications:

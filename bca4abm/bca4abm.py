@@ -4,7 +4,7 @@ import orca
 import os
 import yaml
 
-from activitysim import activitysim as asim
+# from activitysim import activitysim as asim
 
 
 def read_bca_table(table_name, index_col, data_dir, settings):
@@ -33,22 +33,6 @@ def read_bca_table(table_name, index_col, data_dir, settings):
         df.index.names = [index_col]
 
     return df
-
-
-def expect_columns(table, expected_column_names):
-
-    table_column_names = table.columns.values
-
-    missing_column_names = list(c for c in expected_column_names if c not in table_column_names)
-    extra_column_names = list(c for c in table_column_names if c not in expected_column_names)
-
-    for c in missing_column_names:
-        print "expect_columns MISSING expected column %s" % c
-
-    for c in extra_column_names:
-        print "expect_columns FOUND unexpected column %s" % c
-
-    return missing_column_names == []
 
 
 def read_assignment_spec(fname,

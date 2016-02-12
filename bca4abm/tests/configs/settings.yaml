@@ -1,5 +1,10 @@
 answer: 42
 
+#output_store: store.h5
+output_store_tables:
+  - bca_households_internal
+  - bca_persons_internal
+
 bca_households: households.csv
 bca_households_column_map:
   hhno: hh_id
