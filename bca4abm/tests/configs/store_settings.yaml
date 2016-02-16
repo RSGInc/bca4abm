@@ -4,7 +4,7 @@ store: store.h5
 bca_households_column_map:
   hhno: hh_id
   hhincome: hh_income
-  hhtaz: hh_taz
+  hhsize: hh_size
 
 # bca_persons: persons.csv
 bca_persons_column_map:
