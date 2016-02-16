@@ -7,9 +7,20 @@ def add_assigned_columns(base_dfname, from_df):
         orca.add_column(base_dfname, col, from_df[col])
 
 
+# use of this (hidden) utility function is a common idiom in activitysim.defaults
+# from activitysim.defaults.models.utils.misc import add_dependent_columns
+def add_dependent_columns(base_dfname, new_dfname):
+    tbl = orca.get_table(new_dfname)
+    for col in tbl.columns:
+        print "Adding dependent", col
+        orca.add_column(base_dfname, col, tbl[col])
+
+
 def missing_columns(table, expected_column_names):
 
-    return list(c for c in expected_column_names if c not in table.columns.values)
+    table_column_names = tuple(table.columns.values) + tuple(table.index.names)
+
+    return list(c for c in expected_column_names if c not in table_column_names)
 
 
 def extra_columns(table, expected_column_names):
@@ -19,10 +30,8 @@ def extra_columns(table, expected_column_names):
 
 def expect_columns(table, expected_column_names):
 
-    table_column_names = table.columns.values
-
-    missing_column_names = list(c for c in expected_column_names if c not in table_column_names)
-    extra_column_names = list(c for c in table_column_names if c not in expected_column_names)
+    missing_column_names = missing_columns(table, expected_column_names)
+    extra_column_names = extra_columns(table, expected_column_names)
 
     for c in missing_column_names:
         print "expect_columns MISSING expected column %s" % c

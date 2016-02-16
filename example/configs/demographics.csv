@@ -1,3 +1,3 @@
 Description,Target,Expression
-"is_adult",is_adult, person_age > 18
-"is_rich_girl",is_rich_girl, person_age < 18 and hh_income > 100000
+coc_poverty,coc_poverty,"@df.hh_income <= df.hh_size.apply(lambda n : (15930+(n-2)*4160) if n > 2 else ([0, 11770, 15930][n]))"
+coc_age,coc_age, person_age > 65

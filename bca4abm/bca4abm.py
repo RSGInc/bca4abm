@@ -5,9 +5,10 @@ import os
 import yaml
 
 # from activitysim import activitysim as asim
+from .util.misc import expect_columns
 
 
-def read_bca_table(table_name, index_col, data_dir, settings):
+def read_csv_table(table_name, data_dir, settings, index_col=None, column_map=None):
 
     # settings:
     #   <table_name>: <csv fiel name>
@@ -18,20 +19,39 @@ def read_bca_table(table_name, index_col, data_dir, settings):
 
     fpath = os.path.join(data_dir, 'data', settings[table_name])
 
-    column_map_key = table_name + "_column_map"
-    if column_map_key in settings:
-        usecols = settings[column_map_key].keys()
+    if column_map is None:
+        column_map = table_name + "_column_map"
+
+    if column_map in settings:
+        usecols = settings[column_map].keys()
         # print "read_bca_table usecols: ", usecols
         df = pd.read_csv(fpath, header=0, usecols=usecols)
-        df.rename(columns=settings[column_map_key], inplace=True)
+        df.rename(columns=settings[column_map], inplace=True)
     else:
         df = pd.read_csv(fpath, header=0)
 
-    if index_col in df.columns:
-        df.set_index(index_col, inplace=True)
-    else:
-        df.index.names = [index_col]
+    if index_col is not None:
+        if index_col in df.columns:
+            df.set_index(index_col, inplace=True)
+        else:
+            df.index.names = [index_col]
 
+    return df
+
+
+def get_raw_table(table_name, index_col=None, column_map=None):
+
+    settings = orca.eval_variable('settings')
+
+    if table_name in settings:
+        data_dir = orca.eval_variable('data_dir')
+        df = read_csv_table(table_name, data_dir, settings,
+                            index_col=index_col,
+                            column_map=column_map)
+    else:
+        store = orca.eval_variable('store')
+        df = store["raw_" + table_name]
+        expect_columns(df, settings[column_map].values())
     return df
 
 
@@ -131,10 +151,18 @@ def assign_variables(assignment_expressions, df, locals_d=None):
         target = e[0]
         expression = e[1]
         try:
-            l.append((target, to_series(eval(expression[1:], globals(), locals_d))
-                     if expression.startswith('@') else df.eval(expression)))
+            values = to_series(eval(expression[1:], globals(), locals_d)) \
+                if expression.startswith('@') \
+                else df.eval(expression)
+            l.append((target, values))
+
+            # FIXME - do we want to update locals to allows us to ref previously assigned targets?
+            locals_d[target] = values
         except Exception as err:
             print "Variable %s expression failed for: %s" % (str(target), str(expression))
             raise err
 
+    # FIXME - should we add_assigned_columns rather than creating a dataframe and returning it?
+    # FIXME - we could pass in the target df to optionally assign directly from items
+    # FIXME - (though desired target might not be the eval df if eval df is a merged table...)
     return pd.DataFrame.from_items(l)

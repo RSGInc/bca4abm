@@ -1,0 +1,6 @@
+Description,Target,Expression
+"travel_time",travel_time,auto_time+transit_time+bike_time+walk_time
+"travel_time_alt",travel_time_alt,alt_auto_time+alt_transit_time+alt_bike_time+alt_walk_time
+"travel_time_benefit",travel_time_benefit,@travel_time-travel_time_alt
+"value_of_time",vot,@df.tour_purpose.map(settings["tour_purpose_vot_map"])
+"monetized_travel_time_benefit",monetized_travel_time_benefit,@travel_time_benefit*vot

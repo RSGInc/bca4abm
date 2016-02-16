@@ -1,8 +1,10 @@
 import os
 import orca
 
+
 from bca4abm import bca4abm as bca
 from ..util.misc import add_assigned_columns
+from ..util.misc import add_dependent_columns
 
 """
 Demographics processor
@@ -16,7 +18,7 @@ def demographics_spec(configs_dir):
 
 
 @orca.step()
-def demographics_processor(bca_persons_merged, demographics_spec):
+def demographics_processor(bca_persons_merged, demographics_spec, settings):
 
     print "---------- demographics_processor"
 
@@ -40,3 +42,6 @@ def demographics_processor(bca_persons_merged, demographics_spec):
     # print demographics_spec
 
     add_assigned_columns("bca_persons", results)
+
+    # FIXME remove this if there are no demographics columns dependent
+    add_dependent_columns("bca_persons", "persons_demographics")

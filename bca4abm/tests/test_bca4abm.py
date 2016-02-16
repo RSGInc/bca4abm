@@ -34,63 +34,14 @@ def test_read_settings():
     assert settings.get('store')is None
 
 
-def test_read_bca_table():
+def test_read_csv_table():
 
     data_dir = orca.eval_variable('data_dir')
     settings = {'bca_persons': 'persons.csv'}
 
-    df = bca.read_bca_table("bca_persons", 'person_id', data_dir, settings)
+    df = bca.read_csv_table("bca_persons", data_dir, settings, index_col='person_id')
 
     assert not missing_columns(df, ["pno", "hhno", "pptyp"])
-
-
-def test_read_persons_table():
-
-    settings = orca.eval_variable('settings')
-    assert settings.get('bca_persons') == 'persons.csv'
-    assert settings.get('store') is None
-
-    # expect all of and only the columns specified by bca_persons_column_map values
-    persons_internal = orca.eval_variable('bca_persons_internal').to_frame()
-    assert expect_columns(persons_internal,
-                          settings["bca_persons_column_map"].values())
-
-    persons = orca.eval_variable('bca_persons').to_frame()
-    assert not missing_columns(persons,
-                               settings["bca_persons_column_map"].values())
-
-    assert "adult" in persons.columns
-    assert "is_adult" not in persons.columns
-
-
-def test_merged_persons_table():
-
-    settings = orca.eval_variable('settings')
-    assert settings.get('bca_persons') == 'persons.csv'
-    assert settings.get('store') is None
-
-    persons_merged = orca.eval_variable('bca_persons_merged').to_frame()
-    assert "person_gender" in persons_merged.columns
-    assert "hh_income" in persons_merged.columns
-
-    # check for presence of computed column 'adult'
-    assert "adult" in persons_merged.columns
-
-    # check that adult column is correctly computed
-    assert (persons_merged.adult == (persons_merged.person_age > 18)).all()
-
-
-def test_demographics_processor():
-
-    persons_merged = orca.eval_variable('bca_persons_merged').to_frame()
-    assert "is_adult" not in persons_merged.columns
-
-    orca.run(["demographics_processor"])
-
-    persons_merged = orca.eval_variable('bca_persons_merged').to_frame()
-    assert "is_adult" in persons_merged.columns
-
-    # not sure what to test yet...
 
 
 def test_output_store():
@@ -106,18 +57,18 @@ def test_output_store():
     orca.run(["write_output_store"])
 
     output_store = orca.eval_variable('output_store')
-    output_bca_persons_internal = output_store["bca_persons_internal"]
+    output_raw_bca_persons = output_store["raw_bca_persons"]
 
-    bca_persons_internal = orca.eval_variable('bca_persons_internal').to_frame()
+    raw_bca_persons = orca.eval_variable('raw_bca_persons').to_frame()
 
-    assert "person_age" in output_bca_persons_internal.columns.values
+    assert "person_age" in output_raw_bca_persons.columns.values
 
     # expect all of and only the columns in bca_persons
-    assert expect_columns(output_bca_persons_internal,
-                          bca_persons_internal.columns.values)
+    assert expect_columns(output_raw_bca_persons,
+                          raw_bca_persons.columns.values)
 
     # expect all of and only the columns specified by bca_persons_column_map values
-    assert expect_columns(output_bca_persons_internal,
+    assert expect_columns(output_raw_bca_persons,
                           settings["bca_persons_column_map"].values())
 
 
@@ -128,15 +79,12 @@ def test_store():
     settings = orca.eval_variable('settings')
 
     # expect all of and only the columns specified by bca_persons_column_map values
-    persons_internal = orca.eval_variable('bca_persons_internal').to_frame()
+    raw_persons = orca.eval_variable('raw_bca_persons').to_frame()
 
-    assert expect_columns(persons_internal,
+    assert expect_columns(raw_persons,
                           settings["bca_persons_column_map"].values())
 
     persons = orca.eval_variable('bca_persons').to_frame()
     assert "person_gender" in persons.columns
     assert "adult" in persons.columns
-
-    print "xxx: ", persons.columns.values
-
-    assert "is_adult" not in persons.columns.values
+    assert "coc_age" not in persons.columns.values

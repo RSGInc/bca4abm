@@ -1,16 +1,17 @@
-
 #store: store.h5
 
-output_store: store.h5
+#output_store: store.h5
 output_store_tables:
-  - bca_households_internal
-  - bca_persons_internal
+  - raw_bca_households
+  - raw_bca_persons
+  - raw_bca_base_trips
+  - raw_bca_base_trips_alt
 
 bca_households: households.csv
 bca_households_column_map:
   hhno: hh_id
   hhincome: hh_income
-  hhtaz: hh_taz
+  hhsize: hh_size
 
 bca_persons: persons.csv
 bca_persons_column_map:
@@ -19,6 +20,38 @@ bca_persons_column_map:
   pptyp: person_type
   pgend: person_gender
   pagey: person_age
+
+bca_base_trips: base_trips.csv
+bca_base_trips_alt: base_trips_alt.csv
+
+bca_build_trips: build_trips.csv
+bca_build_trips_alt: build_trips_alt.csv
+
+bca_trips_column_map:
+  pno: person_idx
+  hhno: hh_id
+  tour: tour_idx
+  half: half_tour_idx
+  tseg: half_tour_seg_idx
+  pdpurp: tour_purpose
+  mode: trip_mode
+  autotime: auto_time
+  transittime: transit_time
+  biketime: bike_time
+  walktime: walk_time
+  travcost: travel_cost
+
+bca_trips_alt_column_map:
+  pno: person_idx
+  hhno: hh_id
+  tour: tour_idx
+  half: half_tour_idx
+  tseg: half_tour_seg_idx
+  autotime: alt_auto_time
+  transittime: alt_transit_time
+  biketime: alt_bike_time
+  walktime: alt_walk_time
+  travcost: alt_travel_cost
 
 person_type_map:
     1: full
@@ -33,4 +66,24 @@ person_type_map:
 gender_map:
     1: male
     2: female
+
+trip_mode_map:
+    1: walk      # walk
+    2: walk      # bike
+    3: auto      # drive-alone
+    4: auto      # shared-ride-2
+    5: auto      # shared-ride-3+
+    6: transit   # walk-transit
+    7: transit   # drive-transit
+    8: transit   # school-bus
+
+tour_purpose_vot_map:
+    0: 5.00     # home
+    1: 11.03    # work
+    2: 11.03    # school
+    3: 5.00     # escort
+    4: 5.00     # chore
+    5: 5.00     # shop
+    6: 5.00     # meal
+    7: 5.00     # social
 

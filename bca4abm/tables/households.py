@@ -8,20 +8,17 @@ from bca4abm import bca4abm as bca
 
 # this caches things so you don't have to read in the file from disk again
 @orca.table(cache=True)
-def bca_households_internal(data_dir, store, settings):
+def raw_bca_households(data_dir, store, settings):
 
-    if "bca_households" in settings:
-        df = bca.read_bca_table("bca_households", 'hh_id', data_dir, settings)
-    else:
-        df = store["bca_households_internal"]
-
-    return df
+    return bca.get_raw_table("bca_households",
+                             index_col="hh_id",
+                             column_map="bca_households_column_map")
 
 
 # this caches all the columns that are computed on the persons table
 @orca.table(cache=True)
-def bca_households(bca_households_internal):
-    return bca_households_internal.to_frame()
+def bca_households(raw_bca_households):
+    return raw_bca_households.to_frame()
 
 
 orca.broadcast(cast='bca_households',

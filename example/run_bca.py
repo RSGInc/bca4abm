@@ -16,4 +16,19 @@ if 'store' not in settings:
     orca.add_injectable("store", None)
 
 orca.run(["demographics_processor"])
-orca.run(["write_output_store"])
+orca.run(["person_trips_processor"])
+
+#orca.run(["write_output_store"])
+
+bca_base_trips_with_demographics = \
+    orca.eval_variable('bca_base_trips_with_demographics').to_frame()
+
+print bca_base_trips_with_demographics[
+    ["coc_age", "coc_poverty", "travel_time_benefit", "vot", "monetized_travel_time_benefit"]]
+
+# aggregations = {
+#     'travel_time_benefit':'sum',
+# }
+#
+# grouped = bca_base_trips_with_demographics.groupby(['tour_purpose_cat', 'coc_age', 'coc_poverty'])
+# print grouped.agg(aggregations)
