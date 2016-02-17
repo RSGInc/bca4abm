@@ -17,7 +17,7 @@ def read_csv_table(table_name, data_dir, settings, index_col=None, column_map=No
     if table_name not in settings:
         return None
 
-    fpath = os.path.join(data_dir, 'data', settings[table_name])
+    fpath = os.path.join(data_dir, settings[table_name])
 
     if column_map is None:
         column_map = table_name + "_column_map"
@@ -51,7 +51,8 @@ def get_raw_table(table_name, index_col=None, column_map=None):
     else:
         store = orca.eval_variable('store')
         df = store["raw_" + table_name]
-        expect_columns(df, settings[column_map].values())
+        if column_map:
+            expect_columns(df, settings[column_map].values())
     return df
 
 

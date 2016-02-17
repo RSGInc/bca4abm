@@ -10,17 +10,17 @@ import yaml
 
 @orca.injectable()
 def configs_dir():
-    return '.'
+    return 'configs'
 
 
 @orca.injectable()
 def data_dir():
-    return '.'
+    return 'data'
 
 
 @orca.injectable()
 def output_dir():
-    return '.'
+    return 'output'
 
 
 @orca.injectable()
@@ -30,14 +30,14 @@ def settings_file_name():
 
 @orca.injectable()
 def settings(configs_dir, settings_file_name):
-    with open(os.path.join(configs_dir, "configs", settings_file_name)) as f:
+    with open(os.path.join(configs_dir, settings_file_name)) as f:
         return yaml.load(f)
 
 
 @orca.injectable(cache=True)
 def output_store(output_dir, settings):
     if "output_store" in settings:
-        return pd.HDFStore(os.path.join(output_dir, "output", settings["output_store"]))
+        return pd.HDFStore(os.path.join(output_dir, settings["output_store"]))
     else:
         return None
 
@@ -45,7 +45,7 @@ def output_store(output_dir, settings):
 @orca.injectable(cache=True)
 def store(data_dir, settings):
     if "store" in settings:
-        return pd.HDFStore(os.path.join(data_dir, "data", settings["store"]), mode='r')
+        return pd.HDFStore(os.path.join(data_dir, settings["store"]), mode='r')
     else:
         return None
 

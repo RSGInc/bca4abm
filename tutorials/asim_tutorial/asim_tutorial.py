@@ -59,6 +59,7 @@ orca.get_table('pets_merged').to_frame()
 # (configs_dir predefined as '.' by injectable in activitysim.defaults.misc.py)
 @orca.injectable()
 def pet_spec(configs_dir):
+    # Note - odd semantics in activitysim where configs_dir is really configs_parent_dir
     f = os.path.join(configs_dir, 'configs', "pet_activity.csv")
     return asim.read_model_spec(f).fillna(0)
 

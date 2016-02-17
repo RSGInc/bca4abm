@@ -13,7 +13,7 @@ Demographics processor
 
 @orca.injectable()
 def demographics_spec(configs_dir):
-    f = os.path.join(configs_dir, 'configs', "demographics.csv")
+    f = os.path.join(configs_dir, "demographics.csv")
     return bca.read_assignment_spec(f)
 
 
