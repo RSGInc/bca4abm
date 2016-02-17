@@ -4,8 +4,8 @@ answer: 42
 output_store_tables:
   - raw_bca_households
   - raw_bca_persons
-  - raw_bca_base_trips
-  - raw_bca_base_trips_alt
+  - raw_bca_trips
+  - raw_bca_trips_alt
 
 bca_households: households.csv
 bca_households_column_map:

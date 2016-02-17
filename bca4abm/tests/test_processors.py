@@ -21,9 +21,10 @@ from bca4abm import bca4abm as bca
 
 from bca4abm.util.misc import expect_columns, missing_columns, extra_columns
 
-orca.add_injectable("configs_dir", os.path.join(os.path.dirname(__file__)))
-orca.add_injectable("data_dir", os.path.join(os.path.dirname(__file__)))
-orca.add_injectable("output_dir", os.path.join(os.path.dirname(__file__)))
+parent_dir = os.path.dirname(__file__)
+orca.add_injectable("configs_dir", os.path.join(parent_dir, 'configs'))
+orca.add_injectable("data_dir", os.path.join(parent_dir, 'data'))
+orca.add_injectable("output_dir", os.path.join(parent_dir, 'output'))
 
 
 def test_demographics_processor():
@@ -47,9 +48,9 @@ def test_person_trips_processor():
     orca.run(["demographics_processor"])
     orca.run(["person_trips_processor"])
 
-    bca_base_trips_with_demographics = \
-        orca.eval_variable('bca_base_trips_with_demographics').to_frame()
+    bca_trips_with_demographics = \
+        orca.eval_variable('bca_trips_with_demographics').to_frame()
 
-    assert "travel_time" in bca_base_trips_with_demographics.columns
+    assert "travel_time" in bca_trips_with_demographics.columns
 
     # not sure what to test yet...
