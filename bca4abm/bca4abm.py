@@ -4,16 +4,18 @@ import orca
 import os
 import yaml
 
-# from activitysim import activitysim as asim
 from .util.misc import expect_columns
 
 
-def read_csv_table(table_name, data_dir, settings, index_col=None, column_map=None):
+def read_csv_table(data_dir, settings, table_name, index_col=None, column_map=None):
 
     # settings:
-    #   <table_name>: <csv fiel name>
+    #   <table_name>: <csv file name>
     #   <table_name>_column_map: { 'csv_col_name' : table_col_name', ... }
     #
+    # settings = orca.eval_variable('settings')
+    # data_dir = orca.eval_variable('data_dir')
+
     if table_name not in settings:
         return None
 
@@ -25,10 +27,11 @@ def read_csv_table(table_name, data_dir, settings, index_col=None, column_map=No
     if column_map in settings:
         usecols = settings[column_map].keys()
         # print "read_bca_table usecols: ", usecols
+        # FIXME - should we allow comment lines?
         df = pd.read_csv(fpath, header=0, usecols=usecols)
         df.rename(columns=settings[column_map], inplace=True)
     else:
-        df = pd.read_csv(fpath, header=0)
+        df = pd.read_csv(fpath, header=0, comment='#')
 
     if index_col is not None:
         if index_col in df.columns:
@@ -36,23 +39,6 @@ def read_csv_table(table_name, data_dir, settings, index_col=None, column_map=No
         else:
             df.index.names = [index_col]
 
-    return df
-
-
-def get_raw_table(table_name, index_col=None, column_map=None):
-
-    settings = orca.eval_variable('settings')
-
-    if table_name in settings:
-        data_dir = orca.eval_variable('data_dir')
-        df = read_csv_table(table_name, data_dir, settings,
-                            index_col=index_col,
-                            column_map=column_map)
-    else:
-        store = orca.eval_variable('store')
-        df = store["raw_" + table_name]
-        if column_map:
-            expect_columns(df, settings[column_map].values())
     return df
 
 

@@ -1,7 +1,0 @@
-Description,Expression,hunt,fetch,eat,sleep
-"Is smart",iq>100,1,1,0.2,0
-"Is dog",species_name == 'dog',1,1,0.2,0.3
-"Is cat",species_name == 'cat',1,0,0,0.3
-"Is child",(age/age_rate)<=3,1,1,0.3,0
-"Is old",age>50,-1,-1,0,1
-"Is really old",age>70,-2,-2,0,2

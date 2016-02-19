@@ -18,7 +18,6 @@ source activate bca
 pip install bottle orca prettytable simplejson zbox
 pip install openmatrix
 pip install pytest-cov coveralls pep8 pytest-xdist
-pip install git+https://github.com/RSGInc/activitysim.git@master
 
 ################################################################################
 
