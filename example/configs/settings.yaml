@@ -1,33 +1,28 @@
-#store: store.h5
+scenario_label: sample
 
 #output_store: store.h5
-output_store_tables:
-  - raw_bca_households
-  - raw_bca_persons
-  - raw_bca_base_trips
-  - raw_bca_base_trips_alt
 
-bca_households: households.csv
-bca_households_column_map:
+households: households.csv
+households_column_map:
   hhno: hh_id
   hhincome: hh_income
   hhsize: hh_size
 
-bca_persons: persons.csv
-bca_persons_column_map:
+persons: persons.csv
+persons_column_map:
   pno: person_idx
   hhno: hh_id
   pptyp: person_type
   pgend: person_gender
   pagey: person_age
 
-bca_base_trips: base_trips.csv
-bca_base_trips_alt: base_trips_alt.csv
+bca_base_trips: basetrips.csv
+bca_base_trips_alt: basetrips_alt.csv
 
-bca_build_trips: build_trips.csv
-bca_build_trips_alt: build_trips_alt.csv
+bca_build_trips: buildtrips.csv
+bca_build_trips_alt: buildtrips_alt.csv
 
-bca_trips_column_map:
+trips_column_map:
   pno: person_idx
   hhno: hh_id
   tour: tour_idx
@@ -41,7 +36,7 @@ bca_trips_column_map:
   walktime: walk_time
   travcost: travel_cost
 
-bca_trips_alt_column_map:
+trips_alt_column_map:
   pno: person_idx
   hhno: hh_id
   tour: tour_idx
@@ -67,6 +62,7 @@ gender_map:
     1: male
     2: female
 
+
 trip_mode_map:
     1: walk      # walk
     2: walk      # bike
@@ -76,6 +72,16 @@ trip_mode_map:
     6: transit   # walk-transit
     7: transit   # drive-transit
     8: transit   # school-bus
+
+tour_purpose_map:
+    0: noncommute   # home
+    1: commute   # work
+    2: commute   # school
+    3: noncommute   # escort
+    4: noncommute   # chore
+    5: noncommute   # shop
+    6: noncommute   # meal
+    7: noncommute   # social
 
 tour_purpose_vot_map:
     0: 5.00     # home
@@ -87,3 +93,4 @@ tour_purpose_vot_map:
     6: 5.00     # meal
     7: 5.00     # social
 
+ovt_weight: 2.2

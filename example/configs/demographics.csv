@@ -1,3 +1,4 @@
 Description,Target,Expression
+# use apply to compare hh_income to federal poverty threshold based on hh_size
 coc_poverty,coc_poverty,"@df.hh_income <= df.hh_size.apply(lambda n : (15930+(n-2)*4160) if n > 2 else ([0, 11770, 15930][n]))"
 coc_age,coc_age, person_age > 65

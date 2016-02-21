@@ -1,0 +1,3 @@
+description,trip_file_name,trip_table_name,ivt_file_name,ivt_table_name,aoc_file_name,aoc_table_name,aoc_units,toll_file_name,toll_table_name,toll_units,vot
+Commercial vehicles non-toll,trips.omx,non_toll,skim.omx,ivt,skim.omx,aoc,dollars,,,,40.2
+commercial vehicles toll,trips.omx,toll,skim.omx,ivt,skim.omx,aoc,dollars,skim.omx,cvt,cents,40.2

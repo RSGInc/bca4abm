@@ -18,14 +18,14 @@ def demographics_spec(configs_dir):
 
 
 @orca.step()
-def demographics_processor(bca_persons_merged, demographics_spec, settings):
+def demographics_processor(persons_merged, demographics_spec, settings):
 
     print "---------- demographics_processor"
 
     # create synthetic column in python
 
     # the choice model will be applied to each row of the choosers table (a pandas.DataFrame)
-    persons_merged = bca_persons_merged.to_frame()
+    persons_merged = persons_merged.to_frame()
 
     # locals whose values will be accessible to the execution context
     # when the expressions in spec are applied to choosers
@@ -41,7 +41,7 @@ def demographics_processor(bca_persons_merged, demographics_spec, settings):
     # print "\n### demographics_processor - demographics_spec"
     # print demographics_spec
 
-    add_assigned_columns("bca_persons", results)
+    add_assigned_columns("persons", results)
 
     # FIXME remove this if there are no demographics columns dependent
-    add_dependent_columns("bca_persons", "persons_demographics")
+    add_dependent_columns("persons", "persons_demographics")

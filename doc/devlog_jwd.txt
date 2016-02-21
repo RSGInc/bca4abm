@@ -7,20 +7,17 @@
 conda update conda
 
 ~/anaconda/bin/conda create --name bca --clone root
-
 source ~/anaconda/bin/activate bca
 
 python setup.py develop
 
 
 cd ~/work
-git clone https://github.com/RSGInc/activitysim.git ./activitysim
-~/anaconda/bin/conda create --name asim --clone root
-source ~/anaconda/bin/activate asim
-
 git clone https://github.com/RSGInc/orca.git ./orca
 ~/anaconda/bin/conda create --name orca --clone root
 source ~/anaconda/bin/activate orca
+
+
 
 #####
 # testing

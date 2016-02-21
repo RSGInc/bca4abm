@@ -1,6 +1,11 @@
 import orca
 
 
+def get_setting(key):
+    settings = orca.eval_variable('settings')
+    return settings.get(key)
+
+
 def add_assigned_columns(base_dfname, from_df):
     for col in from_df.columns:
         print "Adding %s to %s" % (col, base_dfname)
@@ -8,11 +13,11 @@ def add_assigned_columns(base_dfname, from_df):
 
 
 # use of this (hidden) utility function is a common idiom in activitysim.defaults
-# from activitysim.defaults.models.utils.misc import add_dependent_columns
+# from activitysim.defaults.models.utils.misc
 def add_dependent_columns(base_dfname, new_dfname):
     tbl = orca.get_table(new_dfname)
     for col in tbl.columns:
-        print "Adding dependent", col
+        # print "Adding dependent", col
         orca.add_column(base_dfname, col, tbl[col])
 
 

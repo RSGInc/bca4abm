@@ -30,62 +30,16 @@ orca.add_injectable("output_dir", os.path.join(parent_dir, 'output'))
 def test_read_settings():
 
     settings = orca.eval_variable('settings')
-    assert settings.get('bca_households') == 'households.csv'
-    assert settings.get('bca_persons') == 'persons.csv'
+    assert settings.get('households') == 'households.csv'
+    assert settings.get('persons') == 'persons.csv'
     assert settings.get('store')is None
 
 
 def test_read_csv_table():
 
+    settings = {'persons': 'persons.csv'}
     data_dir = orca.eval_variable('data_dir')
-    settings = {'bca_persons': 'persons.csv'}
 
-    df = bca.read_csv_table("bca_persons", data_dir, settings, index_col='person_id')
+    df = bca.read_csv_table(data_dir, settings, table_name="persons",  index_col='person_id')
 
     assert not missing_columns(df, ["pno", "hhno", "pptyp"])
-
-
-def test_output_store():
-
-    settings = orca.eval_variable('settings')
-    settings["output_store"] = "store.h5"
-    orca.add_injectable("settings", settings)
-
-    # make sure we are reading from csv and not store
-    assert orca.eval_variable('store') is None
-
-    orca.run(["demographics_processor"])
-    orca.run(["write_output_store"])
-
-    output_store = orca.eval_variable('output_store')
-    output_raw_bca_persons = output_store["raw_bca_persons"]
-
-    raw_bca_persons = orca.eval_variable('raw_bca_persons').to_frame()
-
-    assert "person_age" in output_raw_bca_persons.columns.values
-
-    # expect all of and only the columns in bca_persons
-    assert expect_columns(output_raw_bca_persons,
-                          raw_bca_persons.columns.values)
-
-    # expect all of and only the columns specified by bca_persons_column_map values
-    assert expect_columns(output_raw_bca_persons,
-                          settings["bca_persons_column_map"].values())
-
-
-def test_store():
-
-    orca.add_injectable("settings_file_name", "store_settings.yaml")
-
-    settings = orca.eval_variable('settings')
-
-    # expect all of and only the columns specified by bca_persons_column_map values
-    raw_persons = orca.eval_variable('raw_bca_persons').to_frame()
-
-    assert expect_columns(raw_persons,
-                          settings["bca_persons_column_map"].values())
-
-    persons = orca.eval_variable('bca_persons').to_frame()
-    assert "person_gender" in persons.columns
-    assert "adult" in persons.columns
-    assert "coc_age" not in persons.columns.values

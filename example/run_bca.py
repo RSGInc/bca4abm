@@ -7,6 +7,8 @@ import os
 # the following import has the side-effect of registering injectables
 from bca4abm import bca4abm as bca
 
+from bca4abm.util.misc import get_setting
+
 
 parent_dir = os.path.join(os.path.dirname(__file__), '..', 'bca4abm', 'tests')
 #parent_dir = os.path.dirname(__file__)
@@ -17,27 +19,17 @@ orca.add_injectable('data_dir', os.path.join(parent_dir, 'data'))
 parent_dir = os.path.dirname(__file__)
 orca.add_injectable('output_dir', os.path.join(parent_dir, 'output'))
 
-settings = orca.eval_variable('settings')
-if 'store' not in settings:
-    orca.add_injectable('store', None)
+orca.run(['initialize_output_store'])
+with orca.eval_variable('output_store_for_read') as hdf:
+    assert hdf.keys() == []
 
-orca.run(['demographics_processor'])
-orca.run(['person_trips_processor'])
+# orca.run(['demographics_processor'])
+# orca.run(['person_trips_processor'])
+orca.run(['aggregate_trips_processor'])
 
-#orca.run(['write_output_store'])
+with orca.eval_variable('output_store_for_read') as hdf:
 
-bca_trips_with_demographics = \
-    orca.eval_variable('bca_trips_with_demographics').to_frame()
+    for key in hdf.keys():
+        print "\n###\n### %s\n###\n%s\n" % (key, hdf[key])
 
-print bca_trips_with_demographics[
-    ['travel_time_benefit', 'vot', 'monetized_travel_time_benefit']]
 
-print bca_trips_with_demographics[
-    ['build', 'travel_time', 'travel_time_alt', 'travel_time_benefit']]
-
-# aggregations = {
-#     'travel_time_benefit':'sum',
-# }
-#
-# grouped = bca_base_trips_with_demographics.groupby(['tour_purpose_cat', 'coc_age', 'coc_poverty'])
-# print grouped.agg(aggregations)

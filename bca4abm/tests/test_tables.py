@@ -30,67 +30,36 @@ orca.add_injectable('output_dir', os.path.join(parent_dir, 'output'))
 def test_read_persons_table():
 
     settings = orca.eval_variable('settings')
-    assert settings.get('bca_persons') == 'persons.csv'
+    assert settings.get('persons') == 'persons.csv'
     assert settings.get('store') is None
 
-    # expect all of and only the columns specified by bca_persons_column_map values
-    raw_persons = orca.get_table('raw_bca_persons').to_frame()
+    # expect all of and only the columns specified by persons_column_map values
+    raw_persons = orca.get_table('raw_persons').to_frame()
     assert expect_columns(raw_persons,
-                          settings['bca_persons_column_map'].values())
+                          settings['persons_column_map'].values())
 
-    persons = orca.get_table('bca_persons').to_frame()
+    persons = orca.get_table('persons').to_frame()
     assert not missing_columns(persons,
-                               settings['bca_persons_column_map'].values())
+                               settings['persons_column_map'].values())
 
     assert 'adult' in persons.columns
     assert 'coc_age' not in persons.columns
 
 
-def test_stored_persons_table():
-
-    orca.add_injectable('settings_file_name', 'store_settings.yaml')
-
-    settings = orca.eval_variable('settings')
-
-    # expect all of and only the columns specified by bca_persons_column_map values
-    raw_persons = orca.get_table('raw_bca_persons').to_frame()
-
-    assert expect_columns(raw_persons,
-                          settings['bca_persons_column_map'].values())
-
-    persons = orca.get_table('bca_persons').to_frame()
-    assert 'person_gender' in persons.columns
-    assert 'adult' in persons.columns
-    assert 'coc_age' not in persons.columns.values
-
-
 def test_read_households_table():
 
     settings = orca.eval_variable('settings')
-    assert settings.get('bca_households') == 'households.csv'
+    assert settings.get('households') == 'households.csv'
     assert settings.get('store') is None
 
-    # expect all of and only the columns specified by bca_persons_column_map values
-    raw_households = orca.get_table('raw_bca_households').to_frame()
+    # expect all of and only the columns specified by persons_column_map values
+    raw_households = orca.get_table('raw_households').to_frame()
     assert expect_columns(raw_households,
-                          settings['bca_households_column_map'].values())
+                          settings['households_column_map'].values())
 
-    households = orca.get_table('bca_households').to_frame()
+    households = orca.get_table('households').to_frame()
     assert not missing_columns(households,
-                               settings['bca_households_column_map'].values())
-
-
-def test_stored_households_table():
-
-    orca.add_injectable('settings_file_name', 'store_settings.yaml')
-
-    settings = orca.eval_variable('settings')
-
-    # expect all of and only the columns specified by bca_persons_column_map values
-    raw_households = orca.get_table('raw_bca_households').to_frame()
-
-    assert expect_columns(raw_households,
-                          settings['bca_households_column_map'].values())
+                               settings['households_column_map'].values())
 
 
 def test_persons_merged_table():
@@ -98,7 +67,7 @@ def test_persons_merged_table():
     settings = orca.eval_variable('settings')
     assert settings.get('store') is None
 
-    persons_merged = orca.get_table('bca_persons_merged').to_frame()
+    persons_merged = orca.get_table('persons_merged').to_frame()
     assert 'person_gender' in persons_merged.columns
     assert 'hh_income' in persons_merged.columns
 
@@ -108,37 +77,37 @@ def test_persons_merged_table():
     # check that adult column is correctly computed
     assert (persons_merged.adult == (persons_merged.person_age > 18)).all()
 
-    raw_persons = orca.get_table('raw_bca_persons').to_frame()
+    raw_persons = orca.get_table('raw_persons').to_frame()
     assert (persons_merged.person_type == raw_persons.person_type).all()
 
 
 def test_read_trips_table():
 
     settings = orca.eval_variable('settings')
-    assert settings.get('bca_base_trips') == 'base_trips.csv'
+    assert settings.get('bca_base_trips') == 'basetrips.csv'
     assert settings.get('store') is None
 
-    # expect all of and only the columns specified by bca_persons_column_map values
-    raw_trips = orca.get_table('raw_bca_trips').to_frame()
-    raw_columns = settings['bca_trips_column_map'].values() + ['build']
+    # expect all of and only the columns specified by persons_column_map values
+    raw_trips = orca.get_table('raw_trips').to_frame()
+    raw_columns = settings['trips_column_map'].values() + ['build']
     assert expect_columns(raw_trips, raw_columns)
 
-    trips = orca.get_table('bca_trips').to_frame()
+    trips = orca.get_table('trips').to_frame()
     assert not missing_columns(trips, raw_columns)
 
 
 def test_read_trips_alt_table():
 
     settings = orca.eval_variable('settings')
-    assert settings.get('bca_base_trips_alt') == 'base_trips_alt.csv'
+    assert settings.get('bca_base_trips_alt') == 'basetrips_alt.csv'
     assert settings.get('store') is None
 
-    # expect all of and only the columns specified by bca_persons_column_map values
-    raw_trips = orca.get_table('raw_bca_trips_alt').to_frame()
-    raw_columns = settings['bca_trips_alt_column_map'].values() + ['build']
+    # expect all of and only the columns specified by persons_column_map values
+    raw_trips = orca.get_table('raw_trips_alt').to_frame()
+    raw_columns = settings['trips_alt_column_map'].values() + ['build']
     assert expect_columns(raw_trips, raw_columns)
 
-    trips = orca.get_table('bca_trips_alt').to_frame()
+    trips = orca.get_table('trips_alt').to_frame()
     assert not missing_columns(trips, raw_columns)
 
 
@@ -147,7 +116,7 @@ def test_trips_merged_table():
     settings = orca.eval_variable('settings')
     assert settings.get('store') is None
 
-    trips = orca.get_table('bca_trips_merged').to_frame()
+    trips = orca.get_table('trips_merged').to_frame()
     assert 'auto_time' in trips.columns
     assert 'alt_auto_time' in trips.columns
 
@@ -157,7 +126,7 @@ def test_trips_with_demographics_table():
     settings = orca.eval_variable('settings')
     assert settings.get('store') is None
 
-    trips = orca.get_table('bca_trips_with_demographics').to_frame()
+    trips = orca.get_table('trips_with_demographics').to_frame()
     assert 'auto_time' in trips.columns
     assert 'alt_auto_time' in trips.columns
     assert 'person_age' in trips.columns
