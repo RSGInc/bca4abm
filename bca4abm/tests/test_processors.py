@@ -85,4 +85,4 @@ def test_aggregate_trips_processor():
 
     with orca.eval_variable('output_store_for_read') as hdf:
         assert hdf.keys() == ['/aggregate_trips']
-        assert hdf['aggregate_trips'].monetized_tt.sum() > 0
+        assert hdf['aggregate_trips'].monetized_tt_benefit[0] == 133330.0
