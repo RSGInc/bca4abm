@@ -80,31 +80,77 @@ def aggregate_trips_processor(aggregate_trips_manifest, settings, data_dir):
         toll_scale = monetary_scale(row.toll_units)
         vot = row.vot * 1.0
 
-        tt = \
-            (0.5 * (base_trips + build_trips) * (base_ivt-build_ivt)).sum()
-        monetized_tt = \
-            vot * tt
-        aoc = \
-            (0.5 * (base_trips + build_trips) * aoc_scale * (base_aoc-build_aoc)).sum()
-        toll = \
-            (0.5 * (base_trips + build_trips) * toll_scale * (base_toll-build_toll)).sum()
+        # --------- alternate calculations
 
-        total = monetized_tt + aoc + toll
+        # by base vs build change in generalized costs
+        base_delta_cost = \
+            (base_trips *
+             ((build_ivt - base_ivt) * (vot / 60.0) +
+              aoc_scale * (build_aoc - base_aoc) +
+              toll_scale * (build_toll - base_toll)
+              )).sum()
+        build_delta_cost = \
+            (build_trips *
+             ((build_ivt - base_ivt) * (vot/60.0) +
+              aoc_scale * (build_aoc - base_aoc) +
+              toll_scale * (build_toll - base_toll)
+              )).sum()
+        generalized_cost_benefit = -0.5 * (base_delta_cost + build_delta_cost)
+
+        # broken down by benefit category
+        tt_benefit_in_minutes = \
+            0.5 * ((base_trips + build_trips) * (base_ivt-build_ivt)).sum()
+        monetized_tt_benefit = \
+            vot/60.0 * tt_benefit_in_minutes
+        aoc_benefit = \
+            0.5 * ((base_trips + build_trips) * aoc_scale * (base_aoc-build_aoc)).sum()
+        toll_benefit = \
+            0.5 * ((base_trips + build_trips) * toll_scale * (base_toll-build_toll)).sum()
+        categorized_benefit = monetized_tt_benefit + aoc_benefit + toll_benefit
+
+        # omnibus (fastest)
+        omnibus_benefit = \
+            -0.5 * ((base_trips + build_trips) *
+                    ((build_ivt - base_ivt) * (vot / 60.0) +
+                     aoc_scale * (build_aoc - base_aoc) +
+                     toll_scale * (build_toll - base_toll)
+                     )).sum()
 
         aggregate_trips_benefits = {
             'description': row.description,
-            'tt': tt,
+
+            'tt_benefit_in_minutes': tt_benefit_in_minutes,
             'vot': vot,
-            'monetized_tt': monetized_tt,
-            'aoc': aoc,
-            'toll': toll,
-            'total': total,
+            'monetized_tt_benefit': monetized_tt_benefit,
+            'aoc_benefit': aoc_benefit,
+            'toll_benefit': toll_benefit,
+            'categorized_benefit': categorized_benefit,
+
+            # base vs build change in generalized costs
+            'base_delta_cost': base_delta_cost,
+            'build_delta_cost': build_delta_cost,
+            'generalized_cost_benefit': generalized_cost_benefit,
+
+            'benefit': omnibus_benefit
         }
 
         results.append(aggregate_trips_benefits)
 
     # create dataframe with results
-    aggregate_trips_benefits = pd.DataFrame(results)
+    columns = ['description',
+               'tt_benefit_in_minutes',
+               'vot',
+               'monetized_tt_benefit',
+               'aoc_benefit',
+               'toll_benefit',
+               'categorized_benefit',
+               'base_delta_cost',
+               'build_delta_cost',
+               'generalized_cost_benefit',
+               'benefit'
+               ]
+
+    aggregate_trips_benefits = pd.DataFrame(results, columns=columns)
 
     with orca.eval_variable('output_store') as output_store:
         output_store['aggregate_trips'] = aggregate_trips_benefits
