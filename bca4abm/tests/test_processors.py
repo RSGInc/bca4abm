@@ -72,7 +72,7 @@ def test_person_trips_processor():
 
     with orca.eval_variable('output_store_for_read') as hdf:
         assert hdf.keys() == ['/person_trips']
-        assert hdf['person_trips'].monetized_travel_time_benefit.sum() > 0
+        assert hdf['person_trips'].travel_time_benefit.sum() == 1359000.0
 
 
 def test_aggregate_trips_processor():

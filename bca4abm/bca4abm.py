@@ -152,4 +152,11 @@ def assign_variables(assignment_expressions, df, locals_d=None):
     # FIXME - should we add_assigned_columns rather than creating a dataframe and returning it?
     # FIXME - we could pass in the target df to optionally assign directly from items
     # FIXME - (though desired target might not be the eval df if eval df is a merged table...)
-    return pd.DataFrame.from_items(l)
+
+    # since we allow targets to be recycled, we need to only keep the las"
+    keepers = []
+    for statement in reversed(l):
+        if not next((True for keeper in keepers if keeper[0] == statement[0]), False):
+            keepers.append(statement)
+
+    return pd.DataFrame.from_items(keepers)

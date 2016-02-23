@@ -1,12 +1,25 @@
 import orca
 
 
+def mapped_columns(*column_maps):
+    '''
+    Given any number of column_maps
+    return a list of unique column names
+    '''
+    result = set()
+    for column_map in column_maps:
+        result |= set(column_map.values())
+
+    return list(result)
+
+
 def get_setting(key):
     settings = orca.eval_variable('settings')
     return settings.get(key)
 
 
 def add_assigned_columns(base_dfname, from_df):
+
     for col in from_df.columns:
         print "Adding %s to %s" % (col, base_dfname)
         orca.add_column(base_dfname, col, from_df[col])

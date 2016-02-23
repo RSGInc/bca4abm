@@ -5,6 +5,7 @@ households_column_map:
   hhno: hh_id
   hhincome: hh_income
   hhsize: hh_size
+  hhexpfac: hh_expansion_factor
 
 persons: persons.csv
 persons_column_map:
@@ -14,13 +15,8 @@ persons_column_map:
   pgend: person_gender
   pagey: person_age
 
-bca_base_trips: basetrips.csv
-bca_base_trips_alt: basetrips_alt.csv
-
-bca_build_trips: buildtrips.csv
-bca_build_trips_alt: buildtrips_alt.csv
-
-trips_column_map:
+basetrips: basetrips.csv
+basetrips_column_map:
   pno: person_idx
   hhno: hh_id
   tour: tour_idx
@@ -28,23 +24,54 @@ trips_column_map:
   tseg: half_tour_seg_idx
   pdpurp: tour_purpose
   mode: trip_mode
-  autotime: auto_time
-  transittime: transit_time
-  biketime: bike_time
-  walktime: walk_time
-  travcost: travel_cost
+  autotime: base_auto_time
+  transittime: base_transit_time
+  biketime: base_bike_time
+  walktime: base_walk_time
+  travcost: base_travel_cost
 
-trips_alt_column_map:
+
+basetrips_buildlos: basetrips_buildlos.csv
+basetrips_buildlos_column_map:
   pno: person_idx
   hhno: hh_id
   tour: tour_idx
   half: half_tour_idx
   tseg: half_tour_seg_idx
-  autotime: alt_auto_time
-  transittime: alt_transit_time
-  biketime: alt_bike_time
-  walktime: alt_walk_time
-  travcost: alt_travel_cost
+  autotime: build_auto_time
+  transittime: build_transit_time
+  biketime: build_bike_time
+  walktime: build_walk_time
+  travcost: build_travel_cost
+
+buildtrips: buildtrips.csv
+buildtrips_column_map:
+  pno: person_idx
+  hhno: hh_id
+  tour: tour_idx
+  half: half_tour_idx
+  tseg: half_tour_seg_idx
+  pdpurp: tour_purpose
+  mode: trip_mode
+  autotime: build_auto_time
+  transittime: build_transit_time
+  biketime: build_bike_time
+  walktime: build_walk_time
+  travcost: build_travel_cost
+
+
+buildtrips_baselos: buildtrips_baselos.csv
+buildtrips_baselos_column_map:
+  pno: person_idx
+  hhno: hh_id
+  tour: tour_idx
+  half: half_tour_idx
+  tseg: half_tour_seg_idx
+  autotime: base_auto_time
+  transittime: base_transit_time
+  biketime: base_bike_time
+  walktime: base_walk_time
+  travcost: base_travel_cost
 
 person_type_map:
     1: full

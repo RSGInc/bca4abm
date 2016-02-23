@@ -6,75 +6,53 @@ import pandas as pd
 from bca4abm import bca4abm as bca
 
 
-# this caches things so you don't have to read in the file from disk again
+# this caches all the columns that are computed on the trips table
 @orca.table(cache=True)
-def raw_trips(data_dir, settings):
+def base_trips(data_dir, settings):
 
-    base_df = bca.read_csv_table(data_dir, settings, table_name='bca_base_trips',
-                                 column_map='trips_column_map')
-    build_df = bca.read_csv_table(data_dir, settings, table_name='bca_build_trips',
-                                  column_map='trips_column_map')
+    trips = bca.read_csv_table(data_dir, settings, table_name='basetrips')
+    trips_alt = bca.read_csv_table(data_dir, settings, table_name='basetrips_buildlos')
 
-    base_df['build'] = 1
-    build_df['build'] = -1
-    df = pd.concat([base_df, build_df])
-
-    return df
+    trips_merged = pd.merge(trips, trips_alt, on=['hh_id', 'person_idx',
+                                                  'tour_idx', 'half_tour_idx', 'half_tour_seg_idx'])
+    trips_merged['build'] = 0
+    return trips_merged
 
 
 # this caches all the columns that are computed on the trips table
 @orca.table(cache=True)
-def trips(raw_trips):
-    return raw_trips.to_frame()
+def build_trips(data_dir, settings):
+    trips = bca.read_csv_table(data_dir, settings, table_name='buildtrips')
+    trips_alt = bca.read_csv_table(data_dir, settings, table_name='buildtrips_baselos')
+
+    trips_merged = pd.merge(trips, trips_alt, on=['hh_id', 'person_idx',
+                                                  'tour_idx', 'half_tour_idx', 'half_tour_seg_idx'])
+    trips_merged['build'] = 1
+    return trips_merged
 
 
-# this caches things so you don't have to read in the file from disk again
 @orca.table(cache=True)
-def raw_trips_alt(data_dir, settings):
+def disaggregate_trips(base_trips, build_trips):
 
-    base_df = bca.read_csv_table(data_dir, settings, table_name='bca_base_trips_alt',
-                                 column_map='trips_alt_column_map')
-    build_df = bca.read_csv_table(data_dir, settings, table_name='bca_build_trips_alt',
-                                  column_map='trips_alt_column_map')
+    build = build_trips.to_frame()
+    base = base_trips.to_frame()
 
-    base_df['build'] = 1
-    build_df['build'] = -1
-    df = pd.concat([base_df, build_df])
+    print "disaggregate_trips - appending %s base and %s build" % (base.shape[0], build.shape[0])
+
+    df = base.append(build, ignore_index=True)
+
+    df['index1'] = df.index
 
     return df
 
 
-# this caches all the columns that are computed on the persons table
-@orca.table(cache=True)
-def trips_alt(raw_trips_alt):
-    return raw_trips_alt.to_frame()
-
-
-orca.broadcast(cast='trips_alt',
-               onto='trips',
-               cast_on=['build', 'hh_id', 'person_idx',
-                        'tour_idx', 'half_tour_idx', 'half_tour_seg_idx'],
-               onto_on=['build', 'hh_id', 'person_idx',
-                        'tour_idx', 'half_tour_idx', 'half_tour_seg_idx'])
-
 orca.broadcast(cast='persons_merged',
-               onto='trips_merged',
+               onto='disaggregate_trips',
                cast_on=['hh_id', 'person_idx'],
                onto_on=['hh_id', 'person_idx'])
 
 
 @orca.table()
-def trips_merged(trips, trips_alt):
-    return orca.merge_tables(target=trips.name,
-                             tables=[trips, trips_alt])
-
-
-@orca.table()
-def trips_with_demographics(trips_merged, persons_merged):
-    return orca.merge_tables(target=trips_merged.name,
-                             tables=[trips_merged, persons_merged])
-
-
-@orca.column("trips")
-def tour_type(trips, settings):
-    return trips.tour_purpose.map(settings["tour_purpose_map"])
+def trips_with_demographics(disaggregate_trips, persons_merged):
+    return orca.merge_tables(target=disaggregate_trips.name,
+                             tables=[disaggregate_trips, persons_merged])

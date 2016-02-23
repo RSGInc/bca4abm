@@ -23,9 +23,15 @@ orca.run(['initialize_output_store'])
 with orca.eval_variable('output_store_for_read') as hdf:
     assert hdf.keys() == []
 
-# orca.run(['demographics_processor'])
-# orca.run(['person_trips_processor'])
+orca.run(['demographics_processor'])
+orca.run(['person_trips_processor'])
 orca.run(['aggregate_trips_processor'])
+
+# trips_df = orca.get_table('trips_with_demographics').to_frame().sort(['index1'])
+# trips_df.to_csv(os.path.join(parent_dir, 'output', 'trips_with_demographics.csv') )
+
+# print "### FINAL monetized_travel_time_benefit", trips_df.monetized_travel_time_benefit.sum()
+# print "### FINAL travel_time_benefit", trips_df.travel_time_benefit.sum()
 
 with orca.eval_variable('output_store_for_read') as hdf:
 
