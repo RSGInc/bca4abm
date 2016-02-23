@@ -54,3 +54,34 @@ def cvt_freight_skims():
                    os.path.join(omx_dir, 'skim.omx'), 'cvt')
 
 cvt_freight_skims()
+
+#################
+
+# base_dir = os.path.join(os.path.dirname(__file__), '..', 'bca4abm', 'tests', 'data')
+#
+# for skim_dir in ['base-matrices', 'build-matrices']:
+
+# omx_file_name = os.path.join(data_dir, 'base-matrices', 'skim.omx')
+# omx_file = omx.openFile(omx_file_name, 'r')
+#
+# print "----- ivt"
+# m = omx_file['ivt']
+# print type(m)
+# print "atom: %s" % m.atom
+# print "shape", m.shape
+# print "array type", type( m[:,:])
+# print m[:,:]
+#
+# print "----- cvt"
+# m2 = omx_file['cvt']
+# print type(m2)
+# print "atom: %s" % m2.atom
+# print "shape", m2.shape
+# print "array type", type( m2[:,:])
+# print m2[:,:]
+#
+# print "----- sum"
+# print m[:,:] + m2[:,:]
+#
+# omx_file.close()
+

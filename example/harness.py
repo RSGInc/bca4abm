@@ -24,57 +24,8 @@ orca.add_injectable('data_dir', data_dir)
 orca.add_injectable('output_dir', output_dir)
 
 
-import openmatrix as omx
+df = orca.get_table('disaggregate_trips').to_frame()
 
+print "disaggregate_trips", df.shape[0]
 
-#################
-
-omx_file_name = os.path.join(data_dir, 'base-matrices', 'skim.omx')
-omx_file = omx.openFile(omx_file_name, 'r')
-
-print "----- ivt"
-m = omx_file['ivt']
-print type(m)
-print "atom: %s" % m.atom
-print "shape", m.shape
-print "array type", type( m[:,:])
-print m[:,:]
-
-print "----- cvt"
-m2 = omx_file['cvt']
-print type(m2)
-print "atom: %s" % m2.atom
-print "shape", m2.shape
-print "array type", type( m2[:,:])
-print m2[:,:]
-
-print "----- sum"
-print m[:,:] + m2[:,:]
-
-
-# sk = skim.Skim(m, offset=-1)
-#
-# omx_file.close()
-#
-# orig = [5, 9, 1]
-# dest = [2, 9, 6]
-#
-#
-# print "get:", sk.get(orig, dest)
-
-omx_file.close()
-
-
-
-#
-# agg_trip_omx_file = omx.openFile(os.path.join(data_dir, "skim.omx"))
-#
-#
-# skim_matrix = agg_trip_omx_file['DIST']
-#
-# distance_skim = skim.Skim(skim_matrix, offset=-1)
-#
-#
-# skims = skim.Skims()
-# skims['DISTANCE'] = orca.get_injectable("distance_skim")
-
+#print df

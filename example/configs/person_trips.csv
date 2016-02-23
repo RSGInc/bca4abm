@@ -1,7 +1,8 @@
 Description,Target,Expression
-"travel_time",travel_time,auto_time+transit_time+bike_time+walk_time
-"travel_time_alt",travel_time_alt,alt_auto_time+alt_transit_time+alt_bike_time+alt_walk_time
-"travel_time_benefit",travel_time_benefit,@df.build*(travel_time-travel_time_alt)
+"build_travel_time",build_travel_time,hh_expansion_factor * (build_auto_time + build_transit_time + build_bike_time + build_walk_time)
+"base_travel_time",base_travel_time,hh_expansion_factor * (base_auto_time + base_transit_time + base_bike_time + base_walk_time)
+"travel_time_benefit",travel_time_benefit,@0.5 * (base_travel_time-build_travel_time)
 # settings is injected into locals so we can use map vector function to compute vot based on tour purpose
 "value_of_time",vot,@df.tour_purpose.map(settings["tour_purpose_vot_map"])
-"monetized_travel_time_benefit",monetized_travel_time_benefit,@travel_time_benefit*vot
+#"value_of_time",vot,10.0
+"monetized_travel_time_benefit",monetized_travel_time_benefit,@travel_time_benefit * vot / 60.0

@@ -27,24 +27,17 @@ def person_trips_processor(trips_with_demographics, person_trips_spec, settings)
 
     # eval_variables evaluates each of the expressions in spec
     # in the context of each row in of the df dataframe
+    df = trips_with_demographics.to_frame()
     results = bca.assign_variables(assignment_expressions=person_trips_spec,
-                                   df=trips_with_demographics.to_frame(),
+                                   df=df,
                                    locals_d=locals_d)
 
-    assert "travel_time" in results.columns
-    assert "travel_time_alt" in results.columns
+    assert "travel_time_benefit" in results.columns
+    assert "monetized_travel_time_benefit" in results.columns
 
-    # print "\n### person_trips_processor - results of the expressions for each row in table"
-    # print results
-    #
-    # print "\n### person_trips_processor - person_trips_spec"
-    # print person_trips_spec
-
-    # FIXME - should we do the grouping and summary here and just save the results?
-    add_assigned_columns("trips", results)
+    add_assigned_columns("trips_with_demographics", results)
 
     trips_df = orca.get_table('trips_with_demographics').to_frame()
-
     grouped = trips_df.groupby(['coc_age', 'coc_poverty'])
     aggregations = {
         'monetized_travel_time_benefit': 'sum',
@@ -64,3 +57,6 @@ def person_trips_processor(trips_with_demographics, person_trips_spec, settings)
 
     with orca.eval_variable('output_store') as output_store:
         output_store['person_trips'] = grouped
+
+    # output_dir = orca.eval_variable('output_dir')
+    # trips_df.sort(['index1']).to_csv(os.path.join(output_dir, 'trips_with_demographics.csv') )

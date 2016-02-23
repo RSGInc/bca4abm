@@ -1,6 +1,3 @@
-tutorials/output/*
-example/output/*
-tests/output/*
 .idea
 .ipynb_checkpoints
 
