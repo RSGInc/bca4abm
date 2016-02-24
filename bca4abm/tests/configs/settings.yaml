@@ -136,3 +136,30 @@ aggregate_data_manifest_column_map:
   toll_table_name: toll_table_name
   toll_units: toll_units
   vot: vot
+
+link_data_manifest_column_map:
+  description: description
+  link_file_name: link_file_name
+
+link_table_column_map:
+  distance: distance
+  congtime: congested_travel_time
+  facl_type: facility_type_code
+  num_lanes: num_lanes
+  capacity: capacity
+  vol_total: total_volume
+  trk_vol: truck_volume
+  speed_cng: congested_speed
+  confactor: convert_to_hourly
+
+link_processor_locals:
+  non_fuel_cost_car: 0.303
+  non_fuel_cost_truck: 0.418
+  avg_fuel_cost_car: 2.85
+  avg_fuel_cost_truck: 3.15
+
+fuel_consumption: fuel_consumption.csv
+fuel_consumption_column_map:
+  speed: speed
+  car: car
+  truck: truck

@@ -24,8 +24,8 @@ orca.add_injectable('data_dir', data_dir)
 orca.add_injectable('output_dir', output_dir)
 
 
-df = orca.get_table('disaggregate_trips').to_frame()
+df = orca.get_table('build_trips').to_frame()
 
-print "disaggregate_trips", df.shape[0]
+print "build_trips", df.shape[0]
 
-#print df
+print df

@@ -86,3 +86,12 @@ def test_aggregate_trips_processor():
     with orca.eval_variable('output_store_for_read') as hdf:
         assert hdf.keys() == ['/aggregate_trips']
         assert hdf['aggregate_trips'].monetized_tt_benefit[0] == 133330.0
+
+
+def test_link_processor():
+
+    orca.run(["initialize_output_store"])
+    with orca.eval_variable('output_store_for_read') as hdf:
+        assert hdf.keys() == []
+
+    orca.run(["link_processor"])

@@ -1,0 +1,5 @@
+description,link_file_name
+a.m. peak,ha_DIR_LINK_AMPK.csv
+evening thing,ha_DIR_LINK_EVOP.csv
+mid-day thing,ha_DIR_LINK_MDOP.csv
+p.m. peak,ha_DIR_LINK_PMPK.csv
