@@ -92,7 +92,7 @@ def read_assignment_spec(fname,
     return cfg
 
 
-def assign_variables(assignment_expressions, df, locals_d=None):
+def assign_variables(assignment_expressions, df, locals_d):
     """
     Evaluate a set of variable expressions from a spec in the context
     of a given data table.
@@ -122,14 +122,16 @@ def assign_variables(assignment_expressions, df, locals_d=None):
         Will have the index of `df` and columns of `exprs`.
 
     """
-    if locals_d is None:
-        locals_d = {}
-    locals_d.update(locals())
 
     def to_series(x):
         if np.isscalar(x):
+            # assert False
             return pd.Series([x] * len(df), index=df.index)
         return x
+
+    # avoid trashing parameter when we add target
+    locals_d = locals_d.copy() if locals_d is not None else {}
+    locals_d['df'] = df
 
     l = []
     # need to be able to identify which variables causes an error, which keeps
@@ -153,9 +155,10 @@ def assign_variables(assignment_expressions, df, locals_d=None):
     # FIXME - we could pass in the target df to optionally assign directly from items
     # FIXME - (though desired target might not be the eval df if eval df is a merged table...)
 
-    # since we allow targets to be recycled, we need to only keep the las"
+    # since we allow targets to be recycled, we want to only keep the last usage
     keepers = []
     for statement in reversed(l):
+        # add statement to keepers list unless target is already in list
         if not next((True for keeper in keepers if keeper[0] == statement[0]), False):
             keepers.append(statement)
 
