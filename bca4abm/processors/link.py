@@ -6,6 +6,7 @@ import openmatrix as omx
 
 from bca4abm import bca4abm as bca
 from ..util.misc import missing_columns
+from ..util.misc import drop_duplicates
 
 """
 Link processor
@@ -71,7 +72,8 @@ def fuel_consumption(data_dir, settings):
     low_speed = fuel_rate.index[0]
     top_speed = fuel_rate.index[-1]
 
-    # links is in closure
+    # TODO - versions with one arg so no need for commas in param list requiring quoted csv column
+    # fuel_rate in closure
     def f_car(mph):
         return mph.astype(int).clip(low_speed, top_speed).map(fuel_rate.car)
 
@@ -84,7 +86,7 @@ def fuel_consumption(data_dir, settings):
 @orca.step()
 def link_processor(link_manifest, link_spec, settings, data_dir):
 
-    print "---------- aggregate_trips_processor"
+    print "---------- link_trips_processor"
 
     assert not missing_columns(link_manifest,
                                settings['link_data_manifest_column_map'].values())
@@ -112,11 +114,23 @@ def link_processor(link_manifest, link_spec, settings, data_dir):
 
         # eval_variables evaluates each of the expressions in spec
         # in the context of each row in of the choosers dataframe
-        results = bca.assign_variables(link_spec, links, locals_d.copy())
+        assigned_columns = bca.assign_variables(link_spec, links, locals_d.copy())
 
-        print "\n### %s" % row.description
-        print "\n### %s" % row.link_file_name
-        # print "\n%s" % links[: 10]
-        #
-        print "\n### link_processor - results"
-        print results[: 10]
+        benefits = {column: assigned_columns[column].sum() for column in assigned_columns.columns}
+        benefits['description'] = row.description
+
+        results.append(benefits)
+
+    # description column first and the rest in the same order as in link_spec
+    columns = ['description'] + drop_duplicates(link_spec.target)
+    link_benefits = pd.DataFrame(results, columns=columns)
+
+    with orca.eval_variable('output_store') as output_store:
+        link_benefits.insert(loc=0, column='scenario', value=settings['scenario_label'])
+        output_store['link'] = link_benefits
+
+    if settings.get("dump", False):
+        output_dir = orca.eval_variable('output_dir')
+        csv_file_name = os.path.join(output_dir, 'link_benefits.csv')
+        print "writing", csv_file_name
+        link_benefits.to_csv(csv_file_name)

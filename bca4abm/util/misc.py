@@ -1,6 +1,12 @@
 import orca
 
 
+def drop_duplicates(seq):
+    seen = set()
+    seen_add = seen.add
+    return [x for x in seq if not (x in seen or seen_add(x))]
+
+
 def mapped_columns(*column_maps):
     '''
     Given any number of column_maps

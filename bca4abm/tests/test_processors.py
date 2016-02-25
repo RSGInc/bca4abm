@@ -95,3 +95,7 @@ def test_link_processor():
         assert hdf.keys() == []
 
     orca.run(["link_processor"])
+
+    with orca.eval_variable('output_store_for_read') as hdf:
+        assert hdf.keys() == ['/link']
+        # TODO - should check values once we have them from test spec spreadsheet

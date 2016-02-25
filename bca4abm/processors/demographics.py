@@ -45,3 +45,10 @@ def demographics_processor(persons_merged, demographics_spec, settings):
 
     # FIXME remove this if there are no demographics columns dependent
     add_dependent_columns("persons", "persons_demographics")
+
+    if settings.get("dump", False):
+        persons_merged = orca.get_table('persons_merged').to_frame()
+        output_dir = orca.eval_variable('output_dir')
+        csv_file_name = os.path.join(output_dir, 'persons_merged.csv')
+        print "writing", csv_file_name
+        persons_merged.to_csv(csv_file_name)
