@@ -28,14 +28,14 @@ def person_trips_processor(trips_with_demographics, person_trips_spec, settings)
     # eval_variables evaluates each of the expressions in spec
     # in the context of each row in of the df dataframe
     df = trips_with_demographics.to_frame()
-    results = bca.assign_variables(assignment_expressions=person_trips_spec,
-                                   df=df,
-                                   locals_d=locals_d)
+    assigned_columns = bca.assign_variables(assignment_expressions=person_trips_spec,
+                                            df=df,
+                                            locals_d=locals_d)
 
-    assert "travel_time_benefit" in results.columns
-    assert "monetized_travel_time_benefit" in results.columns
+    assert "travel_time_benefit" in assigned_columns.columns
+    assert "monetized_travel_time_benefit" in assigned_columns.columns
 
-    add_assigned_columns("trips_with_demographics", results)
+    add_assigned_columns("trips_with_demographics", assigned_columns)
 
     trips_df = orca.get_table('trips_with_demographics').to_frame()
     grouped = trips_df.groupby(['coc_age', 'coc_poverty'])
@@ -45,18 +45,13 @@ def person_trips_processor(trips_with_demographics, person_trips_spec, settings)
     }
     grouped = grouped.agg(aggregations)
     grouped.reset_index(inplace=True)
-    grouped['scenario'] = settings['scenario_label']
-
-    grouped.set_index(['scenario', 'coc_age', 'coc_poverty'], inplace=True)
-
-    # print grouped
-
-    # FIXME - PerformanceWarning for coc booleans types
-    # your performance may suffer as PyTables will pickle object types that it cannot
-    # map directly to c-types [inferred_type->boolean,key->axis1_level2] [items->None]
 
     with orca.eval_variable('output_store') as output_store:
+        grouped.insert(loc=0, column='scenario', value=settings['scenario_label'])
         output_store['person_trips'] = grouped
 
-    # output_dir = orca.eval_variable('output_dir')
-    # trips_df.sort(['index1']).to_csv(os.path.join(output_dir, 'trips_with_demographics.csv') )
+    if settings.get("dump", False):
+        output_dir = orca.eval_variable('output_dir')
+        csv_file_name = os.path.join(output_dir, 'trips_with_demographics.csv')
+        print "writing", csv_file_name
+        trips_df.sort(['index1']).to_csv(csv_file_name)

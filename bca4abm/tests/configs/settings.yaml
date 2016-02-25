@@ -1,5 +1,7 @@
 scenario_label: sample
 
+dump: True
+
 households: households.csv
 households_column_map:
   hhno: hh_id
@@ -59,7 +61,6 @@ buildtrips_column_map:
   walktime: build_walk_time
   travcost: build_travel_cost
 
-
 buildtrips_baselos: buildtrips_baselos.csv
 buildtrips_baselos_column_map:
   pno: person_idx
@@ -86,7 +87,6 @@ person_type_map:
 gender_map:
     1: male
     2: female
-
 
 trip_mode_map:
     1: walk      # walk

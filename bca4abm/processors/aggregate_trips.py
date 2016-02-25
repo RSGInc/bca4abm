@@ -137,6 +137,7 @@ def aggregate_trips_processor(aggregate_trips_manifest, settings, data_dir):
         results.append(aggregate_trips_benefits)
 
     # create dataframe with results
+    # FIXME - this is only to ensure the desired column order in dataframe (?)
     columns = ['description',
                'tt_benefit_in_minutes',
                'vot',
@@ -153,4 +154,11 @@ def aggregate_trips_processor(aggregate_trips_manifest, settings, data_dir):
     aggregate_trips_benefits = pd.DataFrame(results, columns=columns)
 
     with orca.eval_variable('output_store') as output_store:
+        aggregate_trips_benefits.insert(loc=0, column='scenario', value=settings['scenario_label'])
         output_store['aggregate_trips'] = aggregate_trips_benefits
+
+    if settings.get("dump", False):
+        output_dir = orca.eval_variable('output_dir')
+        csv_file_name = os.path.join(output_dir, 'aggregate_trips_benefits.csv')
+        print "writing", csv_file_name
+        aggregate_trips_benefits.to_csv(csv_file_name)

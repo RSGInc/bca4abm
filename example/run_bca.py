@@ -1,3 +1,7 @@
+# bca4abm
+# Copyright (C) 2016 RSG Inc
+# See full license in LICENSE.txt.
+
 import orca
 import pandas as pd
 import numpy as np
@@ -23,9 +27,16 @@ orca.run(['initialize_output_store'])
 with orca.eval_variable('output_store_for_read') as hdf:
     assert hdf.keys() == []
 
-# orca.run(['demographics_processor'])
-# orca.run(['person_trips_processor'])
-# orca.run(['aggregate_trips_processor'])
+orca.run(['demographics_processor'])
+orca.run(['person_trips_processor'])
+orca.run(['aggregate_trips_processor'])
 orca.run(['link_processor'])
+
+with orca.eval_variable('output_store_for_read') as hdf:
+
+    for key in hdf.keys():
+
+        print "\n========== %s\n" % key
+        print hdf[key]
 
 
