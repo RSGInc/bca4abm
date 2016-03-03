@@ -1,5 +1,7 @@
 scenario_label: sample
 
+discount_rate: 0.75
+
 dump: True
 
 households: households.csv
@@ -17,7 +19,7 @@ persons_column_map:
   pgend: person_gender
   pagey: person_age
 
-basetrips: basetrips.csv
+basetrips: basetrips_normal.csv
 basetrips_column_map:
   pno: person_idx
   hhno: hh_id
@@ -28,9 +30,14 @@ basetrips_column_map:
   mode: trip_mode
   autotime: base_auto_time
   transittime: base_transit_time
+  transitwait: base_transit_wait
+  transitwalk: base_transit_walk
   biketime: base_bike_time
   walktime: base_walk_time
-  travcost: base_travel_cost
+  tollcost: base_toll_cost
+  fuelcost: base_fuel_cost
+  parkcost: base_park_cost
+  farecost: base_fare_cost
 
 
 basetrips_buildlos: basetrips_buildlos.csv
@@ -42,11 +49,16 @@ basetrips_buildlos_column_map:
   tseg: half_tour_seg_idx
   autotime: build_auto_time
   transittime: build_transit_time
+  transitwait: build_transit_wait
+  transitwalk: build_transit_walk
   biketime: build_bike_time
   walktime: build_walk_time
-  travcost: build_travel_cost
+  tollcost: build_toll_cost
+  fuelcost: build_fuel_cost
+  parkcost: build_park_cost
+  farecost: build_fare_cost
 
-buildtrips: buildtrips.csv
+buildtrips: buildtrips_normal.csv
 buildtrips_column_map:
   pno: person_idx
   hhno: hh_id
@@ -57,9 +69,14 @@ buildtrips_column_map:
   mode: trip_mode
   autotime: build_auto_time
   transittime: build_transit_time
+  transitwait: build_transit_wait
+  transitwalk: build_transit_walk
   biketime: build_bike_time
   walktime: build_walk_time
-  travcost: build_travel_cost
+  tollcost: build_toll_cost
+  fuelcost: build_fuel_cost
+  parkcost: build_park_cost
+  farecost: build_fare_cost
 
 buildtrips_baselos: buildtrips_baselos.csv
 buildtrips_baselos_column_map:
@@ -70,55 +87,45 @@ buildtrips_baselos_column_map:
   tseg: half_tour_seg_idx
   autotime: base_auto_time
   transittime: base_transit_time
+  transitwait: base_transit_wait
+  transitwalk: base_transit_walk
   biketime: base_bike_time
   walktime: base_walk_time
-  travcost: base_travel_cost
+  tollcost: base_toll_cost
+  fuelcost: base_fuel_cost
+  parkcost: base_park_cost
+  farecost: base_fare_cost
 
-person_type_map:
-    1: full
-    2: part
-    3: retired
-    4: nonwork
-    5: university
-    6: highschool
-    7: school
-    8: preschool
+tour_purpose_work_map:
+    0: 0   # home
+    1: 1   # work
+    2: 0   # school
+    3: 0   # escort
+    4: 0   # chore
+    5: 0   # shop
+    6: 0   # meal
+    7: 0   # social
 
-gender_map:
-    1: male
-    2: female
+# work/nonwork in-vehicle-time value of time
+work_ivt_vot_map:
+    0: 6.0     # nonwork
+    1: 10.0    # work
 
-trip_mode_map:
-    1: walk      # walk
-    2: walk      # bike
-    3: auto      # drive-alone
-    4: auto      # shared-ride-2
-    5: auto      # shared-ride-3+
-    6: transit   # walk-transit
-    7: transit   # drive-transit
-    8: transit   # school-bus
+# work/nonwork walk value of time
+work_walk_vot_map:
+    0: 9.0     # nonwork
+    1: 15.0    # work
 
-tour_purpose_map:
-    0: noncommute   # home
-    1: commute   # work
-    2: commute   # school
-    3: noncommute   # escort
-    4: noncommute   # chore
-    5: noncommute   # shop
-    6: noncommute   # meal
-    7: noncommute   # social
+# work/nonwork wait value of time
+work_wait_vot_map:
+    0: 9.0     # nonwork
+    1: 15.0    # work
 
-tour_purpose_vot_map:
-    0: 5.00     # home
-    1: 11.03    # work
-    2: 11.03    # school
-    3: 5.00     # escort
-    4: 5.00     # chore
-    5: 5.00     # shop
-    6: 5.00     # meal
-    7: 5.00     # social
+toll_inclusion_factor: 1
+fuel_inclusion_factor: 1
+park_inclusion_factor: 1
+fare_inclusion_factor: 1
 
-ovt_weight: 2.2
 
 # expected column headers in aggregate_data_manifest.csv
 # this is as much to document the expected columns as anything

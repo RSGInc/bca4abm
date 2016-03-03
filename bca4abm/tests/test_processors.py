@@ -19,7 +19,9 @@ import pytest
 # Also note that the following import statement has the side-effect of registering injectables:
 from bca4abm import bca4abm as bca
 
-from bca4abm.util.misc import expect_columns, missing_columns, extra_columns
+from bca4abm.util.misc import expect_columns, missing_columns, extra_columns, get_setting
+
+from bca4abm.processors.link import read_csv_file
 
 parent_dir = os.path.dirname(__file__)
 orca.add_injectable("configs_dir", os.path.join(parent_dir, 'configs'))
@@ -49,9 +51,6 @@ def test_demographics_processor():
     persons_merged = orca.eval_variable('persons_merged').to_frame()
     assert "coc_age" in persons_merged.columns
 
-    # check for presence of added dependent column
-    assert "coc" in persons_merged.columns
-
     # not sure what to test yet...
 
 
@@ -67,12 +66,13 @@ def test_person_trips_processor():
     trips_with_demographics = \
         orca.eval_variable('trips_with_demographics').to_frame()
 
-    assert "travel_time_benefit" in trips_with_demographics.columns
-    assert "monetized_travel_time_benefit" in trips_with_demographics.columns
+    assert "benefit" in trips_with_demographics.columns
 
     with orca.eval_variable('output_store_for_read') as hdf:
-        assert hdf.keys() == ['/person_trips']
-        assert hdf['person_trips'].travel_time_benefit.sum() == 1359000.0
+        assert '/person_trips' in hdf.keys()
+        assert '/person_trips_coc' in hdf.keys()
+        assert hdf['person_trips'].benefit[0] == 507780.0
+        assert hdf['person_trips_coc'].benefit.sum() == 507780.0
 
 
 def test_aggregate_trips_processor():
@@ -86,6 +86,15 @@ def test_aggregate_trips_processor():
     with orca.eval_variable('output_store_for_read') as hdf:
         assert hdf.keys() == ['/aggregate_trips']
         assert hdf['aggregate_trips'].monetized_tt_benefit[0] == 133330.0
+
+
+def read_csv_file():
+
+    fuel_rate = bca.read_csv_file(os.path.join(parent_dir, 'data'),
+                                  file_name=get_setting('fuel_consumption'),
+                                  index_col='speed',
+                                  column_map=get_setting('fuel_consumption_column_map'))
+    assert not missing_columns(fuel_rate, ['speed'])
 
 
 def test_link_processor():

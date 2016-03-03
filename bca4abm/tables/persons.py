@@ -28,36 +28,8 @@ def persons_merged(persons, households):
                              tables=[persons, households])
 
 
-# FIXME - sample of a dependent column that remaps categories
-# convert person type categories to string descriptors
-@orca.column("persons")
-def person_cat(persons, settings):
-    return persons.person_type.map(settings["person_type_map"])
-
-
-# FIXME - sample of a dependent column that remaps categories
-# convert person type categories to string descriptors
-@orca.column("persons")
-def person_gender_cat(persons, settings):
-    return persons.person_gender.map(settings["gender_map"])
-
-
-# FIXME - sample of a dependent column
-@orca.column("persons")
-def adult(persons):
-    return persons.to_frame(["person_age"]).eval("18 <= person_age")
-
-
 # FIXME - remove this if there are no demographics columns dependent
 # this is the placeholder for all the columns to update after the demographic processor runs
 @orca.table()
 def persons_demographics(persons):
     return pd.DataFrame(index=persons.index)
-
-
-# FIXME - replace this with any column dependent on fields added by demographics processor
-# dependent column added after the demographic processor runs
-@orca.column("persons_demographics")
-def coc(persons):
-    return pd.Series(persons.coc_poverty | persons.coc_age,
-                     index=persons.index)

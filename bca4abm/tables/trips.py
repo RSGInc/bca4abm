@@ -41,6 +41,7 @@ def disaggregate_trips(base_trips, build_trips):
 
     df = base.append(build, ignore_index=True)
 
+    # TODO - aids debugging if we can sort merged versions of this table in base+build csv order
     df['index1'] = df.index
 
     return df

@@ -11,10 +11,16 @@ import os
 # the following import has the side-effect of registering injectables
 from bca4abm import bca4abm as bca
 
-parent_dir = os.path.dirname(__file__)
+from bca4abm.util.misc import get_setting
+
+
+parent_dir = os.path.join(os.path.dirname(__file__), '..', 'bca4abm', 'tests')
+#parent_dir = os.path.dirname(__file__)
 
 orca.add_injectable('configs_dir', os.path.join(parent_dir, 'configs'))
 orca.add_injectable('data_dir', os.path.join(parent_dir, 'data'))
+
+parent_dir = os.path.dirname(__file__)
 orca.add_injectable('output_dir', os.path.join(parent_dir, 'output'))
 
 orca.run(['initialize_output_store'])
@@ -23,8 +29,8 @@ with orca.eval_variable('output_store_for_read') as hdf:
 
 orca.run(['demographics_processor'])
 orca.run(['person_trips_processor'])
-orca.run(['aggregate_trips_processor'])
-orca.run(['link_processor'])
+# orca.run(['aggregate_trips_processor'])
+# orca.run(['link_processor'])
 
 with orca.eval_variable('output_store_for_read') as hdf:
 
