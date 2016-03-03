@@ -19,12 +19,31 @@ import pytest
 # Also note that the following import statement has the side-effect of registering injectables:
 from bca4abm import bca4abm as bca
 
-from bca4abm.util.misc import expect_columns, missing_columns, extra_columns
+from bca4abm.util.misc import expect_columns, missing_columns, extra_columns, get_setting
 
-parent_dir = os.path.dirname(__file__)
-orca.add_injectable("configs_dir", os.path.join(parent_dir, 'configs'))
-orca.add_injectable("data_dir", os.path.join(parent_dir, 'data'))
-orca.add_injectable("output_dir", os.path.join(parent_dir, 'output'))
+
+def test_misc():
+
+    # expect all of and only the columns specified by persons_column_map values
+    df = pd.DataFrame.from_items([('A', [1, 2, 3]), ('B', [4, 5, 6])])
+    assert expect_columns(df, ['A', 'B'])
+
+    with pytest.raises(Exception):
+        expect_columns(df, ['A'])
+
+    with pytest.raises(Exception):
+        expect_columns(df, ['A', 'B', 'C'])
+
+    assert get_setting('scenario_label') == 'sample'
+
+
+def test_defaults():
+
+    assert orca.eval_variable('settings_file_name') == 'settings.yaml'
+    assert orca.eval_variable('output_store_file_name',
+                              settings={}) == 'bca_results.h5'
+    assert orca.eval_variable('output_store_file_name',
+                              settings={'output_store': 'zorg.h5'}) == 'zorg.h5'
 
 
 def test_read_settings():

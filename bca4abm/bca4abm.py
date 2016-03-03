@@ -85,13 +85,17 @@ def read_assignment_spec(fname,
     # drop null expressions
     # cfg = cfg.dropna(subset=[expression_name])
 
-    # don't need description
-    cfg = cfg.drop(description_name, axis=1)
-
     cfg.rename(columns={target_name: 'target',
                         expression_name: 'expression',
                         description_name: 'description'},
                inplace=True)
+
+    # don't need description
+    if 'description' in cfg.columns:
+        cfg = cfg.drop('description', axis=1)
+
+    cfg.target = cfg.target.str.strip()
+    cfg.expression = cfg.expression.str.strip()
 
     return cfg
 
@@ -162,6 +166,9 @@ def assign_variables(assignment_expressions, df, locals_d):
     # since we allow targets to be recycled, we want to only keep the last usage
     keepers = []
     for statement in reversed(l):
+        # don't keep targets that staert with underscore
+        if statement[0].startswith('_'):
+            continue
         # add statement to keepers list unless target is already in list
         if not next((True for keeper in keepers if keeper[0] == statement[0]), False):
             keepers.append(statement)

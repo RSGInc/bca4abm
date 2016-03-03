@@ -42,9 +42,6 @@ def test_read_persons_table():
     assert not missing_columns(persons,
                                settings['persons_column_map'].values())
 
-    assert 'adult' in persons.columns
-    assert 'coc_age' not in persons.columns
-
     assert persons.shape[0] == 27
 
 
@@ -75,12 +72,6 @@ def test_persons_merged_table():
     assert 'person_gender' in persons_merged.columns
     assert 'hh_income' in persons_merged.columns
 
-    # check for presence of computed column 'adult'
-    assert 'adult' in persons_merged.columns
-
-    # check that adult column is correctly computed
-    assert (persons_merged.adult == (persons_merged.person_age > 18)).all()
-
     raw_persons = orca.get_table('raw_persons').to_frame()
     assert (persons_merged.person_type == raw_persons.person_type).all()
 
@@ -90,7 +81,7 @@ def test_persons_merged_table():
 def test_read_base_trips_table():
 
     settings = orca.eval_variable('settings')
-    assert settings.get('basetrips') == 'basetrips.csv'
+    assert settings.get('basetrips') == 'basetrips_normal.csv'
     assert settings.get('store') is None
 
     trips = orca.get_table('base_trips').to_frame()
@@ -106,7 +97,7 @@ def test_read_base_trips_table():
 def test_read_build_trips_table():
 
     settings = orca.eval_variable('settings')
-    assert settings.get('buildtrips') == 'buildtrips.csv'
+    assert settings.get('buildtrips') == 'buildtrips_normal.csv'
     assert settings.get('store') is None
 
     trips = orca.get_table('build_trips').to_frame()
@@ -142,11 +133,5 @@ def test_trips_with_demographics_table():
     assert 'base_auto_time' in trips.columns
     assert 'person_age' in trips.columns
     assert 'hh_income' in trips.columns
-
-    # check for presence of computed column 'adult'
-    assert 'adult' in trips.columns
-
-    # check that adult column is correctly computed
-    assert (trips.adult == (trips.person_age > 18)).all()
 
     assert trips.shape[0] == 250

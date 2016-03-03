@@ -1,8 +1,33 @@
-Description,Target,Expression
-"build_travel_time",build_travel_time,hh_expansion_factor * (build_auto_time + build_transit_time + build_bike_time + build_walk_time)
-"base_travel_time",base_travel_time,hh_expansion_factor * (base_auto_time + base_transit_time + base_bike_time + base_walk_time)
-"travel_time_benefit",travel_time_benefit,@0.5 * (base_travel_time-build_travel_time)
-# settings is injected into locals so we can use map vector function to compute vot based on tour purpose
-"value_of_time",vot,@df.tour_purpose.map(settings["tour_purpose_vot_map"])
-#"value_of_time",vot,10.0
-"monetized_travel_time_benefit",monetized_travel_time_benefit,@travel_time_benefit * vot / 60.0
+Target,Expression
+work, @trips.tour_purpose.map(settings["tour_purpose_work_map"])
+#
+auto_time, @(trips.build_auto_time - trips.base_auto_time) * work.map(settings["work_ivt_vot_map"])/60.0
+transit_time, @(trips.build_transit_time - trips.base_transit_time) * work.map(settings["work_ivt_vot_map"])/60.0
+transit_wait_time, @(trips.build_transit_wait - trips.base_transit_wait) * work.map(settings["work_wait_vot_map"])/60.0
+transit_walk_time, @(trips.build_transit_walk - trips.base_transit_walk) * work.map(settings["work_walk_vot_map"])/60.0
+bike_time, @(trips.build_bike_time - trips.base_bike_time) * work.map(settings["work_ivt_vot_map"])/60.0
+walk_time, @(trips.build_walk_time - trips.base_walk_time) * work.map(settings["work_walk_vot_map"])/60.0
+toll, @(trips.build_toll_cost - trips.base_toll_cost) * settings["toll_inclusion_factor"]
+fuel, @(trips.build_fuel_cost - trips.base_fuel_cost) * settings["fuel_inclusion_factor"]
+park, @(trips.build_park_cost - trips.base_park_cost) * settings["park_inclusion_factor"]
+fare, @(trips.build_fare_cost - trips.base_fare_cost) * settings["fare_inclusion_factor"]
+#
+monetized_time, @auto_time+transit_time+transit_wait_time+transit_walk_time+bike_time+walk_time
+cost, @toll+fuel+park+fare
+benefit, @-0.5 * trips.hh_expansion_factor * (monetized_time + cost)
+#
+# the following is neither computationally efficient not epistemologically sound
+# but very convenient for error checking and generating benefit breakdown summations
+#
+monetized_time, @-0.5 * trips.hh_expansion_factor * monetized_time
+cost, @-0.5 * trips.hh_expansion_factor * cost
+auto_time, @-0.5 * trips.hh_expansion_factor * auto_time
+transit_time, @-0.5 * trips.hh_expansion_factor * transit_time
+transit_wait_time, @-0.5 * trips.hh_expansion_factor * transit_wait_time
+transit_walk_time, @-0.5 * trips.hh_expansion_factor * transit_walk_time
+bike_time, @-0.5 * trips.hh_expansion_factor * bike_time
+walk_time, @-0.5 * trips.hh_expansion_factor * walk_time
+toll, @-0.5 * trips.hh_expansion_factor * toll
+fuel, @-0.5 * trips.hh_expansion_factor * fuel
+park, @-0.5 * trips.hh_expansion_factor * park
+fare, @-0.5 * trips.hh_expansion_factor * fare

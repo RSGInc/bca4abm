@@ -1,0 +1,6 @@
+Description,Target,Expression
+"speed",speed,congested_speed
+VMT_car,VMT_car,distance * (total_volume - truck_volume)
+VMT_truck,VMT_truck,distance * truck_volume
+op_cost_car,op_cost_car,@(non_fuel_cost_car + avg_fuel_cost_car * fuel_consumption_car(speed)) * VMT_car
+op_cost_truck,op_cost_truck,@(non_fuel_cost_truck + avg_fuel_cost_truck * fuel_consumption_truck(df.congested_speed)) * VMT_truck

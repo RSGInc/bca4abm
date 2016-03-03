@@ -1,0 +1,3 @@
+,scenario,description,tt_benefit_in_minutes,vot,monetized_tt_benefit,aoc_benefit,toll_benefit,categorized_benefit,base_delta_cost,build_delta_cost,generalized_cost_benefit,benefit
+0,sample,Commercial vehicles non-toll,799980.0,10.0,133330.0,799980.0,0.0,933310.0,-928620.0,-938000.0,933310.0,933310.0
+1,sample,commercial vehicles toll,799980.0,40.2,535986.6,799980.0,0.0,1335966.6,-1329253.2,-1342680.0,1335966.6,1335966.6
