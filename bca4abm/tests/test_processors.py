@@ -78,8 +78,8 @@ def test_person_trips_processor():
     with orca.eval_variable('output_store_for_read') as hdf:
         assert '/summary_results' in hdf.keys()
         assert '/coc_results' in hdf.keys()
-        npt.assert_almost_equal(hdf['summary_results'].PT_benefit[0], 507780.0)
-        npt.assert_almost_equal(hdf['coc_results'].PT_benefit.sum(), 507780.0)
+        npt.assert_almost_equal(hdf['summary_results'].PT_total[0], 139004775.0)
+        npt.assert_almost_equal(hdf['coc_results'].PT_total.sum(), 139004775.0)
 
 
 def test_aggregate_trips_processor():
@@ -91,16 +91,17 @@ def test_aggregate_trips_processor():
     with orca.eval_variable('output_store_for_read') as hdf:
         assert '/aggregate_trips' in hdf.keys()
         assert '/summary_results' in hdf.keys()
-        npt.assert_almost_equal(hdf['aggregate_trips'].monetized_tt_benefit[0],
-                                666650.0, decimal=2)
-        npt.assert_almost_equal(hdf['summary_results'].AT_monetized_tt_benefit[0],
-                                666650.0, decimal=2)
+        npt.assert_almost_equal(hdf['aggregate_trips'].total_benefit[0],
+                                209733562.50, decimal=2)
+        npt.assert_equal(hdf['aggregate_trips'].vot[0], 50.0)
+        npt.assert_almost_equal(hdf['summary_results'].AT_ivt_benefit[0],
+                                182495437.50, decimal=2)
         npt.assert_almost_equal(hdf['summary_results'].AT_aoc_benefit[0],
-                                66665.0, decimal=2)
+                                18249543.75, decimal=2)
         npt.assert_almost_equal(hdf['summary_results'].AT_toll_benefit[0],
-                                32835.0, decimal=2)
-        npt.assert_almost_equal(hdf['summary_results'].AT_benefit[0],
-                                766150.0, decimal=2)
+                                8988581.25, decimal=2)
+        npt.assert_almost_equal(hdf['summary_results'].AT_total_benefit[0],
+                                209733562.50, decimal=2)
 
 
 def test_link_daily_processor():
@@ -124,9 +125,16 @@ def test_link_processor():
     orca.run(['write_results'])
 
     with orca.eval_variable('output_store_for_read') as hdf:
+        assert '/link_results' in hdf.keys()
+        npt.assert_almost_equal(hdf['link_results'].cost_op_total[0],
+                                -79044707.159, decimal=2)
+        npt.assert_almost_equal(hdf['link_results'].cost_delay_total[0],
+                                12216076.978, decimal=2)
         assert '/summary_results' in hdf.keys()
+        npt.assert_almost_equal(hdf['summary_results'].L_cost_op_total[0],
+                                -79044707.159, decimal=2)
         npt.assert_almost_equal(hdf['summary_results'].L_cost_delay_total[0],
-                                44624.9387, decimal=2)
+                                12216076.978, decimal=2)
 
 
 def test_auto_ownership_processor():

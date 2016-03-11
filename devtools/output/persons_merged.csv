@@ -19,7 +19,7 @@ hh_id,person_idx,person_type,person_age,person_gender,coc_age,coc_poverty,hh_inc
 80,1,2,47,2,False,True,10681,4,2,10000,2
 80,2,4,48,1,False,True,10681,4,2,10000,2
 80,3,7,14,2,False,True,10681,4,2,10000,2
-80,4,7,90,2,True,True,10681,4,2,10000,2
+80,4,7,10,2,False,True,10681,4,2,10000,2
 90,1,2,37,2,False,False,60433,5,2,10000,2
 90,2,1,37,1,False,False,60433,5,2,10000,2
 90,3,7,6,1,False,False,60433,5,2,10000,2

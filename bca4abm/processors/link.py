@@ -84,7 +84,7 @@ def eval_link_spec(link_spec, link_file_name, data_dir, link_file_column_map,
                                                 df=links_df,
                                                 locals_d=locals_d.copy())
 
-        print assigned_columns[:10]
+        # print assigned_columns[:10]
 
         result = pd.DataFrame(data=assigned_columns.sum()).T
 
@@ -127,7 +127,7 @@ def link_processor(link_manifest, link_spec, settings, data_dir):
 
     results.reset_index(inplace=True)
 
-    print "\nassigned_column_names\n", assigned_column_names
+    # print "\nassigned_column_names\n", assigned_column_names
 
     add_summary_results(results, summary_column_names=assigned_column_names, prefix='L_')
 

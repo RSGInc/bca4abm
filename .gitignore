@@ -1,6 +1,7 @@
 .idea
 .ipynb_checkpoints
 
+~$*.xlsx
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

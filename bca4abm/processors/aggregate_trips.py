@@ -55,13 +55,9 @@ def aggregate_trips_processor(aggregate_trips_manifest, settings, data_dir):
     assert not missing_columns(aggregate_trips_manifest,
                                settings['aggregate_data_manifest_column_map'].values())
 
-    locals_d = {
-        'IVT_COST_COUNTING_FACTOR': 1.0,
-        'AOC_COST_COUNTING_FACTOR': 1.0,
-        'TOLL_COST_COUNTING_FACTOR': 1.0
-    }
+    locals_d = settings['locals']
     if 'locals_aggregate_trips' in settings:
-        locals_d.update(settings['locals_auto_ownership'])
+        locals_d.update(settings['locals_aggregate_trips'])
 
     results = []
     for row in aggregate_trips_manifest.itertuples(index=True):
@@ -87,25 +83,27 @@ def aggregate_trips_processor(aggregate_trips_manifest, settings, data_dir):
         # --------- alternate calculations
 
         # broken down by benefit category
-        tt_benefit_in_minutes = \
-            0.5 * ((base_trips + build_trips) * (base_ivt-build_ivt)).sum()
-        monetized_tt_benefit = \
-            vot/60.0 * tt_benefit_in_minutes
-        aoc_benefit = \
-            0.5 * ((base_trips + build_trips) * aoc_scale * (base_aoc-build_aoc)).sum()
-        toll_benefit = \
-            0.5 * ((base_trips + build_trips) * toll_scale * (base_toll-build_toll)).sum()
+        ivt_benefit = \
+            0.5 * ((base_trips + build_trips) * (base_ivt-build_ivt)).sum()\
+            * vot/60.0 * locals_d['DISCOUNT_RATE'] * locals_d['ANNUALIZATION_FACTOR']
 
-        benefit = monetized_tt_benefit + aoc_benefit + toll_benefit
+        aoc_benefit = \
+            0.5 * ((base_trips + build_trips) * aoc_scale * (base_aoc-build_aoc)).sum()\
+            * locals_d['DISCOUNT_RATE'] * locals_d['ANNUALIZATION_FACTOR']
+
+        toll_benefit = \
+            0.5 * ((base_trips + build_trips) * toll_scale * (base_toll-build_toll)).sum()\
+            * locals_d['DISCOUNT_RATE'] * locals_d['ANNUALIZATION_FACTOR']
+
+        total_benefit = ivt_benefit + aoc_benefit + toll_benefit
 
         aggregate_trips_benefits = {
             'description': row.description,
             'vot': vot,
-            'tt_benefit_in_minutes': tt_benefit_in_minutes,
-            'monetized_tt_benefit': monetized_tt_benefit,
+            'ivt_benefit': ivt_benefit,
             'aoc_benefit': aoc_benefit,
             'toll_benefit': toll_benefit,
-            'benefit': benefit
+            'total_benefit': total_benefit
         }
 
         results.append(aggregate_trips_benefits)
@@ -113,7 +111,7 @@ def aggregate_trips_processor(aggregate_trips_manifest, settings, data_dir):
     # create dataframe with detailed results
     aggregate_trips_benefits = pd.DataFrame(results)
 
-    summary_column_names = ['monetized_tt_benefit', 'aoc_benefit', 'toll_benefit', 'benefit']
+    summary_column_names = ['ivt_benefit', 'aoc_benefit', 'toll_benefit', 'total_benefit']
     add_summary_results(aggregate_trips_benefits, summary_column_names, prefix='AT_')
 
     with orca.eval_variable('output_store') as output_store:
