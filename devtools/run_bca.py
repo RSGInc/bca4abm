@@ -28,7 +28,8 @@ with orca.eval_variable('output_store_for_read') as hdf:
     assert hdf.keys() == []
 
 orca.run(['demographics_processor'])
-orca.run(['person_trips_processor'])
+# orca.run(['person_trips_processor'])
+orca.run(['auto_ownership_processor'])
 # orca.run(['aggregate_trips_processor'])
 # orca.run(['link_processor'])
 

@@ -43,19 +43,16 @@ def cvt_freight_skims():
         omx_dir = csv_dir
 
         cvt_to_omx(os.path.join(csv_dir, 'freight_trips.csv'),
-                   os.path.join(omx_dir, 'trips.omx'), 'non_toll')
-
-        cvt_to_omx(os.path.join(csv_dir, 'freight_trips.csv'),
-                   os.path.join(omx_dir, 'trips.omx'), 'toll')
+                   os.path.join(omx_dir, 'testtrips.omx'), 'freight_trips')
 
         cvt_to_omx(os.path.join(csv_dir, 'freight_ivt.csv'),
-                   os.path.join(omx_dir, 'skim.omx'), 'ivt')
+                   os.path.join(omx_dir, 'testlos.omx'), 'freight_ivt')
 
-        cvt_to_omx(os.path.join(csv_dir, 'freight_aoc.csv'),
-                   os.path.join(omx_dir, 'skim.omx'), 'aoc')
+        cvt_to_omx(os.path.join(csv_dir, 'freight_opercost.csv'),
+                   os.path.join(omx_dir, 'testlos.omx'), 'freight_opercost')
 
-        cvt_to_omx(os.path.join(csv_dir, 'freight_cvt.csv'),
-                   os.path.join(omx_dir, 'skim.omx'), 'cvt')
+        cvt_to_omx(os.path.join(csv_dir, 'freight_tollcost.csv'),
+                   os.path.join(omx_dir, 'testlos.omx'), 'freight_tollcost')
 
 cvt_freight_skims()
 

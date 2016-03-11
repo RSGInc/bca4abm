@@ -17,6 +17,8 @@ git clone https://github.com/RSGInc/orca.git ./orca
 ~/anaconda/bin/conda create --name orca --clone root
 source ~/anaconda/bin/activate orca
 
+pip install pytest-cov coveralls pep8 pytest-xdist
+pip install sphinx_rtd_theme
 
 
 #####

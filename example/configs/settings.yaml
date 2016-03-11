@@ -1,15 +1,102 @@
-scenario_label: sample
-
-discount_rate: 0.75
-
 dump: True
 
-households: households.csv
-households_column_map:
+scenario_year: sample
+
+# local values available to all processors
+locals:
+  DISCOUNT_RATE: 0.75
+  ANNUALIZATION_FACTOR: 365
+
+locals_demographics:
+  POVERTY_1: 11770
+  POVERTY_2: 15930
+  POVERTY_N: 4160
+  POVERTY_MAP:
+    1: 11770
+    2: 15930
+
+locals_auto_ownership:
+  ANNUAL_COST_PER_VEHICLE: 2000
+
+locals_physical_activity:
+  WALK_FACTOR_AGE_UNDER_20: 0
+  WALK_FACTOR_AGE_20_TO_74: 0.11
+  WALK_FACTOR_AGE_75_PLUS: 0
+  WALK_DIVISOR_MINUTES_PER_DAY: 24
+  WALK_MAX_RISK_REDUCTION: 0.3
+  BIKE_FACTOR_AGE_UNDER_20: 0
+  BIKE_FACTOR_AGE_20_TO_64: 0.1
+  BIKE_FACTOR_AGE_65_PLUS: 0
+  BIKE_DIVISOR_MINUTES_PER_DAY: 14.3
+  BIKE_MAX_RISK_REDUCTION: 0.45
+  TOTAL_MAX_RISK_REDUCTION: 0.45
+  VALUE_OF_MORTALITY_RISK_PER_YEAR: 100000
+
+
+locals_person_trips:
+  # work/nonwork in-vehicle-time value of time
+  WORK_IVT_VOT_MAP:
+      0: 6.0     # nonwork
+      1: 10.0    # work
+  # work/nonwork walk value of time
+  WORK_WALK_VOT_MAP:
+      0: 9.0     # nonwork
+      1: 15.0    # work
+  # work/nonwork wait value of time
+  WORK_WAIT_VOT_MAP:
+      0: 9.0     # nonwork
+      1: 15.0    # work
+  TOLL_INCLUSION_FACTOR: 1
+  FUEL_INCLUSION_FACTOR: 1
+  PARK_INCLUSION_FACTOR: 1
+  FARE_INCLUSION_FACTOR: 1
+
+locals_link:
+  # unreliability costs - inputs
+  RELIABILITY_RATIO: 0.5
+  VALUE_OF_RELIABILITY_AUTO: 10.00
+  VALUE_OF_RELIABILITY_TRUCK: 40.00
+  # unreliability costs - constants
+  TIME_RATIO_FACTOR: 1.0274
+  TIME_RATIO_POWER: 1.2204
+  TIME_RATIO_UPPER_LIMIT: 3
+  TTI50_POWER: 0.8601
+  TTI80_LOG_MULTIPLIER: 2.1406
+  # operating costs
+  OPERATING_COST_PER_MILE_AUTO: 0.20
+  OPERATING_COST_PER_MILE_TRUCK: 0.80
+
+locals_link_daily:
+  # accident costs
+  # Crash rates per vehicle-mile
+  CRASH_RATE_PDO: 0.0001
+  CRASH_RATE_INJURY: 0.00001
+  CRASH_RATE_FATAL: 0.000001
+  # Crash costs in Dollars
+  CRASH_COST_PDO: 2500
+  CRASH_COST_INJURY: 25000
+  CRASH_COST_FATAL: 100000
+
+locals_aggregate_trips:
+  IVT_COST_COUNTING_FACTOR: 1.0
+  AOC_COST_COUNTING_FACTOR: 1.0
+  TOLL_COST_COUNTING_FACTOR: 1.0
+
+
+### table definitions
+
+base_households: base_households.csv
+base_households_column_map:
   hhno: hh_id
   hhincome: hh_income
   hhsize: hh_size
   hhexpfac: hh_expansion_factor
+  hhvehs: base_vehicles
+
+build_households: build_households.csv
+build_households_column_map:
+  hhno: hh_id
+  hhvehs: build_vehicles
 
 persons: persons.csv
 persons_column_map:
@@ -106,27 +193,6 @@ tour_purpose_work_map:
     6: 0   # meal
     7: 0   # social
 
-# work/nonwork in-vehicle-time value of time
-work_ivt_vot_map:
-    0: 6.0     # nonwork
-    1: 10.0    # work
-
-# work/nonwork walk value of time
-work_walk_vot_map:
-    0: 9.0     # nonwork
-    1: 15.0    # work
-
-# work/nonwork wait value of time
-work_wait_vot_map:
-    0: 9.0     # nonwork
-    1: 15.0    # work
-
-toll_inclusion_factor: 1
-fuel_inclusion_factor: 1
-park_inclusion_factor: 1
-fare_inclusion_factor: 1
-
-
 # expected column headers in aggregate_data_manifest.csv
 # this is as much to document the expected columns as anything
 # but it does allow you to use different column headers
@@ -136,13 +202,14 @@ aggregate_data_manifest_column_map:
   trip_table_name: trip_table_name
   ivt_file_name: ivt_file_name
   ivt_table_name: ivt_table_name
+  dollars_per_hour: vot
   aoc_file_name: aoc_file_name
   aoc_table_name: aoc_table_name
-  aoc_units: aoc_units
+  aoc_dollars_per_unit: aoc_units
   toll_file_name: toll_file_name
   toll_table_name: toll_table_name
-  toll_units: toll_units
-  vot: vot
+  toll_dollars_per_unit: toll_units
+
 
 link_data_manifest_column_map:
   description: description
@@ -150,23 +217,15 @@ link_data_manifest_column_map:
 
 link_table_column_map:
   distance: distance
-  congtime: congested_travel_time
+  dircode: dircode
+  time: time
+  congtime: congested_time
+  area_type: area_type
   facl_type: facility_type_code
   num_lanes: num_lanes
   capacity: capacity
+  twoway: two_way
   vol_total: total_volume
   trk_vol: truck_volume
-  speed_cng: congested_speed
-  confactor: convert_to_hourly
 
-link_processor_locals:
-  non_fuel_cost_car: 0.303
-  non_fuel_cost_truck: 0.418
-  avg_fuel_cost_car: 2.85
-  avg_fuel_cost_truck: 3.15
-
-fuel_consumption: fuel_consumption.csv
-fuel_consumption_column_map:
-  speed: speed
-  car: car
-  truck: truck
+link_daily_file_name: link_daily.csv

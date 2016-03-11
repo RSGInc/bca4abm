@@ -48,17 +48,14 @@ def test_read_persons_table():
 def test_read_households_table():
 
     settings = orca.eval_variable('settings')
-    assert settings.get('households') == 'households.csv'
     assert settings.get('store') is None
-
-    # expect all of and only the columns specified by persons_column_map values
-    raw_households = orca.get_table('raw_households').to_frame()
-    assert expect_columns(raw_households,
-                          settings['households_column_map'].values())
 
     households = orca.get_table('households').to_frame()
     assert not missing_columns(households,
-                               settings['households_column_map'].values())
+                               settings['base_households_column_map'].values())
+
+    assert not missing_columns(households,
+                               settings['build_households_column_map'].values())
 
     assert households.shape[0] == 9
 
@@ -88,7 +85,7 @@ def test_read_base_trips_table():
 
     # expect all of and only the columns specified by column_map values
     raw_columns = mapped_columns(settings['basetrips_column_map'],
-                                 settings['basetrips_buildlos_column_map']) + ['build']
+                                 settings['basetrips_buildlos_column_map']) + ['build', 'base']
     assert expect_columns(trips, raw_columns)
 
     assert trips.shape[0] == 123
@@ -104,7 +101,7 @@ def test_read_build_trips_table():
 
     # expect all of and only the columns specified by persons_column_map values
     raw_columns = mapped_columns(settings['buildtrips_column_map'],
-                                 settings['buildtrips_baselos_column_map']) + ['build']
+                                 settings['buildtrips_baselos_column_map']) + ['build', 'base']
 
     assert expect_columns(trips, raw_columns)
 

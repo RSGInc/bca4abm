@@ -1,0 +1,4 @@
+Target,Expression
+base_auto_ownership_cost, @persons.hh_expansion_factor * persons.base_vehicles * ANNUAL_COST_PER_VEHICLE / persons.hh_size
+build_auto_ownership_cost, @persons.hh_expansion_factor * persons.build_vehicles * ANNUAL_COST_PER_VEHICLE / persons.hh_size
+diff_auto_ownership_cost, @build_auto_ownership_cost - base_auto_ownership_cost
