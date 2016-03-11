@@ -32,7 +32,7 @@ def read_csv_table(data_dir, settings, table_name, index_col=None, column_map=No
         usecols = settings[column_map].keys()
         # print "read_bca_table usecols: ", usecols
         # FIXME - should we allow comment lines?
-        df = pd.read_csv(fpath, header=0, usecols=usecols)
+        df = pd.read_csv(fpath, header=0, usecols=usecols, comment='#')
         df.rename(columns=settings[column_map], inplace=True)
     else:
         df = pd.read_csv(fpath, header=0, comment='#')
@@ -78,7 +78,7 @@ def read_assignment_spec(fname,
         expression values are set as the table index.
     """
 
-    print "read_assignment_spec", fname
+    # print "read_assignment_spec", fname
 
     cfg = pd.read_csv(fname, comment='#')
 
@@ -174,3 +174,16 @@ def assign_variables(assignment_expressions, df, locals_d):
             keepers.append(statement)
 
     return pd.DataFrame.from_items(keepers)
+
+
+def assign_variables_locals(settings, settings_locals=None):
+    # locals whose values will be accessible to the execution context
+    # when the expressions in spec are applied to choosers
+    locals_d = {
+        'settings': settings,
+        'log': np.log
+    }
+    locals_d.update(settings['locals'])
+    if settings_locals and settings_locals in settings:
+        locals_d.update(settings[settings_locals])
+    return locals_d

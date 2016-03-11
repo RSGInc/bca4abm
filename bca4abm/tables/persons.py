@@ -4,7 +4,6 @@ import orca
 import pandas as pd
 
 from bca4abm import bca4abm as bca
-from bca4abm.util.misc import expect_columns
 
 
 # this caches things so you don't have to read in the file from disk again
@@ -26,10 +25,3 @@ def persons(raw_persons):
 def persons_merged(persons, households):
     return orca.merge_tables(target=persons.name,
                              tables=[persons, households])
-
-
-# FIXME - remove this if there are no demographics columns dependent
-# this is the placeholder for all the columns to update after the demographic processor runs
-@orca.table()
-def persons_demographics(persons):
-    return pd.DataFrame(index=persons.index)

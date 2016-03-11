@@ -6,20 +6,29 @@ import pandas as pd
 from bca4abm import bca4abm as bca
 
 
-# this caches things so you don't have to read in the file from disk again
+# this caches all the columns that are computed on the trips table
 @orca.table(cache=True)
-def raw_households(data_dir, settings):
+def households(data_dir, settings):
 
-    return bca.read_csv_table(data_dir, settings,
-                              table_name="households",
-                              index_col="hh_id",
-                              column_map="households_column_map")
+    base_households = bca.read_csv_table(
+        data_dir, settings,
+        table_name="base_households",
+        index_col="hh_id",
+        column_map="base_households_column_map")
 
+    # print "\nbase_households\n", base_households
 
-# this caches all the columns that are computed on the persons table
-@orca.table(cache=True)
-def households(raw_households):
-    return raw_households.to_frame()
+    build_households = bca.read_csv_table(
+        data_dir, settings,
+        table_name="build_households",
+        index_col="hh_id",
+        column_map="build_households_column_map")
+
+    # print "\nbuild_households\n", build_households
+
+    households = pd.merge(base_households, build_households, left_index=True, right_index=True)
+
+    return households
 
 
 orca.broadcast(cast='households',

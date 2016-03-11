@@ -1,4 +1,5 @@
 import orca
+import pandas as pd
 
 
 def drop_duplicates(seq):
@@ -31,13 +32,41 @@ def add_assigned_columns(base_dfname, from_df):
         orca.add_column(base_dfname, col, from_df[col])
 
 
-# use of this (hidden) utility function is a common idiom in activitysim.defaults
-# from activitysim.defaults.models.utils.misc
-def add_dependent_columns(base_dfname, new_dfname):
-    tbl = orca.get_table(new_dfname)
-    for col in tbl.columns:
-        # print "Adding dependent", col
-        orca.add_column(base_dfname, col, tbl[col])
+def add_result_columns(base_dfname, from_df, prefix=''):
+
+    for col_name in from_df.columns:
+        dest_col_name = prefix + col_name
+        # print "Adding result column %s to %s.%s" % (col_name, base_dfname, dest_col_name)
+        orca.add_column(base_dfname, dest_col_name, from_df[col_name])
+
+
+def add_summary_results(df, summary_column_names=None, prefix=''):
+
+    #  summarize all columns unless summary_column_names specifies a subset
+    if summary_column_names is not None:
+        df = df[summary_column_names]
+
+    # if it has more than one row, sum the columns
+    if df.shape[0] > 1:
+        df = pd.DataFrame(df.sum()).T
+
+    add_result_columns("summary_results", df, prefix)
+
+
+def add_grouped_results(df, summary_column_names, prefix=''):
+    # summarize everything
+    coc_columns = orca.get_injectable('coc_column_names')
+
+    if coc_columns == [None]:
+        raise RuntimeError("add_grouped_results: coc_column_names not initialized"
+                           " - did you forget to run demographics_processor?")
+
+    grouped = df.groupby(coc_columns)
+    aggregations = {column: 'sum' for column in summary_column_names}
+    grouped = grouped.agg(aggregations)
+    add_result_columns("coc_results", grouped, prefix)
+
+    add_summary_results(grouped, prefix=prefix)
 
 
 def missing_columns(table, expected_column_names):

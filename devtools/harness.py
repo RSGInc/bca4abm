@@ -28,8 +28,17 @@ orca.add_injectable('data_dir', data_dir)
 orca.add_injectable('output_dir', output_dir)
 
 
-df = orca.get_table('build_trips').to_frame()
+orca.run(['initialize_output_store'])
 
-print "build_trips", df.shape[0]
+orca.run(['demographics_processor'])
+#orca.run(['person_trips_processor'])
+# orca.run(['auto_ownership_processor'])
+orca.run(['physical_activity_processor'])
+#orca.run(['aggregate_trips_processor'])
+#orca.run(['link_daily_processor'])
+#orca.run(['link_processor'])
 
-print df
+orca.run(['write_results'])
+
+orca.run(['print_results'])
+

@@ -16,6 +16,7 @@ def base_trips(data_dir, settings):
     trips_merged = pd.merge(trips, trips_alt, on=['hh_id', 'person_idx',
                                                   'tour_idx', 'half_tour_idx', 'half_tour_seg_idx'])
     trips_merged['build'] = 0
+    trips_merged['base'] = 1
     return trips_merged
 
 
@@ -28,6 +29,7 @@ def build_trips(data_dir, settings):
     trips_merged = pd.merge(trips, trips_alt, on=['hh_id', 'person_idx',
                                                   'tour_idx', 'half_tour_idx', 'half_tour_seg_idx'])
     trips_merged['build'] = 1
+    trips_merged['base'] = 0
     return trips_merged
 
 
@@ -37,7 +39,7 @@ def disaggregate_trips(base_trips, build_trips):
     build = build_trips.to_frame()
     base = base_trips.to_frame()
 
-    print "disaggregate_trips - appending %s base and %s build" % (base.shape[0], build.shape[0])
+    # print "disaggregate_trips - appending %s base and %s build" % (base.shape[0], build.shape[0])
 
     df = base.append(build, ignore_index=True)
 

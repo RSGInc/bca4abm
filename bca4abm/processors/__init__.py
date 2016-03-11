@@ -7,3 +7,5 @@ import demographics
 import person_trips
 import aggregate_trips
 import link
+import auto_ownership
+import physical_activity

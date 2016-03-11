@@ -5,7 +5,7 @@ import numpy as np
 import openmatrix as omx
 
 from bca4abm import bca4abm as bca
-from ..util.misc import missing_columns
+from ..util.misc import missing_columns, add_result_columns, add_summary_results
 
 """
 Aggregate trips processor
@@ -45,10 +45,6 @@ def get_omx_matrix(matrix_dir, omx_file_name, omx_key, close_after_read=True):
     return matrix
 
 
-def monetary_scale(units):
-    return 1.0 if units == 'dollars' else 100.0 if units == 'cents' else 0.0
-
-
 @orca.step()
 def aggregate_trips_processor(aggregate_trips_manifest, settings, data_dir):
 
@@ -58,6 +54,14 @@ def aggregate_trips_processor(aggregate_trips_manifest, settings, data_dir):
 
     assert not missing_columns(aggregate_trips_manifest,
                                settings['aggregate_data_manifest_column_map'].values())
+
+    locals_d = {
+        'IVT_COST_COUNTING_FACTOR': 1.0,
+        'AOC_COST_COUNTING_FACTOR': 1.0,
+        'TOLL_COST_COUNTING_FACTOR': 1.0
+    }
+    if 'locals_aggregate_trips' in settings:
+        locals_d.update(settings['locals_auto_ownership'])
 
     results = []
     for row in aggregate_trips_manifest.itertuples(index=True):
@@ -76,26 +80,11 @@ def aggregate_trips_processor(aggregate_trips_manifest, settings, data_dir):
         build_aoc = get_omx_matrix(matrix_dir, row.aoc_file_name, row.aoc_table_name)
         build_toll = get_omx_matrix(matrix_dir, row.toll_file_name, row.toll_table_name)
 
-        aoc_scale = monetary_scale(row.aoc_units)
-        toll_scale = monetary_scale(row.toll_units)
-        vot = row.vot * 1.0
+        aoc_scale = row.aoc_units * locals_d['AOC_COST_COUNTING_FACTOR']
+        toll_scale = row.toll_units * locals_d['TOLL_COST_COUNTING_FACTOR']
+        vot = row.vot * locals_d['IVT_COST_COUNTING_FACTOR']
 
         # --------- alternate calculations
-
-        # by base vs build change in generalized costs
-        base_delta_cost = \
-            (base_trips *
-             ((build_ivt - base_ivt) * (vot / 60.0) +
-              aoc_scale * (build_aoc - base_aoc) +
-              toll_scale * (build_toll - base_toll)
-              )).sum()
-        build_delta_cost = \
-            (build_trips *
-             ((build_ivt - base_ivt) * (vot/60.0) +
-              aoc_scale * (build_aoc - base_aoc) +
-              toll_scale * (build_toll - base_toll)
-              )).sum()
-        generalized_cost_benefit = -0.5 * (base_delta_cost + build_delta_cost)
 
         # broken down by benefit category
         tt_benefit_in_minutes = \
@@ -106,59 +95,33 @@ def aggregate_trips_processor(aggregate_trips_manifest, settings, data_dir):
             0.5 * ((base_trips + build_trips) * aoc_scale * (base_aoc-build_aoc)).sum()
         toll_benefit = \
             0.5 * ((base_trips + build_trips) * toll_scale * (base_toll-build_toll)).sum()
-        categorized_benefit = monetized_tt_benefit + aoc_benefit + toll_benefit
 
-        # omnibus (fastest)
-        omnibus_benefit = \
-            -0.5 * ((base_trips + build_trips) *
-                    ((build_ivt - base_ivt) * (vot / 60.0) +
-                     aoc_scale * (build_aoc - base_aoc) +
-                     toll_scale * (build_toll - base_toll)
-                     )).sum()
+        benefit = monetized_tt_benefit + aoc_benefit + toll_benefit
 
         aggregate_trips_benefits = {
             'description': row.description,
-
-            'tt_benefit_in_minutes': tt_benefit_in_minutes,
             'vot': vot,
+            'tt_benefit_in_minutes': tt_benefit_in_minutes,
             'monetized_tt_benefit': monetized_tt_benefit,
             'aoc_benefit': aoc_benefit,
             'toll_benefit': toll_benefit,
-            'categorized_benefit': categorized_benefit,
-
-            # base vs build change in generalized costs
-            'base_delta_cost': base_delta_cost,
-            'build_delta_cost': build_delta_cost,
-            'generalized_cost_benefit': generalized_cost_benefit,
-
-            'benefit': omnibus_benefit
+            'benefit': benefit
         }
 
         results.append(aggregate_trips_benefits)
 
-    # create dataframe with results
-    # FIXME - this is only to ensure the desired column order in dataframe (?)
-    columns = ['description',
-               'tt_benefit_in_minutes',
-               'vot',
-               'monetized_tt_benefit',
-               'aoc_benefit',
-               'toll_benefit',
-               'categorized_benefit',
-               'base_delta_cost',
-               'build_delta_cost',
-               'generalized_cost_benefit',
-               'benefit'
-               ]
+    # create dataframe with detailed results
+    aggregate_trips_benefits = pd.DataFrame(results)
 
-    aggregate_trips_benefits = pd.DataFrame(results, columns=columns)
+    summary_column_names = ['monetized_tt_benefit', 'aoc_benefit', 'toll_benefit', 'benefit']
+    add_summary_results(aggregate_trips_benefits, summary_column_names, prefix='AT_')
 
     with orca.eval_variable('output_store') as output_store:
-        aggregate_trips_benefits.insert(loc=0, column='scenario', value=settings['scenario_label'])
+        # for troubleshooting, write table with benefits for each row in manifest
         output_store['aggregate_trips'] = aggregate_trips_benefits
 
     if settings.get("dump", False):
         output_dir = orca.eval_variable('output_dir')
         csv_file_name = os.path.join(output_dir, 'aggregate_trips_benefits.csv')
         print "writing", csv_file_name
-        aggregate_trips_benefits.to_csv(csv_file_name)
+        aggregate_trips_benefits.to_csv(csv_file_name, index=False)

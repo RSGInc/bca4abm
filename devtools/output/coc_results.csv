@@ -1,0 +1,5 @@
+coc_age,coc_poverty,persons,PA_build_value_of_risk_reduction,PA_benefit_risk_reduction,PA_base_value_of_risk_reduction
+False,False,20,501372377.622,35958624.7086,465413752.914
+False,True,3,0.0,-73333333.3333,73333333.3333
+True,False,3,0.0,0.0,0.0
+True,True,1,0.0,0.0,0.0

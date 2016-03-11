@@ -34,7 +34,7 @@ def test_misc():
     with pytest.raises(Exception):
         expect_columns(df, ['A', 'B', 'C'])
 
-    assert get_setting('scenario_label') == 'sample'
+    assert get_setting('scenario_year') == 'sample'
 
 
 def test_defaults():
@@ -49,7 +49,6 @@ def test_defaults():
 def test_read_settings():
 
     settings = orca.eval_variable('settings')
-    assert settings.get('households') == 'households.csv'
     assert settings.get('persons') == 'persons.csv'
     assert settings.get('store')is None
 
