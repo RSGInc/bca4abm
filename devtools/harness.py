@@ -35,7 +35,7 @@ orca.run(['demographics_processor'])
 # orca.run(['auto_ownership_processor'])
 orca.run(['physical_activity_processor'])
 #orca.run(['aggregate_trips_processor'])
-#orca.run(['link_daily_processor'])
+orca.run(['link_daily_processor'])
 #orca.run(['link_processor'])
 
 orca.run(['write_results'])
