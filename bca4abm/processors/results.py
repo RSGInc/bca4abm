@@ -40,6 +40,7 @@ def write_results(output_dir, coc_results, summary_results, settings):
                 coc_silos[coc] = df[df[coc]][assigned_column_names].sum()
             # plus an extra column for 'any coc'
             coc_silos['any_coc'] = df[df[coc_column_names].any(axis=1)][assigned_column_names].sum()
+            coc_silos.sort_index(inplace=True)
 
             csv_file_name = os.path.join(output_dir, 'coc_silos.csv')
             coc_silos.to_csv(csv_file_name, index=True)
@@ -50,6 +51,7 @@ def write_results(output_dir, coc_results, summary_results, settings):
 
         csv_file_name = os.path.join(output_dir, 'summary_results.csv')
         df = summary_results.to_frame().T
+        df.sort_index(inplace=True)
         df.to_csv(csv_file_name, index=True, index_label='index', header=['value'])
 
 

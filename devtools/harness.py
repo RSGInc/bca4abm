@@ -31,12 +31,12 @@ orca.add_injectable('output_dir', output_dir)
 orca.run(['initialize_output_store'])
 
 orca.run(['demographics_processor'])
-#orca.run(['person_trips_processor'])
-# orca.run(['auto_ownership_processor'])
+orca.run(['person_trips_processor'])
+orca.run(['auto_ownership_processor'])
 orca.run(['physical_activity_processor'])
-#orca.run(['aggregate_trips_processor'])
+orca.run(['aggregate_trips_processor'])
 orca.run(['link_daily_processor'])
-#orca.run(['link_processor'])
+orca.run(['link_processor'])
 
 orca.run(['write_results'])
 
