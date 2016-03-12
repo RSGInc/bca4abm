@@ -1,4 +1,0 @@
-coc_age,coc_poverty,PT_transit_wait_time,PT_transit_time,AO_diff_auto_ownership_cost,PT_fare,AO_build_auto_ownership_cost,PT_total,PA_base_value_of_risk_reduction,PT_transit_walk_time,persons,AO_base_auto_ownership_cost,PT_bike_time,PT_toll,PT_park,PT_walk_time,PA_benefit_risk_reduction,PT_work,PT_fuel,PA_build_value_of_risk_reduction,PT_auto_time
-False,False,205312.5,438000.0,20000000.0,547500.0,233333333.333,101347725.0,465413752.914,410625.0,20,213333333.333,2737500.0,1026562.5,1779375.0,410625.0,35958624.7086,74,58637250.0,501372377.622,35154975.0
-False,True,205312.5,410625.0,0.0,547500.0,40000000.0,22515937.5,73333333.3333,328500.0,4,40000000.0,0.0,410625.0,547500.0,0.0,-73333333.3333,0,13468500.0,0.0,6597375.0
-True,False,821250.0,1368750.0,0.0,958125.0,46666666.6667,15141112.5,0.0,698062.5,3,46666666.6667,0.0,0.0,410625.0,0.0,0.0,0,7582875.0,0.0,3301425.0

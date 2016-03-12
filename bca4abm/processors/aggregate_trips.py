@@ -13,6 +13,12 @@ Aggregate trips processor
 
 
 @orca.injectable()
+def aggregate_trips_spec(configs_dir):
+    f = os.path.join(configs_dir, 'aggregate_trips.csv')
+    return bca.read_assignment_spec(f)
+
+
+@orca.injectable()
 def aggregate_trips_manifest(data_dir, settings):
     fname = os.path.join(data_dir, 'aggregate_data_manifest.csv')
 
@@ -45,8 +51,73 @@ def get_omx_matrix(matrix_dir, omx_file_name, omx_key, close_after_read=True):
     return matrix
 
 
+def scalar_assign_variables(assignment_expressions, locals_d):
+    """
+    Evaluate a set of variable expressions from a spec in the context
+    of a given data table.
+
+    Python expressions are evaluated in the context of this function using
+    Python's eval function.
+    Users should take care that these expressions must result in
+    a scalar
+
+    Parameters
+    ----------
+    exprs : sequence of str
+    locals_d : Dict
+        This is a dictionary of local variables that will be the environment
+        for an evaluation of an expression that begins with @
+
+    Returns
+    -------
+    variables : pandas.DataFrame
+        Will have the index of `df` and columns of `exprs`.
+
+    """
+
+    # avoid trashing parameter when we add target
+    locals_d = locals_d.copy() if locals_d is not None else {}
+
+    l = []
+    # need to be able to identify which variables causes an error, which keeps
+    # this from being expressed more parsimoniously
+    for e in zip(assignment_expressions.target, assignment_expressions.expression):
+        target = e[0]
+        expression = e[1]
+
+        # print "\n%s = %s" % (target, expression)
+
+        try:
+            if expression.startswith('@'):
+                expression = expression[1:]
+
+            value = eval(expression, globals(), locals_d)
+
+            # print "\n%s = %s" % (target, value)
+
+            l.append((target, [value]))
+
+            # FIXME - do we want to update locals to allows us to ref previously assigned targets?
+            locals_d[target] = value
+        except Exception as err:
+            print "Variable %s expression failed for: %s" % (str(target), str(expression))
+            raise err
+
+    # since we allow targets to be recycled, we want to only keep the last usage
+    keepers = []
+    for statement in reversed(l):
+        # don't keep targets that staert with underscore
+        if statement[0].startswith('_'):
+            continue
+        # add statement to keepers list unless target is already in list
+        if not next((True for keeper in keepers if keeper[0] == statement[0]), False):
+            keepers.append(statement)
+
+    return pd.DataFrame.from_items(keepers)
+
+
 @orca.step()
-def aggregate_trips_processor(aggregate_trips_manifest, settings, data_dir):
+def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, settings, data_dir):
 
     print "---------- aggregate_trips_processor"
 
@@ -59,67 +130,52 @@ def aggregate_trips_processor(aggregate_trips_manifest, settings, data_dir):
     if 'locals_aggregate_trips' in settings:
         locals_d.update(settings['locals_aggregate_trips'])
 
-    results = []
+    results = None
     for row in aggregate_trips_manifest.itertuples(index=True):
 
-        print "   %s" % row.description
+        # print "   %s" % row.description
 
         matrix_dir = os.path.join(data_dir, "base-matrices")
-        base_trips = get_omx_matrix(matrix_dir, row.trip_file_name, row.trip_table_name)
-        base_ivt = get_omx_matrix(matrix_dir, row.ivt_file_name, row.ivt_table_name)
-        base_aoc = get_omx_matrix(matrix_dir, row.aoc_file_name, row.aoc_table_name)
-        base_toll = get_omx_matrix(matrix_dir, row.toll_file_name, row.toll_table_name)
+        locals_d['base_trips'] = get_omx_matrix(matrix_dir, row.trip_file_name, row.trip_table_name)
+        locals_d['base_ivt'] = get_omx_matrix(matrix_dir, row.ivt_file_name, row.ivt_table_name)
+        locals_d['base_aoc'] = get_omx_matrix(matrix_dir, row.aoc_file_name, row.aoc_table_name)
+        locals_d['base_toll'] = get_omx_matrix(matrix_dir, row.toll_file_name, row.toll_table_name)
 
         matrix_dir = os.path.join(data_dir, "build-matrices")
-        build_trips = get_omx_matrix(matrix_dir, row.trip_file_name, row.trip_table_name)
-        build_ivt = get_omx_matrix(matrix_dir, row.ivt_file_name, row.ivt_table_name)
-        build_aoc = get_omx_matrix(matrix_dir, row.aoc_file_name, row.aoc_table_name)
-        build_toll = get_omx_matrix(matrix_dir, row.toll_file_name, row.toll_table_name)
+        locals_d['build_trips'] = get_omx_matrix(matrix_dir, row.trip_file_name,
+                                                 row.trip_table_name)
+        locals_d['build_ivt'] = get_omx_matrix(matrix_dir, row.ivt_file_name, row.ivt_table_name)
+        locals_d['build_aoc'] = get_omx_matrix(matrix_dir, row.aoc_file_name, row.aoc_table_name)
+        locals_d['build_toll'] = get_omx_matrix(matrix_dir, row.toll_file_name, row.toll_table_name)
 
-        aoc_scale = row.aoc_units * locals_d['AOC_COST_COUNTING_FACTOR']
-        toll_scale = row.toll_units * locals_d['TOLL_COST_COUNTING_FACTOR']
-        vot = row.vot * locals_d['IVT_COST_COUNTING_FACTOR']
+        locals_d['aoc_units'] = row.aoc_units
+        locals_d['toll_units'] = row.toll_units
+        locals_d['vot'] = row.vot
 
-        # --------- alternate calculations
+        row_results = scalar_assign_variables(assignment_expressions=aggregate_trips_spec,
+                                              locals_d=locals_d)
 
-        # broken down by benefit category
-        ivt_benefit = \
-            0.5 * ((base_trips + build_trips) * (base_ivt-build_ivt)).sum()\
-            * vot/60.0 * locals_d['DISCOUNT_RATE'] * locals_d['ANNUALIZATION_FACTOR']
+        assigned_column_names = row_results.columns.values
+        row_results.insert(loc=0, column='description', value=row.description)
+        row_results.insert(loc=0, column='manifest_idx', value=row.Index)
 
-        aoc_benefit = \
-            0.5 * ((base_trips + build_trips) * aoc_scale * (base_aoc-build_aoc)).sum()\
-            * locals_d['DISCOUNT_RATE'] * locals_d['ANNUALIZATION_FACTOR']
+        if results is None:
+            results = row_results
+        else:
+            results = results.append(row_results, ignore_index=True)
 
-        toll_benefit = \
-            0.5 * ((base_trips + build_trips) * toll_scale * (base_toll-build_toll)).sum()\
-            * locals_d['DISCOUNT_RATE'] * locals_d['ANNUALIZATION_FACTOR']
+    results.reset_index(inplace=True)
 
-        total_benefit = ivt_benefit + aoc_benefit + toll_benefit
+    # print "\nassigned_column_names\n", assigned_column_names
 
-        aggregate_trips_benefits = {
-            'description': row.description,
-            'vot': vot,
-            'ivt_benefit': ivt_benefit,
-            'aoc_benefit': aoc_benefit,
-            'toll_benefit': toll_benefit,
-            'total_benefit': total_benefit
-        }
-
-        results.append(aggregate_trips_benefits)
-
-    # create dataframe with detailed results
-    aggregate_trips_benefits = pd.DataFrame(results)
-
-    summary_column_names = ['ivt_benefit', 'aoc_benefit', 'toll_benefit', 'total_benefit']
-    add_summary_results(aggregate_trips_benefits, summary_column_names, prefix='AT_')
+    add_summary_results(results, summary_column_names=assigned_column_names, prefix='AT_')
 
     with orca.eval_variable('output_store') as output_store:
         # for troubleshooting, write table with benefits for each row in manifest
-        output_store['aggregate_trips'] = aggregate_trips_benefits
+        output_store['aggregate_trips'] = results
 
     if settings.get("dump", False):
         output_dir = orca.eval_variable('output_dir')
         csv_file_name = os.path.join(output_dir, 'aggregate_trips_benefits.csv')
         print "writing", csv_file_name
-        aggregate_trips_benefits.to_csv(csv_file_name, index=False)
+        results.to_csv(csv_file_name, index=False)
