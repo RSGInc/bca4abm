@@ -78,7 +78,6 @@ locals_link_daily:
   CRASH_COST_FATAL: 100000
 
 locals_aggregate_trips:
-  IVT_COST_COUNTING_FACTOR: 1.0
   AOC_COST_COUNTING_FACTOR: 1.0
   TOLL_COST_COUNTING_FACTOR: 1.0
 
