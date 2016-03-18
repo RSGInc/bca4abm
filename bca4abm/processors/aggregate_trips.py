@@ -168,7 +168,8 @@ def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, se
 
     # print "\nassigned_column_names\n", assigned_column_names
 
-    add_summary_results(results, summary_column_names=assigned_column_names, prefix='AT_')
+    add_summary_results(results, summary_column_names=assigned_column_names,
+                        prefix='AT_', spec=aggregate_trips_spec)
 
     with orca.eval_variable('output_store') as output_store:
         # for troubleshooting, write table with benefits for each row in manifest

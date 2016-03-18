@@ -33,7 +33,8 @@ def auto_ownership_processor(persons_merged, auto_ownership_spec, settings):
     # add assigned columns to local persons_df df
     persons_df = pd.concat([persons_df, assigned_columns], axis=1)
 
-    add_grouped_results(persons_df, assigned_columns.columns, prefix='AO_')
+    add_grouped_results(persons_df, assigned_columns.columns,
+                        prefix='AO_', spec=auto_ownership_spec)
 
     if settings.get("dump", False):
         output_dir = orca.eval_variable('output_dir')

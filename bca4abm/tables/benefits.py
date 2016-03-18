@@ -18,3 +18,8 @@ def coc_results():
 def coc_column_names(coc_results):
     column_names = coc_results.index.names
     return column_names
+
+
+@orca.injectable(cache=True)
+def data_dictionary():
+    return {}
