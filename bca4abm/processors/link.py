@@ -150,3 +150,6 @@ def link_daily_processor(link_daily_spec, settings, data_dir):
                              settings_locals='locals_link_daily')
 
     add_summary_results(results, prefix='LD_')
+
+    with orca.eval_variable('output_store') as output_store:
+        output_store['link_daily_results'] = results
