@@ -34,7 +34,8 @@ def person_trips_processor(trips_with_demographics, person_trips_spec, settings)
     # add assigned columns to local trips df
     trips_df = pd.concat([trips_df, assigned_columns], axis=1)
 
-    add_grouped_results(trips_df, assigned_columns.columns, prefix='PT_')
+    add_grouped_results(trips_df, assigned_columns.columns,
+                        prefix='PT_', spec=person_trips_spec)
 
     if settings.get("dump", False):
         trips_df.sort_values(['index1'], inplace=True)

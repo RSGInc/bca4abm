@@ -1,7 +1,7 @@
-Target,Expression
-vmt_total, total_volume * distance
+Description,Target,Expression
+total vehicle miles travelled,vmt_total, total_volume * distance
 # accident costs SANDAG version based on daily volumes
-crash_cost_pdo, @ vmt_total * CRASH_RATE_PDO * CRASH_COST_PDO * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-crash_cost_injury, @ vmt_total * CRASH_RATE_INJURY * CRASH_COST_INJURY * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-crash_cost_fatal, @ vmt_total * CRASH_RATE_FATAL * CRASH_COST_FATAL * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-crash_cost_total, @ crash_cost_pdo + crash_cost_injury + crash_cost_fatal
+annualized crash cost property damage,crash_cost_pdo, @ vmt_total * CRASH_RATE_PDO * CRASH_COST_PDO * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+annualized crash cost injury,crash_cost_injury, @ vmt_total * CRASH_RATE_INJURY * CRASH_COST_INJURY * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+annualized crash cost fatalities,crash_cost_fatal, @ vmt_total * CRASH_RATE_FATAL * CRASH_COST_FATAL * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+total annualized crash cost,crash_cost_total, @ crash_cost_pdo + crash_cost_injury + crash_cost_fatal

@@ -90,9 +90,9 @@ def read_assignment_spec(fname,
                         description_name: 'description'},
                inplace=True)
 
-    # don't need description
-    if 'description' in cfg.columns:
-        cfg = cfg.drop('description', axis=1)
+    # backfill description
+    if 'description' not in cfg.columns:
+        cfg.description = ''
 
     cfg.target = cfg.target.str.strip()
     cfg.expression = cfg.expression.str.strip()
@@ -166,7 +166,7 @@ def assign_variables(assignment_expressions, df, locals_d):
     # since we allow targets to be recycled, we want to only keep the last usage
     keepers = []
     for statement in reversed(l):
-        # don't keep targets that staert with underscore
+        # don't keep targets that start with underscore
         if statement[0].startswith('_'):
             continue
         # add statement to keepers list unless target is already in list

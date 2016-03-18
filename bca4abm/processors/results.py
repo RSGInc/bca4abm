@@ -27,6 +27,8 @@ def write_results(output_dir, coc_results, summary_results, settings):
 
     if settings.get("dump", False):
 
+        data_dict = orca.get_injectable('data_dictionary')
+
         # coc_silos
         if coc_results.index.names != [None]:
 
@@ -42,8 +44,13 @@ def write_results(output_dir, coc_results, summary_results, settings):
             coc_silos['any_coc'] = df[df[coc_column_names].any(axis=1)][assigned_column_names].sum()
             coc_silos.sort_index(inplace=True)
 
+            coc_silos.reset_index(inplace=True)
+            coc_silos.rename(columns={'index': 'Target'}, inplace=True)
+            # add the description from the data dictionary
+            coc_silos['Description'] = coc_silos.Target.map(data_dict)
+
             csv_file_name = os.path.join(output_dir, 'coc_silos.csv')
-            coc_silos.to_csv(csv_file_name, index=True)
+            coc_silos.to_csv(csv_file_name, index=False)
 
         csv_file_name = os.path.join(output_dir, 'coc_results.csv')
         df = coc_results.to_frame()
@@ -52,7 +59,13 @@ def write_results(output_dir, coc_results, summary_results, settings):
         csv_file_name = os.path.join(output_dir, 'summary_results.csv')
         df = summary_results.to_frame().T
         df.sort_index(inplace=True)
-        df.to_csv(csv_file_name, index=True, index_label='index', header=['value'])
+
+        df.reset_index(inplace=True)
+        df.columns = ['Target', 'Value']
+        # add the description from the data dictionary
+        df['Description'] = df.Target.map(data_dict)
+
+        df.to_csv(csv_file_name, index=False)
 
 
 @orca.step()

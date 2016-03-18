@@ -40,7 +40,23 @@ def add_result_columns(base_dfname, from_df, prefix=''):
         orca.add_column(base_dfname, dest_col_name, from_df[col_name])
 
 
-def add_summary_results(df, summary_column_names=None, prefix=''):
+def add_targets_to_data_dictionary(targets, prefix, spec):
+
+    if spec is None:
+        return
+
+    # map prefixed column name to description
+    spec_dict = {prefix+e[0]: e[1] for e in zip(spec.target, spec.description)}
+
+    data_dict = orca.get_injectable('data_dictionary')
+
+    for col in targets:
+        dest_col_name = prefix + col
+        description = spec_dict.get(dest_col_name, '-')
+        data_dict[dest_col_name] = description
+
+
+def add_summary_results(df, summary_column_names=None, prefix='', spec=None):
 
     #  summarize all columns unless summary_column_names specifies a subset
     if summary_column_names is not None:
@@ -50,10 +66,12 @@ def add_summary_results(df, summary_column_names=None, prefix=''):
     if df.shape[0] > 1:
         df = pd.DataFrame(df.sum()).T
 
+    add_targets_to_data_dictionary(df.columns, prefix, spec)
+
     add_result_columns("summary_results", df, prefix)
 
 
-def add_grouped_results(df, summary_column_names, prefix=''):
+def add_grouped_results(df, summary_column_names, prefix='', spec=None):
     # summarize everything
     coc_columns = orca.get_injectable('coc_column_names')
 
@@ -66,7 +84,7 @@ def add_grouped_results(df, summary_column_names, prefix=''):
     grouped = grouped.agg(aggregations)
     add_result_columns("coc_results", grouped, prefix)
 
-    add_summary_results(grouped, prefix=prefix)
+    add_summary_results(grouped, prefix=prefix, spec=spec)
 
 
 def missing_columns(table, expected_column_names):
