@@ -1,5 +1,5 @@
 Target,Expression
 # compare hh_income to federal poverty threshold based on hh_size
-_poverty_threshold, @(persons.hh_size==1)*POVERTY_1 + (persons.hh_size>1)*POVERTY_2 + (persons.hh_size - 2).clip(lower=0)*POVERTY_N
-coc_poverty,@persons.hh_income <= _poverty_threshold
-coc_age, person_age > 65
+_poverty_threshold, (persons.hh_size==1)*POVERTY_1 + (persons.hh_size>1)*POVERTY_2 + (persons.hh_size - 2).clip(lower=0)*POVERTY_N
+coc_poverty, persons.hh_income <= _poverty_threshold
+coc_age, persons.person_age > 65

@@ -1,5 +1,5 @@
 Target,Expression
-base_walk, (base == 1) * (base_transit_walk + base_walk_time)
-base_bike, (base == 1) * base_bike_time
-build_walk, (build == 1) * (build_transit_walk + build_walk_time)
-build_bike, (build == 1) * build_bike_time
+base_walk, (trips.base == 1) * (trips.base_transit_walk + trips.base_walk_time)
+base_bike, (trips.base == 1) * trips.base_bike_time
+build_walk, (trips.build == 1) * (trips.build_transit_walk + trips.build_walk_time)
+build_bike, (trips.build == 1) * trips.build_bike_time
