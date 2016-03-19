@@ -1,17 +1,17 @@
 Description,Target,Expression
-,_work, @trips.tour_purpose.map(settings['tour_purpose_work_map'])
+,_work, trips.tour_purpose.map(TOUR_PURPOSE_WORK_MAP)
 #
-monetized auto ivt,auto_time, @-0.5 * trips.hh_expansion_factor * (trips.build_auto_time - trips.base_auto_time) * _work.map(WORK_IVT_VOT_MAP)/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-monetized transit ivt,transit_time, @-0.5 * trips.hh_expansion_factor * (trips.build_transit_time - trips.base_transit_time) * _work.map(WORK_IVT_VOT_MAP)/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-monetized transit wait time,transit_wait_time, @-0.5 * trips.hh_expansion_factor * (trips.build_transit_wait - trips.base_transit_wait) * _work.map(WORK_WAIT_VOT_MAP)/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-monetized transit walk time,transit_walk_time, @-0.5 * trips.hh_expansion_factor * (trips.build_transit_walk - trips.base_transit_walk) * _work.map(WORK_WALK_VOT_MAP)/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-monetized bike time,bike_time, @-0.5 * trips.hh_expansion_factor * (trips.build_bike_time - trips.base_bike_time) * _work.map(WORK_IVT_VOT_MAP)/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-monetized walk time,walk_time, @-0.5 * trips.hh_expansion_factor * (trips.build_walk_time - trips.base_walk_time) * _work.map(WORK_WALK_VOT_MAP)/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-toll cost,toll, @-0.5 * trips.hh_expansion_factor * (trips.build_toll_cost - trips.base_toll_cost) * TOLL_INCLUSION_FACTOR * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-fuel cost,fuel, @-0.5 * trips.hh_expansion_factor * (trips.build_fuel_cost - trips.base_fuel_cost) * FUEL_INCLUSION_FACTOR * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-park cost,park, @-0.5 * trips.hh_expansion_factor * (trips.build_park_cost - trips.base_park_cost) * PARK_INCLUSION_FACTOR * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-fare cost,fare, @-0.5 * trips.hh_expansion_factor * (trips.build_fare_cost - trips.base_fare_cost) * FARE_INCLUSION_FACTOR * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+monetized auto ivt,auto_time, -0.5 * trips.hh_expansion_factor * (trips.build_auto_time - trips.base_auto_time) * _work.map(WORK_IVT_VOT_MAP)/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+monetized transit ivt,transit_time, -0.5 * trips.hh_expansion_factor * (trips.build_transit_time - trips.base_transit_time) * _work.map(WORK_IVT_VOT_MAP)/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+monetized transit wait time,transit_wait_time, -0.5 * trips.hh_expansion_factor * (trips.build_transit_wait - trips.base_transit_wait) * _work.map(WORK_WAIT_VOT_MAP)/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+monetized transit walk time,transit_walk_time, -0.5 * trips.hh_expansion_factor * (trips.build_transit_walk - trips.base_transit_walk) * _work.map(WORK_WALK_VOT_MAP)/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+monetized bike time,bike_time, -0.5 * trips.hh_expansion_factor * (trips.build_bike_time - trips.base_bike_time) * _work.map(WORK_IVT_VOT_MAP)/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+monetized walk time,walk_time, -0.5 * trips.hh_expansion_factor * (trips.build_walk_time - trips.base_walk_time) * _work.map(WORK_WALK_VOT_MAP)/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+toll cost,toll, -0.5 * trips.hh_expansion_factor * (trips.build_toll_cost - trips.base_toll_cost) * TOLL_INCLUSION_FACTOR * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+fuel cost,fuel, -0.5 * trips.hh_expansion_factor * (trips.build_fuel_cost - trips.base_fuel_cost) * FUEL_INCLUSION_FACTOR * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+park cost,park, -0.5 * trips.hh_expansion_factor * (trips.build_park_cost - trips.base_park_cost) * PARK_INCLUSION_FACTOR * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+fare cost,fare, -0.5 * trips.hh_expansion_factor * (trips.build_fare_cost - trips.base_fare_cost) * FARE_INCLUSION_FACTOR * DISCOUNT_RATE * ANNUALIZATION_FACTOR
 #
-,_monetized_time, @auto_time+transit_time+transit_wait_time+transit_walk_time+bike_time+walk_time
-,_cost, @toll+fuel+park+fare
-total benefit,total, @(_monetized_time + _cost)
+,_monetized_time, auto_time+transit_time+transit_wait_time+transit_walk_time+bike_time+walk_time
+,_cost, toll+fuel+park+fare
+total benefit,total, _monetized_time + _cost

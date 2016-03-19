@@ -105,24 +105,23 @@ def assign_variables(assignment_expressions, df, locals_d):
     Evaluate a set of variable expressions from a spec in the context
     of a given data table.
 
-    There are two kinds of supported expressions: "simple" expressions are
-    evaluated in the context of the DataFrame using DataFrame.eval.
-    This is the default type of expression.
+    Expressions are evaluated using Python's eval function.
+    Python expressions have access to variables in locals_d (and df being
+    accessible as variable df.) They also have access to previously assigned
+    targets as the assigned target name.
 
-    Python expressions are evaluated in the context of this function using
-    Python's eval function. Because we use Python's eval this type of
-    expression supports more complex operations than a simple expression.
-    Python expressions are denoted by beginning with the @ character.
-    Users should take care that these expressions must result in
-    a Pandas Series.
+    Users should take care that expressions should result in
+    a Pandas Series (scalars will be automatically promoted to series.)
 
     Parameters
     ----------
-    exprs : sequence of str
+    assignment_expressions : pandas.DataFrame of target assignment expressions
+        target: target column names
+        expression: pandas or python expression to evaluate
     df : pandas.DataFrame
     locals_d : Dict
         This is a dictionary of local variables that will be the environment
-        for an evaluation of an expression that begins with @
+        for an evaluation of "python" expression.
 
     Returns
     -------
@@ -131,9 +130,10 @@ def assign_variables(assignment_expressions, df, locals_d):
 
     """
 
-    def to_series(x):
+    def to_series(x, target=None):
         if np.isscalar(x):
-            # assert False
+            if target:
+                print "WARNING: assign_variables promoting scalar %s to series" % target
             return pd.Series([x] * len(df), index=df.index)
         return x
 
@@ -148,9 +148,7 @@ def assign_variables(assignment_expressions, df, locals_d):
         target = e[0]
         expression = e[1]
         try:
-            values = to_series(eval(expression[1:], globals(), locals_d)) \
-                if expression.startswith('@') \
-                else df.eval(expression)
+            values = to_series(eval(expression, globals(), locals_d), target=target)
             l.append((target, values))
 
             # FIXME - do we want to update locals to allows us to ref previously assigned targets?
@@ -158,10 +156,6 @@ def assign_variables(assignment_expressions, df, locals_d):
         except Exception as err:
             print "Variable %s expression failed for: %s" % (str(target), str(expression))
             raise err
-
-    # FIXME - should we add_assigned_columns rather than creating a dataframe and returning it?
-    # FIXME - we could pass in the target df to optionally assign directly from items
-    # FIXME - (though desired target might not be the eval df if eval df is a merged table...)
 
     # since we allow targets to be recycled, we want to only keep the last usage
     keepers = []

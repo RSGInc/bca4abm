@@ -1,15 +1,15 @@
 Description,Target,Expression
-,_under_20, person_age < 20
-,_over_65, person_age >= 65
-,_over_75, person_age >= 75
-,_walk_risk_factor, @WALK_FACTOR_AGE_UNDER_20 * _under_20 + WALK_FACTOR_AGE_20_TO_74 * ( ~ (_under_20 | _over_75)) + WALK_FACTOR_AGE_75_PLUS * _over_75
-,_bike_risk_factor, @BIKE_FACTOR_AGE_UNDER_20 * _under_20 + BIKE_FACTOR_AGE_20_TO_64 * ( ~ (_under_20 | _over_65)) + BIKE_FACTOR_AGE_65_PLUS * _over_65
-,_base_walk_risk_reduction, @(_walk_risk_factor * persons.base_walk / WALK_DIVISOR_MINUTES_PER_DAY).clip(upper=WALK_MAX_RISK_REDUCTION)
-,_base_bike_risk_reduction, @(_bike_risk_factor * persons.base_bike / BIKE_DIVISOR_MINUTES_PER_DAY).clip(upper=BIKE_MAX_RISK_REDUCTION)
-,_base_total_risk_reduction, @(_base_walk_risk_reduction+_base_bike_risk_reduction).clip(upper=TOTAL_MAX_RISK_REDUCTION)
-base scenario value of risk reduction,base_value_of_risk_reduction, @_base_total_risk_reduction * VALUE_OF_MORTALITY_RISK_PER_YEAR * persons.hh_expansion_factor
-,_build_walk_risk_reduction, @(_walk_risk_factor * persons.build_walk / WALK_DIVISOR_MINUTES_PER_DAY).clip(upper=WALK_MAX_RISK_REDUCTION)
-,_build_bike_risk_reduction, @(_bike_risk_factor * persons.build_bike / BIKE_DIVISOR_MINUTES_PER_DAY).clip(upper=BIKE_MAX_RISK_REDUCTION)
-,_build_total_risk_reduction, @(_build_walk_risk_reduction+_build_bike_risk_reduction).clip(upper=TOTAL_MAX_RISK_REDUCTION)
-build scenario value of risk reduction,build_value_of_risk_reduction, @_build_total_risk_reduction * VALUE_OF_MORTALITY_RISK_PER_YEAR * persons.hh_expansion_factor
-benefit value of risk reduction,benefit_risk_reduction, @build_value_of_risk_reduction - base_value_of_risk_reduction
+,_under_20, persons.person_age < 20
+,_over_65, persons.person_age >= 65
+,_over_75, persons.person_age >= 75
+,_walk_risk_factor, WALK_FACTOR_AGE_UNDER_20 * _under_20 + WALK_FACTOR_AGE_20_TO_74 * ( ~ (_under_20 | _over_75)) + WALK_FACTOR_AGE_75_PLUS * _over_75
+,_bike_risk_factor, BIKE_FACTOR_AGE_UNDER_20 * _under_20 + BIKE_FACTOR_AGE_20_TO_64 * ( ~ (_under_20 | _over_65)) + BIKE_FACTOR_AGE_65_PLUS * _over_65
+,_base_walk_risk_reduction, (_walk_risk_factor * persons.base_walk / WALK_DIVISOR_MINUTES_PER_DAY).clip(upper=WALK_MAX_RISK_REDUCTION)
+,_base_bike_risk_reduction, (_bike_risk_factor * persons.base_bike / BIKE_DIVISOR_MINUTES_PER_DAY).clip(upper=BIKE_MAX_RISK_REDUCTION)
+,_base_total_risk_reduction, (_base_walk_risk_reduction+_base_bike_risk_reduction).clip(upper=TOTAL_MAX_RISK_REDUCTION)
+base scenario value of risk reduction,base_value_of_risk_reduction, _base_total_risk_reduction * VALUE_OF_MORTALITY_RISK_PER_YEAR * persons.hh_expansion_factor
+,_build_walk_risk_reduction, (_walk_risk_factor * persons.build_walk / WALK_DIVISOR_MINUTES_PER_DAY).clip(upper=WALK_MAX_RISK_REDUCTION)
+,_build_bike_risk_reduction, (_bike_risk_factor * persons.build_bike / BIKE_DIVISOR_MINUTES_PER_DAY).clip(upper=BIKE_MAX_RISK_REDUCTION)
+,_build_total_risk_reduction, (_build_walk_risk_reduction+_build_bike_risk_reduction).clip(upper=TOTAL_MAX_RISK_REDUCTION)
+build scenario value of risk reduction,build_value_of_risk_reduction, _build_total_risk_reduction * VALUE_OF_MORTALITY_RISK_PER_YEAR * persons.hh_expansion_factor
+benefit value of risk reduction,benefit_risk_reduction, build_value_of_risk_reduction - base_value_of_risk_reduction
