@@ -1,5 +1,5 @@
 Description,Target,Expression
-,_work, @trips.tour_purpose.map(settings['tour_purpose_work_map'])
+,_work, @trips.tour_purpose.map(TOUR_PURPOSE_WORK_MAP)
 #
 monetized auto ivt,auto_time, @-0.5 * trips.hh_expansion_factor * (trips.build_auto_time - trips.base_auto_time) * _work.map(WORK_IVT_VOT_MAP)/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
 monetized transit ivt,transit_time, @-0.5 * trips.hh_expansion_factor * (trips.build_transit_time - trips.base_transit_time) * _work.map(WORK_IVT_VOT_MAP)/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
