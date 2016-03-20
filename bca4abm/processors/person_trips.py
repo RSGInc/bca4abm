@@ -37,7 +37,7 @@ def person_trips_processor(trips_with_demographics, person_trips_spec, settings)
     add_grouped_results(trips_df, assigned_columns.columns,
                         prefix='PT_', spec=person_trips_spec)
 
-    if settings.get("dump", False):
+    if settings.get("dump", False) and settings.get("dump_person_trips", True):
         trips_df.sort_values(['index1'], inplace=True)
         output_dir = orca.eval_variable('output_dir')
 

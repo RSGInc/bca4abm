@@ -89,11 +89,8 @@ def test_aggregate_trips_processor():
     orca.run(['write_results'])
 
     with orca.eval_variable('output_store_for_read') as hdf:
-        assert '/aggregate_trips' in hdf.keys()
         assert '/summary_results' in hdf.keys()
-        npt.assert_almost_equal(hdf['aggregate_trips'].total_benefit[0],
-                                209733562.50, decimal=2)
-        npt.assert_equal(hdf['aggregate_trips'].vot[0], 50.0)
+        npt.assert_equal(hdf['summary_results'].AT_vot[0], 50.0)
         npt.assert_almost_equal(hdf['summary_results'].AT_ivt_benefit[0],
                                 182495437.50, decimal=2)
         npt.assert_almost_equal(hdf['summary_results'].AT_aoc_benefit[0],
@@ -111,11 +108,6 @@ def test_link_daily_processor():
     orca.run(['write_results'])
 
     with orca.eval_variable('output_store_for_read') as hdf:
-        assert '/link_daily_results' in hdf.keys()
-        npt.assert_almost_equal(hdf['link_daily_results'].crash_cost_pdo[0],
-                                -463938023.432, decimal=2)
-        npt.assert_almost_equal(hdf['link_daily_results'].crash_cost_total[0],
-                                -1113451256.237, decimal=2)
         assert '/summary_results' in hdf.keys()
         npt.assert_almost_equal(hdf['summary_results'].LD_crash_cost_pdo[0],
                                 -463938023.432, decimal=2)
@@ -130,11 +122,6 @@ def test_link_processor():
     orca.run(['write_results'])
 
     with orca.eval_variable('output_store_for_read') as hdf:
-        assert '/link_results' in hdf.keys()
-        npt.assert_almost_equal(hdf['link_results'].cost_op_total[0],
-                                -79044707.159, decimal=2)
-        npt.assert_almost_equal(hdf['link_results'].cost_delay_total[0],
-                                12216076.978, decimal=2)
         assert '/summary_results' in hdf.keys()
         npt.assert_almost_equal(hdf['summary_results'].L_cost_op_total[0],
                                 -79044707.159, decimal=2)

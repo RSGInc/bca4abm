@@ -67,8 +67,7 @@ def physical_activity_processor(trips_with_demographics,
 
     add_grouped_results(persons_df, assigned_columns.columns, prefix='PA_')
 
-    if settings.get("dump", False):
-
+    if settings.get("dump", False) and settings.get("dump_physical_activity", True):
         output_dir = orca.eval_variable('output_dir')
         csv_file_name = os.path.join(output_dir, 'physical_activity.csv')
         persons_df = persons_df[['hh_id', 'person_idx'] + list(assigned_columns.columns)]

@@ -1,4 +1,11 @@
 dump: True
+#dump_aggregate_trips: True
+#dump_auto_ownership: True
+#dump_demographics: True
+#dump_link: True
+#dump_link_daily: True
+#dump_person_trips: True
+#dump_physical_activity: True
 
 scenario_year: sample
 
@@ -11,9 +18,7 @@ locals_demographics:
   POVERTY_1: 11770
   POVERTY_2: 15930
   POVERTY_N: 4160
-  POVERTY_MAP:
-    1: 11770
-    2: 15930
+
 
 locals_auto_ownership:
   ANNUAL_COST_PER_VEHICLE: 2000
