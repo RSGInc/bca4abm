@@ -36,7 +36,7 @@ def auto_ownership_processor(persons_merged, auto_ownership_spec, settings):
     add_grouped_results(persons_df, assigned_columns.columns,
                         prefix='AO_', spec=auto_ownership_spec)
 
-    if settings.get("dump", False):
+    if settings.get("dump", False) and settings.get("dump_auto_ownership", True):
         output_dir = orca.eval_variable('output_dir')
         csv_file_name = os.path.join(output_dir, 'auto_ownership.csv')
         persons_df = persons_df[['hh_id', 'person_idx'] + list(assigned_columns.columns)]

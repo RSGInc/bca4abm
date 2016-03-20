@@ -48,7 +48,7 @@ def demographics_processor(persons_merged, demographics_spec, settings):
 
     add_summary_results(coc_grouped)
 
-    if settings.get('dump', False):
+    if settings.get("dump", False) and settings.get("dump_demographics", True):
         persons_merged = orca.get_table('persons_merged').to_frame()
         output_dir = orca.eval_variable('output_dir')
         csv_file_name = os.path.join(output_dir, 'persons_merged.csv')

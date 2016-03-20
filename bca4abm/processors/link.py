@@ -132,10 +132,7 @@ def link_processor(link_manifest, link_spec, settings, data_dir):
     add_summary_results(results, summary_column_names=assigned_column_names,
                         prefix='L_', spec=link_spec)
 
-    with orca.eval_variable('output_store') as output_store:
-        output_store['link_results'] = results
-
-    if settings.get("dump", False):
+    if settings.get("dump", False) and settings.get("dump_link", True):
         output_dir = orca.eval_variable('output_dir')
         csv_file_name = os.path.join(output_dir, 'link_benefits.csv')
         print "writing", csv_file_name
@@ -158,10 +155,7 @@ def link_daily_processor(link_daily_spec, settings, data_dir):
 
     add_summary_results(results, prefix='LD_', spec=link_daily_spec)
 
-    with orca.eval_variable('output_store') as output_store:
-        output_store['link_daily_results'] = results
-
-    if settings.get("dump", False):
+    if settings.get("dump", False) and settings.get("dump_link_daily", True):
         output_dir = orca.eval_variable('output_dir')
         csv_file_name = os.path.join(output_dir, 'link_daily_benefits.csv')
         print "writing", csv_file_name
