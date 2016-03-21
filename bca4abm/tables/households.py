@@ -8,21 +8,31 @@ from bca4abm import bca4abm as bca
 
 # this caches all the columns that are computed on the trips table
 @orca.table(cache=True)
-def households(data_dir, settings):
+def households(data_dir, input_source, settings):
 
-    base_households = bca.read_csv_table(
-        data_dir, settings,
-        table_name="base_households",
-        index_col="hh_id",
-        column_map="base_households_column_map")
+    base_households = bca.read_csv_or_stored_table(table_name="base_households",
+                                                   index_col="hh_id",
+                                                   data_dir=data_dir,
+                                                   input_source=input_source,
+                                                   settings=settings)
+
+    # base_households = bca.read_csv_table(
+    #     data_dir, settings,
+    #     table_name="base_households",
+    #     index_col="hh_id")
 
     # print "\nbase_households\n", base_households
 
-    build_households = bca.read_csv_table(
-        data_dir, settings,
-        table_name="build_households",
-        index_col="hh_id",
-        column_map="build_households_column_map")
+    build_households = bca.read_csv_or_stored_table(table_name="build_households",
+                                                    index_col="hh_id",
+                                                    data_dir=data_dir,
+                                                    input_source=input_source,
+                                                    settings=settings)
+
+    # build_households = bca.read_csv_table(
+    #     data_dir, settings,
+    #     table_name="build_households",
+    #     index_col="hh_id")
 
     # print "\nbuild_households\n", build_households
 

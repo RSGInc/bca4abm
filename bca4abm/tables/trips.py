@@ -6,15 +6,50 @@ import pandas as pd
 from bca4abm import bca4abm as bca
 
 
+def read_merged_trips(table_name, alt_table_name, data_dir, input_source, settings):
+
+    # like bca.read_csv_or_stored_table except stores and retrieves merged table and alt together
+
+    if input_source in ['read_from_csv', 'update_store_from_csv']:
+
+        trips = bca.read_csv_or_stored_table(table_name=table_name,
+                                             data_dir=data_dir,
+                                             input_source=input_source,
+                                             settings=settings)
+
+        trips_alt = bca.read_csv_or_stored_table(table_name=alt_table_name,
+                                                 data_dir=data_dir,
+                                                 input_source=input_source,
+                                                 settings=settings)
+
+        trips_merged = pd.merge(trips, trips_alt, on=['hh_id',
+                                                      'person_idx',
+                                                      'tour_idx',
+                                                      'half_tour_idx',
+                                                      'half_tour_seg_idx'])
+
+        if input_source == 'update_store_from_csv':
+            print "updating store with table %s" % table_name
+            with orca.eval_variable('input_store_for_update') as input_store:
+                input_store[table_name] = trips_merged
+    else:
+        with orca.eval_variable('input_store_for_read') as input_store:
+            print "reading table %s from store" % table_name
+            trips_merged = input_store[table_name]
+
+    return trips_merged
+
+
 # this caches all the columns that are computed on the trips table
 @orca.table(cache=True)
-def base_trips(data_dir, settings):
+def base_trips(data_dir, input_source, settings):
 
-    trips = bca.read_csv_table(data_dir, settings, table_name='basetrips')
-    trips_alt = bca.read_csv_table(data_dir, settings, table_name='basetrips_buildlos')
+    trips_merged = read_merged_trips(table_name="basetrips",
+                                     alt_table_name="basetrips_buildlos",
+                                     data_dir=data_dir,
+                                     input_source=input_source,
+                                     settings=settings)
 
-    trips_merged = pd.merge(trips, trips_alt, on=['hh_id', 'person_idx',
-                                                  'tour_idx', 'half_tour_idx', 'half_tour_seg_idx'])
     trips_merged['build'] = 0
     trips_merged['base'] = 1
     return trips_merged
@@ -22,12 +57,14 @@ def base_trips(data_dir, settings):
 
 # this caches all the columns that are computed on the trips table
 @orca.table(cache=True)
-def build_trips(data_dir, settings):
-    trips = bca.read_csv_table(data_dir, settings, table_name='buildtrips')
-    trips_alt = bca.read_csv_table(data_dir, settings, table_name='buildtrips_baselos')
+def build_trips(data_dir, input_source, settings):
 
-    trips_merged = pd.merge(trips, trips_alt, on=['hh_id', 'person_idx',
-                                                  'tour_idx', 'half_tour_idx', 'half_tour_seg_idx'])
+    trips_merged = read_merged_trips(table_name="buildtrips",
+                                     alt_table_name="buildtrips_baselos",
+                                     data_dir=data_dir,
+                                     input_source=input_source,
+                                     settings=settings)
+
     trips_merged['build'] = 1
     trips_merged['base'] = 0
     return trips_merged

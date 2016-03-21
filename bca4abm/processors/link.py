@@ -70,7 +70,7 @@ def eval_link_spec(link_spec, link_file_name, data_dir, link_file_column_map,
 
     for scenario in ['base', 'build']:
 
-        link_data_subdir = 'base-matrices' if scenario == 'base' else 'build-matrices'
+        link_data_subdir = 'base-data' if scenario == 'base' else 'build-data'
 
         links_df = read_csv_file(data_dir=os.path.join(data_dir, link_data_subdir),
                                  file_name=link_file_name,
