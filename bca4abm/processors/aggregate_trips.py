@@ -135,13 +135,13 @@ def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, se
 
         # print "   %s" % row.description
 
-        matrix_dir = os.path.join(data_dir, "base-matrices")
+        matrix_dir = os.path.join(data_dir, "base-data")
         locals_d['base_trips'] = get_omx_matrix(matrix_dir, row.trip_file_name, row.trip_table_name)
         locals_d['base_ivt'] = get_omx_matrix(matrix_dir, row.ivt_file_name, row.ivt_table_name)
         locals_d['base_aoc'] = get_omx_matrix(matrix_dir, row.aoc_file_name, row.aoc_table_name)
         locals_d['base_toll'] = get_omx_matrix(matrix_dir, row.toll_file_name, row.toll_table_name)
 
-        matrix_dir = os.path.join(data_dir, "build-matrices")
+        matrix_dir = os.path.join(data_dir, "build-data")
         locals_d['build_trips'] = get_omx_matrix(matrix_dir, row.trip_file_name,
                                                  row.trip_table_name)
         locals_d['build_ivt'] = get_omx_matrix(matrix_dir, row.ivt_file_name, row.ivt_table_name)

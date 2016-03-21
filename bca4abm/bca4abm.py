@@ -11,7 +11,7 @@ import yaml
 from .util.misc import expect_columns
 
 
-def read_csv_table(data_dir, settings, table_name, index_col=None, column_map=None):
+def read_csv_table(data_dir, settings, table_name, index_col=None):
 
     # settings:
     #   <table_name>: <csv file name>
@@ -25,8 +25,7 @@ def read_csv_table(data_dir, settings, table_name, index_col=None, column_map=No
 
     fpath = os.path.join(data_dir, settings[table_name])
 
-    if column_map is None:
-        column_map = table_name + "_column_map"
+    column_map = table_name + "_column_map"
 
     if column_map in settings:
         usecols = settings[column_map].keys()
@@ -42,6 +41,22 @@ def read_csv_table(data_dir, settings, table_name, index_col=None, column_map=No
             df.set_index(index_col, inplace=True)
         else:
             df.index.names = [index_col]
+
+    return df
+
+
+def read_csv_or_stored_table(data_dir, input_source, settings, table_name, index_col=None):
+
+    if input_source in ['read_from_csv', 'update_store_from_csv']:
+        df = read_csv_table(data_dir, settings, table_name=table_name, index_col=index_col)
+        if input_source == 'update_store_from_csv':
+            print "updating store with table %s" % table_name
+            with orca.eval_variable('input_store_for_update') as input_store:
+                input_store[table_name] = df
+    else:
+        with orca.eval_variable('input_store_for_read') as input_store:
+            print "reading table %s from store" % table_name
+            df = input_store[table_name]
 
     return df
 

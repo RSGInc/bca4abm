@@ -8,16 +8,14 @@ from bca4abm import bca4abm as bca
 
 # this caches things so you don't have to read in the file from disk again
 @orca.table(cache=True)
-def raw_persons(data_dir, settings):
-    return bca.read_csv_table(data_dir, settings,
-                              table_name="persons",
-                              column_map="persons_column_map")
+def persons(data_dir, input_source, settings):
 
+    df = bca.read_csv_or_stored_table(table_name="persons",
+                                      data_dir=data_dir,
+                                      input_source=input_source,
+                                      settings=settings)
 
-# this caches all the columns that are computed on the persons table
-@orca.table(cache=True)
-def persons(raw_persons):
-    return raw_persons.to_frame()
+    return df
 
 
 # merge table casting households onto persons

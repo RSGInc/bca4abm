@@ -6,13 +6,16 @@ from bca4abm import bca4abm as bca
 
 
 @orca.step()
-def initialize_output_store(output_dir, output_store_file_name):
+def initialize_stores(output_dir, output_store_file_name, data_dir, input_store_file_name):
 
-    print "---------- initialize_output_store"
+    print "---------- initialize_stores"
 
-    output = pd.HDFStore(os.path.join(output_dir, output_store_file_name),
-                         mode='w')
+    output = pd.HDFStore(os.path.join(output_dir, output_store_file_name), mode='w')
     output.close()
+
+    if orca.eval_variable('input_source') in ['update_store_from_csv']:
+        input = pd.HDFStore(os.path.join(data_dir, input_store_file_name), mode='w')
+        input.close()
 
 
 @orca.step()

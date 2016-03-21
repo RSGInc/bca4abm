@@ -30,7 +30,7 @@ orca.add_injectable("output_dir", os.path.join(parent_dir, 'output'))
 
 def test_initialize():
 
-    orca.run(["initialize_output_store"])
+    orca.run(["initialize_stores"])
 
     with orca.eval_variable('output_store_for_read') as hdf:
         assert hdf.keys() == []
@@ -38,7 +38,7 @@ def test_initialize():
 
 def test_print_results_processor(capsys):
 
-    orca.run(["initialize_output_store"])
+    orca.run(["initialize_stores"])
     orca.run(["demographics_processor"])
     orca.run(['write_results'])
 
@@ -54,7 +54,7 @@ def test_demographics_processor():
     persons_merged = orca.eval_variable('persons_merged').to_frame()
     assert "coc_age" not in persons_merged.columns
 
-    orca.run(["initialize_output_store"])
+    orca.run(["initialize_stores"])
     orca.run(["demographics_processor"])
     orca.run(['write_results'])
 
@@ -70,7 +70,7 @@ def test_demographics_processor():
 
 def test_person_trips_processor():
 
-    orca.run(["initialize_output_store"])
+    orca.run(["initialize_stores"])
     orca.run(["demographics_processor"])
     orca.run(["person_trips_processor"])
     orca.run(['write_results'])
@@ -84,7 +84,7 @@ def test_person_trips_processor():
 
 def test_aggregate_trips_processor():
 
-    orca.run(["initialize_output_store"])
+    orca.run(["initialize_stores"])
     orca.run(["aggregate_trips_processor"])
     orca.run(['write_results'])
 
@@ -103,7 +103,7 @@ def test_aggregate_trips_processor():
 
 def test_link_daily_processor():
 
-    orca.run(["initialize_output_store"])
+    orca.run(["initialize_stores"])
     orca.run(["link_daily_processor"])
     orca.run(['write_results'])
 
@@ -117,7 +117,7 @@ def test_link_daily_processor():
 
 def test_link_processor():
 
-    orca.run(["initialize_output_store"])
+    orca.run(["initialize_stores"])
     orca.run(["link_processor"])
     orca.run(['write_results'])
 
@@ -131,7 +131,7 @@ def test_link_processor():
 
 def test_auto_ownership_processor():
 
-    orca.run(["initialize_output_store"])
+    orca.run(["initialize_stores"])
     orca.run(["demographics_processor"])
     orca.run(["auto_ownership_processor"])
     orca.run(['write_results'])
@@ -147,7 +147,7 @@ def test_auto_ownership_processor():
 
 def test_physical_activity_processor():
 
-    orca.run(["initialize_output_store"])
+    orca.run(["initialize_stores"])
     orca.run(["demographics_processor"])
     orca.run(["physical_activity_processor"])
     orca.run(['write_results'])

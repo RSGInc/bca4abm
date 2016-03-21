@@ -27,20 +27,43 @@ orca.add_injectable('data_dir', os.path.join(parent_dir, 'data'))
 orca.add_injectable('output_dir', os.path.join(parent_dir, 'output'))
 
 
+def test_read_persons_table_from_store():
+
+    settings = orca.eval_variable('settings')
+    assert settings.get('persons') == 'persons.csv'
+
+    data_dir = orca.eval_variable('data_dir')
+    orca.add_injectable('input_source', 'update_store_from_csv')
+
+    with orca.eval_variable('input_store_for_write') as hdf:
+        assert '/persons' not in hdf.keys()
+
+    df = bca.read_csv_or_stored_table(table_name="persons",
+                                      data_dir=data_dir,
+                                      input_source='update_store_from_csv',
+                                      settings=settings)
+
+    assert expect_columns(df,
+                          settings['persons_column_map'].values())
+
+    assert df.shape[0] == 27
+
+    with orca.eval_variable('input_store_for_read') as hdf:
+        assert '/persons' in hdf.keys()
+        assert expect_columns(hdf['persons'],
+                              settings['persons_column_map'].values())
+
+
 def test_read_persons_table():
 
     settings = orca.eval_variable('settings')
     assert settings.get('persons') == 'persons.csv'
-    assert settings.get('store') is None
+    assert orca.eval_variable('input_source') == 'read_from_csv'
 
     # expect all of and only the columns specified by persons_column_map values
-    raw_persons = orca.get_table('raw_persons').to_frame()
-    assert expect_columns(raw_persons,
-                          settings['persons_column_map'].values())
-
     persons = orca.get_table('persons').to_frame()
-    assert not missing_columns(persons,
-                               settings['persons_column_map'].values())
+    assert expect_columns(persons,
+                          settings['persons_column_map'].values())
 
     assert persons.shape[0] == 27
 
@@ -48,7 +71,6 @@ def test_read_persons_table():
 def test_read_households_table():
 
     settings = orca.eval_variable('settings')
-    assert settings.get('store') is None
 
     households = orca.get_table('households').to_frame()
     assert not missing_columns(households,
@@ -63,23 +85,45 @@ def test_read_households_table():
 def test_persons_merged_table():
 
     settings = orca.eval_variable('settings')
-    assert settings.get('store') is None
 
     persons_merged = orca.get_table('persons_merged').to_frame()
     assert 'person_gender' in persons_merged.columns
     assert 'hh_income' in persons_merged.columns
 
-    raw_persons = orca.get_table('raw_persons').to_frame()
-    assert (persons_merged.person_type == raw_persons.person_type).all()
+    persons = orca.get_table('persons').to_frame()
+    assert (persons_merged.person_type == persons.person_type).all()
 
     assert persons_merged.shape[0] == 27
+
+
+def test_persons_merged_table_from_store():
+
+    settings = orca.eval_variable('settings')
+
+    with orca.eval_variable('input_store_for_write') as hdf:
+        assert '/persons' not in hdf.keys()
+
+    orca.add_injectable('input_source', 'update_store_from_csv')
+
+    persons_merged = orca.get_table('persons_merged').to_frame()
+    assert 'person_gender' in persons_merged.columns
+    assert 'hh_income' in persons_merged.columns
+
+    persons = orca.get_table('persons').to_frame()
+    assert (persons_merged.person_type == persons.person_type).all()
+
+    with orca.eval_variable('input_store_for_read') as hdf:
+        assert '/persons' in hdf.keys()
+        assert expect_columns(hdf['persons'],
+                              settings['persons_column_map'].values())
+        assert '/base_households' in hdf.keys()
+        assert '/build_households' in hdf.keys()
 
 
 def test_read_base_trips_table():
 
     settings = orca.eval_variable('settings')
     assert settings.get('basetrips') == 'basetrips_normal.csv'
-    assert settings.get('store') is None
 
     trips = orca.get_table('base_trips').to_frame()
 
@@ -95,7 +139,6 @@ def test_read_build_trips_table():
 
     settings = orca.eval_variable('settings')
     assert settings.get('buildtrips') == 'buildtrips_normal.csv'
-    assert settings.get('store') is None
 
     trips = orca.get_table('build_trips').to_frame()
 
@@ -111,7 +154,6 @@ def test_read_build_trips_table():
 def test_disaggregate_trips_table():
 
     settings = orca.eval_variable('settings')
-    assert settings.get('store') is None
 
     trips = orca.get_table('disaggregate_trips').to_frame()
     assert 'build_auto_time' in trips.columns
@@ -120,10 +162,32 @@ def test_disaggregate_trips_table():
     assert trips.shape[0] == 250
 
 
+def test_disaggregate_trips_table_from_store():
+
+    settings = orca.eval_variable('settings')
+    data_dir = orca.eval_variable('data_dir')
+    orca.add_injectable('input_source', 'update_store_from_csv')
+
+    with orca.eval_variable('input_store_for_write') as hdf:
+        assert '/basetrips' not in hdf.keys()
+        assert '/buildtrips' not in hdf.keys()
+
+    trips = orca.get_table('disaggregate_trips').to_frame()
+    assert 'build_auto_time' in trips.columns
+    assert 'base_auto_time' in trips.columns
+
+    assert trips.shape[0] == 250
+
+    with orca.eval_variable('input_store_for_read') as hdf:
+        assert '/basetrips' in hdf.keys()
+        assert '/buildtrips' in hdf.keys()
+        assert hdf['basetrips'].shape[0] == 123
+        assert hdf['buildtrips'].shape[0] == 127
+
+
 def test_trips_with_demographics_table():
 
     settings = orca.eval_variable('settings')
-    assert settings.get('store') is None
 
     trips = orca.get_table('trips_with_demographics').to_frame()
     assert 'build_auto_time' in trips.columns
