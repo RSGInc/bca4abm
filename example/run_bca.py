@@ -17,8 +17,8 @@ orca.add_injectable('configs_dir', os.path.join(parent_dir, 'configs'))
 orca.add_injectable('data_dir', os.path.join(parent_dir, 'data'))
 orca.add_injectable('output_dir', os.path.join(parent_dir, 'output'))
 
-#input_source = 'read_from_csv'
-input_source = 'read_from_store'
+input_source = 'read_from_csv'
+# input_source = 'read_from_store'
 # input_source = 'update_store_from_csv'
 orca.add_injectable('input_source', input_source)
 
