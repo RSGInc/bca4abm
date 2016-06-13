@@ -41,10 +41,10 @@ def read_csv_file(data_dir, file_name, column_map=None):
         usecols = column_map.keys()
         # print "read_bca_table usecols: ", usecols
         # FIXME - should we allow comment lines?
-        df = pd.read_csv(fpath, header=0, usecols=usecols)
+        df = bca.read_csv_or_tsv(fpath, header=0, usecols=usecols)
         df.rename(columns=column_map, inplace=True)
     else:
-        df = pd.read_csv(fpath, header=0, comment='#')
+        df = bca.read_csv_or_tsv(fpath, header=0, comment='#')
 
     return df
 
