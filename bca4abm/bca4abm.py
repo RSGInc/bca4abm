@@ -11,6 +11,18 @@ import yaml
 from .util.misc import expect_columns
 
 
+def read_csv_or_tsv(fpath, header='infer', usecols=None, comment=None):
+
+    if fpath.endswith('.tsv'):
+        sep = '\t'
+    elif fpath.endswith('.txt'):
+        sep = '\s+'
+    else:
+        sep = ','
+
+    return pd.read_csv(fpath, sep=sep, header=header, usecols=usecols, comment=comment)
+
+
 def read_csv_table(data_dir, settings, table_name, index_col=None):
 
     # settings:
@@ -31,10 +43,10 @@ def read_csv_table(data_dir, settings, table_name, index_col=None):
         usecols = settings[column_map].keys()
         # print "read_bca_table usecols: ", usecols
         # FIXME - should we allow comment lines?
-        df = pd.read_csv(fpath, header=0, usecols=usecols, comment='#')
+        df = read_csv_or_tsv(fpath, header=0, usecols=usecols, comment='#')
         df.rename(columns=settings[column_map], inplace=True)
     else:
-        df = pd.read_csv(fpath, header=0, comment='#')
+        df = read_csv_or_tsv(fpath, header=0, comment='#')
 
     if index_col is not None:
         if index_col in df.columns:

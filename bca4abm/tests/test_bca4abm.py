@@ -61,3 +61,23 @@ def test_read_csv_table():
     df = bca.read_csv_table(data_dir, settings, table_name="persons",  index_col='person_id')
 
     assert not missing_columns(df, ["pno", "hhno", "pptyp"])
+
+
+def test_read_csv_table_with_tsv():
+
+    settings = {'persons': 'persons.tsv'}
+    data_dir = orca.eval_variable('data_dir')
+
+    df = bca.read_csv_table(data_dir, settings, table_name="persons",  index_col='person_id')
+
+    assert not missing_columns(df, ["pno", "hhno", "pptyp"])
+
+
+def test_read_csv_table_with_txt():
+
+    settings = {'persons': 'persons.txt'}
+    data_dir = orca.eval_variable('data_dir')
+
+    df = bca.read_csv_table(data_dir, settings, table_name="persons",  index_col='person_id')
+
+    assert not missing_columns(df, ["pno", "hhno", "pptyp"])
