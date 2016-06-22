@@ -4,5 +4,5 @@ SET PYPATH=C:\Anaconda\python.exe
 
 rem # install bca4abm package
 cd..
-python setup.py install
+python setup.py develop
 
