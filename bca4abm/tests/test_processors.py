@@ -110,9 +110,9 @@ def test_link_daily_processor():
     with orca.eval_variable('output_store_for_read') as hdf:
         assert '/summary_results' in hdf.keys()
         npt.assert_almost_equal(hdf['summary_results'].LD_crash_cost_pdo[0],
-                                -463938023.432, decimal=2)
+                                463938023.432, decimal=2)
         npt.assert_almost_equal(hdf['summary_results'].LD_crash_cost_total[0],
-                                -1113451256.237, decimal=2)
+                                1113451256.237, decimal=2)
 
 
 def test_link_processor():
@@ -124,9 +124,9 @@ def test_link_processor():
     with orca.eval_variable('output_store_for_read') as hdf:
         assert '/summary_results' in hdf.keys()
         npt.assert_almost_equal(hdf['summary_results'].L_cost_op_total[0],
-                                -79044707.159, decimal=2)
+                                79044707.159, decimal=2)
         npt.assert_almost_equal(hdf['summary_results'].L_cost_delay_total[0],
-                                12216076.978, decimal=2)
+                                -12216076.978, decimal=2)
 
 
 def test_auto_ownership_processor():

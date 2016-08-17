@@ -90,7 +90,7 @@ def eval_link_spec(link_spec, link_file_name, data_dir, link_file_column_map,
 
         results[scenario] = result
 
-    results = results['base'] - results['build']
+    results = results['build'] - results['base']
 
     results.reset_index(drop=True, inplace=True)
 
