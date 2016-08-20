@@ -71,17 +71,24 @@ def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, se
         # print "   %s" % row.description
 
         matrix_dir = os.path.join(data_dir, "base-data")
-        locals_dict['base_trips'] = get_omx_matrix(matrix_dir, row.trip_file_name, row.trip_table_name)
-        locals_dict['base_ivt'] = get_omx_matrix(matrix_dir, row.ivt_file_name, row.ivt_table_name)
-        locals_dict['base_aoc'] = get_omx_matrix(matrix_dir, row.aoc_file_name, row.aoc_table_name)
-        locals_dict['base_toll'] = get_omx_matrix(matrix_dir, row.toll_file_name, row.toll_table_name)
+        locals_dict['base_trips'] = \
+            get_omx_matrix(matrix_dir, row.trip_file_name, row.trip_table_name)
+        locals_dict['base_ivt'] = \
+            get_omx_matrix(matrix_dir, row.ivt_file_name, row.ivt_table_name)
+        locals_dict['base_aoc'] = \
+            get_omx_matrix(matrix_dir, row.aoc_file_name, row.aoc_table_name)
+        locals_dict['base_toll'] = \
+            get_omx_matrix(matrix_dir, row.toll_file_name, row.toll_table_name)
 
         matrix_dir = os.path.join(data_dir, "build-data")
-        locals_dict['build_trips'] = get_omx_matrix(matrix_dir, row.trip_file_name,
-                                                 row.trip_table_name)
-        locals_dict['build_ivt'] = get_omx_matrix(matrix_dir, row.ivt_file_name, row.ivt_table_name)
-        locals_dict['build_aoc'] = get_omx_matrix(matrix_dir, row.aoc_file_name, row.aoc_table_name)
-        locals_dict['build_toll'] = get_omx_matrix(matrix_dir, row.toll_file_name, row.toll_table_name)
+        locals_dict['build_trips'] = \
+            get_omx_matrix(matrix_dir, row.trip_file_name, row.trip_table_name)
+        locals_dict['build_ivt'] = \
+            get_omx_matrix(matrix_dir, row.ivt_file_name, row.ivt_table_name)
+        locals_dict['build_aoc'] = \
+            get_omx_matrix(matrix_dir, row.aoc_file_name, row.aoc_table_name)
+        locals_dict['build_toll'] = \
+            get_omx_matrix(matrix_dir, row.toll_file_name, row.toll_table_name)
 
         locals_dict['aoc_units'] = row.aoc_units
         locals_dict['toll_units'] = row.toll_units

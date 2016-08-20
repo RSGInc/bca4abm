@@ -39,9 +39,7 @@ def person_trips_processor(trips_with_demographics,
     locals_dict = bca.assign_variables_locals(settings, 'locals_person_trips')
     locals_dict['trips'] = trips_df
 
-
     trace_rows = trace_hh_id and trips_df['hh_id'] == trace_hh_id
-
 
     coc_summary, trace_results = bca.eval_group_and_sum(assignment_expressions=person_trips_spec,
                                                         df=trips_df,
@@ -51,7 +49,7 @@ def person_trips_processor(trips_with_demographics,
                                                         chunk_size=chunk_size,
                                                         trace_rows=trace_rows)
 
-    result_prefix='PT_'
+    result_prefix = 'PT_'
     add_result_columns("coc_results", coc_summary, result_prefix)
     add_summary_results(coc_summary, prefix=result_prefix, spec=person_trips_spec)
 
@@ -65,5 +63,5 @@ def person_trips_processor(trips_with_demographics,
                               file_name="person_trips_processor",
                               index_label='trip_id',
                               columns=None,
-                              column_labels=['label','trip'],
+                              column_labels=['label', 'trip'],
                               transpose=True)

@@ -168,7 +168,6 @@ def test_chunked_person_trips_processor():
     settings['chunk_size'] = 5
     orca.add_injectable("settings", settings)
 
-
     orca.run(["initialize_stores"])
     orca.run(["demographics_processor"])
     orca.run(["person_trips_processor"])

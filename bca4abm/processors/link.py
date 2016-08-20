@@ -83,11 +83,7 @@ def eval_link_spec(link_spec, link_file_name, data_dir, link_file_column_map,
                                                   chunk_size=0,
                                                   trace_rows=None)
 
-        result = pd.DataFrame(data=summary).T
-
-        print "result %s \n %s" % (scenario, result)
-
-        results[scenario] = result #.T
+        results[scenario] = pd.DataFrame(data=summary).T
 
     results = results['build'] - results['base']
 

@@ -69,5 +69,5 @@ def demographics_processor(persons_merged, demographics_spec, settings,
                               file_name="demographics_processor",
                               index_label='person_idx',
                               columns=None,
-                              column_labels=['label','person'],
+                              column_labels=['label', 'person'],
                               transpose=True)

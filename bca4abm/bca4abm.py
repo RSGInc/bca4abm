@@ -310,7 +310,8 @@ def chunked_df(df, trace_rows, chunk_size):
 #         i += 1
 
 
-def eval_group_and_sum(assignment_expressions, df, locals_dict, group_by_column_names, df_alias=None, chunk_size=0, trace_rows=None):
+def eval_group_and_sum(assignment_expressions, df, locals_dict, group_by_column_names,
+                       df_alias=None, chunk_size=0, trace_rows=None):
 
     if group_by_column_names == [None]:
         raise RuntimeError("calculate_benefits: group_by_column_names not initialized")
@@ -340,9 +341,15 @@ def eval_group_and_sum(assignment_expressions, df, locals_dict, group_by_column_
         chunk_summary = assigned_chunk.groupby(group_by_column_names).sum()
 
         # accumulate chunk_summaries in df
-        summary = chunk_summary if summary is None else pd.concat([summary, chunk_summary], axis=0)
+        if summary is None:
+            summary = chunk_summary
+        else:
+            summary = pd.concat([summary, chunk_summary], axis=0)
 
-        trace_results = trace_chunk if trace_results is None else pd.concat([trace_results, trace_chunk], axis=0)
+        if trace_results is None:
+            trace_results = trace_chunk
+        else:
+            trace_results = pd.concat([trace_results, trace_chunk], axis=0)
 
     if chunks > 1:
         # squash the accumulated chunk summaries by reapplying group and sum
@@ -356,7 +363,8 @@ def eval_group_and_sum(assignment_expressions, df, locals_dict, group_by_column_
     return summary, trace_results
 
 
-def eval_and_sum(assignment_expressions, df, locals_dict, df_alias=None, chunk_size=0, trace_rows=None):
+def eval_and_sum(assignment_expressions, df, locals_dict, df_alias=None,
+                 chunk_size=0, trace_rows=None):
 
     summary = trace_results = trace_rows_chunk = None
     chunks = 0
@@ -377,9 +385,15 @@ def eval_and_sum(assignment_expressions, df, locals_dict, df_alias=None, chunk_s
         chunk_summary = assigned_chunk.sum()
 
         # accumulate chunk_summaries in df
-        summary = chunk_summary if summary is None else pd.concat([summary, chunk_summary], axis=0)
+        if summary is None:
+            summary = chunk_summary
+        else:
+            summary = pd.concat([summary, chunk_summary], axis=0)
 
-        trace_results = trace_chunk if trace_results is None else pd.concat([trace_results, trace_chunk], axis=0)
+        if trace_results is None:
+            trace_results = trace_chunk
+        else:
+            trace_results = pd.concat([trace_results, trace_chunk], axis=0)
 
     if chunks > 1:
         # squash the accumulated chunk summaries by reapplying group and sum

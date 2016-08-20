@@ -48,7 +48,7 @@ def auto_ownership_processor(persons_merged,
                                                         chunk_size=chunk_size,
                                                         trace_rows=trace_rows)
 
-    result_prefix='AO_'
+    result_prefix = 'AO_'
     add_result_columns("coc_results", coc_summary, result_prefix)
     add_summary_results(coc_summary, prefix=result_prefix, spec=auto_ownership_spec)
 
@@ -62,6 +62,5 @@ def auto_ownership_processor(persons_merged,
                               file_name="auto_ownership_processor",
                               index_label='person_id',
                               columns=None,
-                              column_labels=['label','person'],
+                              column_labels=['label', 'person'],
                               transpose=True)
-
