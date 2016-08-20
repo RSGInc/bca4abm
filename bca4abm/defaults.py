@@ -3,9 +3,14 @@
 # See full license in LICENSE.txt.
 
 import os.path
+import logging
+
 import pandas as pd
 import orca
 import yaml
+
+
+logger = logging.getLogger(__name__)
 
 
 @orca.injectable()
@@ -26,6 +31,19 @@ def output_dir():
 @orca.injectable()
 def settings_file_name():
     return 'settings.yaml'
+
+
+@orca.injectable(cache=True)
+def chunk_size(settings):
+    return int(settings.get('chunk_size', 0))
+
+
+@orca.injectable(cache=True)
+def hh_chunk_size(settings):
+    if 'hh_chunk_size' in settings:
+        return settings.get('hh_chunk_size', 0)
+    else:
+        return settings.get('chunk_size', 0)
 
 
 @orca.injectable()
@@ -101,3 +119,32 @@ def input_store_for_write(data_dir, input_store_file_name):
     # print "opening input_store for READ", input_store_path
 
     return pd.HDFStore(input_store_path, mode='w')
+
+
+@orca.injectable(cache=True)
+def trace_hh_id(settings):
+
+    id = settings.get('trace_hh_id', None)
+
+    if id and not isinstance(id, int):
+        logger.warn("setting trace_hh_id is wrong type, should be an int, but was %s" % type(id))
+        id = None
+
+    return id
+
+
+@orca.injectable(cache=True)
+def trace_od(settings):
+
+    od = settings.get('trace_od', None)
+
+    if od and not (isinstance(od, list) and len(od) == 2 and all(isinstance(x, int) for x in od)):
+        logger.warn("setting trace_od is wrong type, should be a list of length 2, but was %s" % od)
+        od = None
+
+    return od
+
+
+@orca.injectable(cache=True)
+def enable_trace_log(trace_hh_id, trace_od):
+    return (trace_hh_id or trace_od)

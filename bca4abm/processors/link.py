@@ -64,7 +64,7 @@ def link_daily_spec(configs_dir):
 def eval_link_spec(link_spec, link_file_name, data_dir, link_file_column_map,
                    settings, settings_locals):
 
-    locals_d = bca.assign_variables_locals(settings, settings_locals)
+    locals_dict = bca.assign_variables_locals(settings, settings_locals)
 
     results = {}
 
@@ -76,19 +76,18 @@ def eval_link_spec(link_spec, link_file_name, data_dir, link_file_column_map,
                                  file_name=link_file_name,
                                  column_map=link_file_column_map)
 
-        locals_d['links'] = links_df
+        summary, trace_results = bca.eval_and_sum(link_spec,
+                                                  links_df,
+                                                  locals_dict,
+                                                  df_alias='links',
+                                                  chunk_size=0,
+                                                  trace_rows=None)
 
-        # eval_variables evaluates each of the expressions in spec
-        # in the context of each row in of the choosers dataframe
-        assigned_columns = bca.assign_variables(assignment_expressions=link_spec,
-                                                df=links_df,
-                                                locals_d=locals_d.copy())
+        result = pd.DataFrame(data=summary).T
 
-        # print assigned_columns[:10]
+        print "result %s \n %s" % (scenario, result)
 
-        result = pd.DataFrame(data=assigned_columns.sum()).T
-
-        results[scenario] = result
+        results[scenario] = result #.T
 
     results = results['build'] - results['base']
 
@@ -126,8 +125,6 @@ def link_processor(link_manifest, link_spec, settings, data_dir):
             results = results.append(row_results, ignore_index=True)
 
     results.reset_index(inplace=True)
-
-    # print "\nassigned_column_names\n", assigned_column_names
 
     add_summary_results(results, summary_column_names=assigned_column_names,
                         prefix='L_', spec=link_spec)

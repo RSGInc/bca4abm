@@ -4,13 +4,17 @@ dump: True
 #dump_demographics: True
 #dump_link: True
 #dump_link_daily: True
-#dump_person_trips: True
 #dump_physical_activity: True
+
+# trace household id; comment out for no trace
+trace_hh_id: 60
+
+chunk_size: 5
 
 scenario_year: sample
 
 # local values available to all processors
-locals:
+globals:
   DISCOUNT_RATE: 0.75
   ANNUALIZATION_FACTOR: 365
 
@@ -18,7 +22,6 @@ locals_demographics:
   POVERTY_1: 11770
   POVERTY_2: 15930
   POVERTY_N: 4160
-
 
 locals_auto_ownership:
   ANNUAL_COST_PER_VEHICLE: 2000

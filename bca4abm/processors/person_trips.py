@@ -3,7 +3,9 @@ import orca
 import pandas as pd
 
 from bca4abm import bca4abm as bca
-from ..util.misc import add_assigned_columns, add_grouped_results
+from bca4abm import tracing
+
+from ..util.misc import add_result_columns, add_summary_results
 
 """
 Person trips processor
@@ -17,30 +19,51 @@ def person_trips_spec(configs_dir):
 
 
 @orca.step()
-def person_trips_processor(trips_with_demographics, person_trips_spec, settings):
-
-    print "---------- person_trips_processor"
+def person_trips_processor(trips_with_demographics,
+                           person_trips_spec,
+                           coc_column_names,
+                           settings,
+                           chunk_size,
+                           trace_hh_id):
+    """
+    Compute disaggregate trips benefits
+    """
 
     trips_df = trips_with_demographics.to_frame()
 
+    tracing.info(__name__,
+                 "Running person_trips_processor with %d trips (chunk size = %s)"
+                 % (len(trips_with_demographics), chunk_size))
+
     # eval person_trips_spec in context of trips_with_demographics
-    locals_d = bca.assign_variables_locals(settings, settings_locals='locals_person_trips')
-    locals_d['trips'] = trips_df
+    locals_dict = bca.assign_variables_locals(settings, 'locals_person_trips')
+    locals_dict['trips'] = trips_df
 
-    assigned_columns = bca.assign_variables(assignment_expressions=person_trips_spec,
-                                            df=trips_df,
-                                            locals_d=locals_d)
 
-    # add assigned columns to local trips df
-    trips_df = pd.concat([trips_df, assigned_columns], axis=1)
+    trace_rows = trace_hh_id and trips_df['hh_id'] == trace_hh_id
 
-    add_grouped_results(trips_df, assigned_columns.columns,
-                        prefix='PT_', spec=person_trips_spec)
 
-    if settings.get("dump", False) and settings.get("dump_person_trips", True):
-        trips_df.sort_values(['index1'], inplace=True)
-        output_dir = orca.eval_variable('output_dir')
+    coc_summary, trace_results = bca.eval_group_and_sum(assignment_expressions=person_trips_spec,
+                                                        df=trips_df,
+                                                        locals_dict=locals_dict,
+                                                        df_alias='trips',
+                                                        group_by_column_names=coc_column_names,
+                                                        chunk_size=chunk_size,
+                                                        trace_rows=trace_rows)
 
-        csv_file_name = os.path.join(output_dir, 'trips_with_demographics.csv')
-        print "writing", csv_file_name
-        trips_df.to_csv(csv_file_name, index=False)
+    result_prefix='PT_'
+    add_result_columns("coc_results", coc_summary, result_prefix)
+    add_summary_results(coc_summary, prefix=result_prefix, spec=person_trips_spec)
+
+    if trace_hh_id:
+
+        if trace_results is not None:
+
+            # add trips_df columns to trace_results
+            df = pd.concat([trips_df[trace_rows], trace_results], axis=1)
+            tracing.write_csv(df,
+                              file_name="person_trips_processor",
+                              index_label='trip_id',
+                              columns=None,
+                              column_labels=['label','trip'],
+                              transpose=True)
