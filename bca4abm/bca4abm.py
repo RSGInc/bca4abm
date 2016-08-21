@@ -2,6 +2,8 @@
 # Copyright (C) 2016 RSG Inc
 # See full license in LICENSE.txt.
 
+import logging
+
 import numpy as np
 import pandas as pd
 import orca
@@ -9,6 +11,9 @@ import os
 import yaml
 
 from .util.misc import expect_columns
+
+
+logger = logging.getLogger(__name__)
 
 
 def read_csv_or_tsv(fpath, header='infer', usecols=None, comment=None):
@@ -127,7 +132,37 @@ def read_assignment_spec(fname,
     return cfg
 
 
-def assign_variables(assignment_expressions, df, locals_d):
+def undupe_column_names(df, template="{} ({})"):
+    """
+    rename df column names so there are no duplicates (in place)
+
+    e.g. if there are two columns named "dog", the second column will be reformatted to "dog (2)"
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        dataframe whose column names should be de-duplicated
+    template : template taking two arguments (old_name, int) to use to rename columns
+
+    Returns
+    -------
+    df : pandas.DataFrame
+        dataframe that was renamed in place, for convenience in chaining
+    """
+    new_names = []
+    seen = set()
+    for name in df.columns:
+        n = 1
+        new_name = name
+        while new_name in seen:
+            n += 1
+            new_name = template.format(name, n)
+        new_names.append(new_name)
+        seen.add(new_name)
+    df.columns = new_names
+    return df
+
+
+def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, trace_rows=None):
     """
     Evaluate a set of variable expressions from a spec in the context
     of a given data table.
@@ -136,6 +171,9 @@ def assign_variables(assignment_expressions, df, locals_d):
     Python expressions have access to variables in locals_d (and df being
     accessible as variable df.) They also have access to previously assigned
     targets as the assigned target name.
+
+    variables starting with underscore are considered temps variables and returned seperately
+    (and only if return_temp_variables is true)
 
     Users should take care that expressions should result in
     a Pandas Series (scalars will be automatically promoted to series.)
@@ -149,6 +187,240 @@ def assign_variables(assignment_expressions, df, locals_d):
     locals_d : Dict
         This is a dictionary of local variables that will be the environment
         for an evaluation of "python" expression.
+    trace_rows: series or array of bools to use as mask to select target rows to trace
+
+    Returns
+    -------
+    variables : pandas.DataFrame
+        Will have the index of `df` and columns named by target and containing
+        the result of evaluating expression
+    trace_df : pandas.DataFrame or None
+        a dataframe containing the eval result values for each assignment expression
+    """
+
+    def to_series(x, target=None):
+        if x is None or np.isscalar(x):
+            if target:
+                logger.warning("WARNING: assign_variables promoting scalar %s to series" % target)
+            return pd.Series([x] * len(df.index), index=df.index)
+        return x
+
+    trace_results = None
+    if trace_rows is not None:
+        # convert to numpy array so we can slice ndarrays as well as series
+        trace_rows = np.asanyarray(trace_rows)
+        if trace_rows.any():
+            trace_results = []
+
+    # avoid touching caller's passed-in locals_d parameter (they may be looping)
+    locals_dict = locals_dict.copy() if locals_dict is not None else {}
+    if df_alias:
+        locals_dict[df_alias] = df
+    else:
+        locals_dict['df'] = df
+    local_keys = locals_dict.keys()
+
+    l = []
+    # need to be able to identify which variables causes an error, which keeps
+    # this from being expressed more parsimoniously
+    for e in zip(assignment_expressions.target, assignment_expressions.expression):
+        target, expression = e
+
+        if target in local_keys:
+            logger.warn("assign_variables target obscures local_d name '%s'" % str(target))
+
+        try:
+            values = to_series(eval(expression, globals(), locals_dict), target=target)
+        except Exception as err:
+            logger.error("assign_variables failed target: %s expression: %s"
+                         % (str(target), str(expression)))
+            # raise err
+            values = to_series(None, target=target)
+
+        l.append((target, values))
+
+        if trace_results is not None:
+            trace_results.append((target, values[trace_rows]))
+
+        # update locals to allows us to ref previously assigned targets
+        locals_dict[target] = values
+
+    # build a dataframe of eval results for non-temp targets
+    # since we allow targets to be recycled, we want to only keep the last usage
+    # we scan through targets in reverse order and add them to the front of the list
+    # the first time we see them so they end up in execution order
+    variables = []
+    seen = set()
+    for statement in reversed(l):
+        # statement is a tuple (<target_name>, <eval results in pandas.Series>)
+        target_name = statement[0]
+        if not target_name.startswith('_') and target_name not in seen:
+            variables.insert(0, statement)
+            seen.add(target_name)
+
+    # DataFrame from list of tuples [<target_name>, <eval results>), ...]
+    variables = pd.DataFrame.from_items(variables)
+
+    if trace_results is not None:
+        trace_results = undupe_column_names(pd.DataFrame.from_items(trace_results))
+
+    return variables, trace_results
+
+
+def assign_variables_locals(settings, locals_tag=None):
+    # locals whose values will be accessible to the execution context
+    # when the expressions in spec are applied to choosers
+    locals_dict = {
+        'log': np.log,
+        'exp': np.exp
+    }
+    if 'globals' in settings:
+        locals_dict.update(settings.get('globals'))
+    if locals_tag in settings:
+        locals_dict.update(settings.get(locals_tag))
+    return locals_dict
+
+
+def chunked_df(df, trace_rows, chunk_size):
+    # generator to iterate over chooses in chunk_size chunks
+    if chunk_size == 0:
+        yield 0, df, trace_rows
+    else:
+        num_choosers = len(df.index)
+        i = 0
+        while i < num_choosers:
+            if trace_rows is None:
+                yield i, df[i: i+chunk_size], None
+            else:
+                yield i, df[i: i+chunk_size], trace_rows[i: i+chunk_size]
+            i += chunk_size
+
+
+# FIXME - need this for chunking physical activity processor
+# def hh_chunked_choosers(df, trace_rows):
+#     # generator to iterate over chooses in chunk_size chunks
+#     last_chooser = df['chunk_id'].max()
+#     i = 0
+#     while i <= last_chooser:
+#         chunk_me = (df['chunk_id'] == i)
+#         if trace_rows is not None:
+#             yield i, df[chunk_me]
+#         else:
+#             yield i, df[chunk_me], trace_rows[chunk_me]
+#         i += 1
+
+
+def eval_group_and_sum(assignment_expressions, df, locals_dict, group_by_column_names,
+                       df_alias=None, chunk_size=0, trace_rows=None):
+
+    if group_by_column_names == [None]:
+        raise RuntimeError("calculate_benefits: group_by_column_names not initialized")
+
+    summary = trace_results = trace_rows_chunk = None
+    chunks = 0
+
+    for i, df_chunk, trace_rows_chunk in chunked_df(df, trace_rows_chunk, chunk_size):
+
+        chunks += 1
+
+        # print "eval_and_sum chunk %s i: %s" % (chunks, i)
+
+        if trace_rows is not None:
+            trace_rows_chunk = trace_rows[i: i+chunk_size]
+
+        assigned_chunk, trace_chunk = assign_variables(assignment_expressions,
+                                                       df_chunk,
+                                                       locals_dict=locals_dict,
+                                                       df_alias=df_alias,
+                                                       trace_rows=trace_rows_chunk)
+
+        # concat in the group_by columns
+        assigned_chunk = pd.concat([df_chunk[group_by_column_names], assigned_chunk], axis=1)
+
+        # sum this chunk
+        chunk_summary = assigned_chunk.groupby(group_by_column_names).sum()
+
+        # accumulate chunk_summaries in df
+        if summary is None:
+            summary = chunk_summary
+        else:
+            summary = pd.concat([summary, chunk_summary], axis=0)
+
+        if trace_results is None:
+            trace_results = trace_chunk
+        else:
+            trace_results = pd.concat([trace_results, trace_chunk], axis=0)
+
+    if chunks > 1:
+        # squash the accumulated chunk summaries by reapplying group and sum
+        summary.reset_index(inplace=True)
+        summary = summary.groupby(group_by_column_names).sum()
+
+        if trace_results is not None:
+            # trace_rows index values should match index of original df
+            trace_results.index = df[trace_rows].index
+
+    return summary, trace_results
+
+
+def eval_and_sum(assignment_expressions, df, locals_dict, df_alias=None,
+                 chunk_size=0, trace_rows=None):
+
+    summary = trace_results = trace_rows_chunk = None
+    chunks = 0
+
+    for i, df_chunk, trace_rows_chunk in chunked_df(df, trace_rows, chunk_size):
+
+        chunks += 1
+
+        # print "eval_and_sum chunk %s i: %s" % (chunks, i)
+
+        assigned_chunk, trace_chunk = assign_variables(assignment_expressions,
+                                                       df_chunk,
+                                                       locals_dict=locals_dict,
+                                                       df_alias=df_alias,
+                                                       trace_rows=trace_rows_chunk)
+
+        # sum this chunk
+        chunk_summary = assigned_chunk.sum()
+
+        # accumulate chunk_summaries in df
+        if summary is None:
+            summary = chunk_summary
+        else:
+            summary = pd.concat([summary, chunk_summary], axis=0)
+
+        if trace_results is None:
+            trace_results = trace_chunk
+        else:
+            trace_results = pd.concat([trace_results, trace_chunk], axis=0)
+
+    if chunks > 1:
+        # squash the accumulated chunk summaries by reapplying group and sum
+        summary = summary.sum()
+
+        # trace_rows index values should match index of original df
+        trace_results.index = df[trace_rows].index
+
+    return summary, trace_results
+
+
+def scalar_assign_variables(assignment_expressions, locals_dict):
+    """
+    Evaluate a set of variable expressions from a spec in the context
+    of a given data table.
+
+    Python expressions are evaluated in the context of this function using
+    Python's eval function.
+    Users should take care that these expressions must result in
+    a scalar
+
+    Parameters
+    ----------
+    exprs : sequence of str
+    locals_dict : Dict
+        This is a dictionary of local variables that will be the environment
+        for an evaluation of an expression that begins with @
 
     Returns
     -------
@@ -157,16 +429,8 @@ def assign_variables(assignment_expressions, df, locals_d):
 
     """
 
-    def to_series(x, target=None):
-        if np.isscalar(x):
-            if target:
-                print "WARNING: assign_variables promoting scalar %s to series" % target
-            return pd.Series([x] * len(df), index=df.index)
-        return x
-
     # avoid trashing parameter when we add target
-    locals_d = locals_d.copy() if locals_d is not None else {}
-    locals_d['df'] = df
+    locals_dict = locals_dict.copy() if locals_dict is not None else {}
 
     l = []
     # need to be able to identify which variables causes an error, which keeps
@@ -174,20 +438,30 @@ def assign_variables(assignment_expressions, df, locals_d):
     for e in zip(assignment_expressions.target, assignment_expressions.expression):
         target = e[0]
         expression = e[1]
+
+        # print "\n%s = %s" % (target, expression)
+
         try:
-            values = to_series(eval(expression, globals(), locals_d), target=target)
-            l.append((target, values))
+            if expression.startswith('@'):
+                expression = expression[1:]
+
+            value = eval(expression, globals(), locals_dict)
+
+            # print "\n%s = %s" % (target, value)
+
+            l.append((target, [value]))
 
             # FIXME - do we want to update locals to allows us to ref previously assigned targets?
-            locals_d[target] = values
+            locals_dict[target] = value
         except Exception as err:
-            print "Variable %s expression failed for: %s" % (str(target), str(expression))
+            logger.error("assign_variables failed target: %s expression: %s"
+                         % (str(target), str(expression)))
             raise err
 
     # since we allow targets to be recycled, we want to only keep the last usage
     keepers = []
     for statement in reversed(l):
-        # don't keep targets that start with underscore
+        # don't keep targets that staert with underscore
         if statement[0].startswith('_'):
             continue
         # add statement to keepers list unless target is already in list
@@ -195,16 +469,3 @@ def assign_variables(assignment_expressions, df, locals_d):
             keepers.append(statement)
 
     return pd.DataFrame.from_items(keepers)
-
-
-def assign_variables_locals(settings, settings_locals=None):
-    # locals whose values will be accessible to the execution context
-    # when the expressions in spec are applied to choosers
-    locals_d = {
-        'settings': settings,
-        'log': np.log
-    }
-    locals_d.update(settings['locals'])
-    if settings_locals and settings_locals in settings:
-        locals_d.update(settings[settings_locals])
-    return locals_d

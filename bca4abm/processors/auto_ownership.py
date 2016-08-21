@@ -3,7 +3,9 @@ import orca
 import pandas as pd
 
 from bca4abm import bca4abm as bca
-from ..util.misc import add_grouped_results
+from ..util.misc import add_result_columns, add_summary_results
+
+from bca4abm import tracing
 
 """
 auto ownership processor
@@ -17,27 +19,48 @@ def auto_ownership_spec(configs_dir):
 
 
 @orca.step()
-def auto_ownership_processor(persons_merged, auto_ownership_spec, settings):
+def auto_ownership_processor(persons_merged,
+                             auto_ownership_spec,
+                             settings,
+                             coc_column_names,
+                             chunk_size,
+                             trace_hh_id):
 
-    print "---------- auto_ownership_processor"
+    """
+    Compute auto ownership benefits
+    """
 
     persons_df = persons_merged.to_frame()
 
-    locals_d = bca.assign_variables_locals(settings, settings_locals='locals_auto_ownership')
-    locals_d['persons'] = persons_df
+    tracing.info(__name__,
+                 "Running auto_ownership_processor with %d persons (chunk size = %s)"
+                 % (len(persons_df), chunk_size))
 
-    assigned_columns = bca.assign_variables(assignment_expressions=auto_ownership_spec,
-                                            df=persons_df,
-                                            locals_d=locals_d)
+    locals_dict = bca.assign_variables_locals(settings, 'locals_auto_ownership')
 
-    # add assigned columns to local persons_df df
-    persons_df = pd.concat([persons_df, assigned_columns], axis=1)
+    trace_rows = trace_hh_id and persons_df['hh_id'] == trace_hh_id
 
-    add_grouped_results(persons_df, assigned_columns.columns,
-                        prefix='AO_', spec=auto_ownership_spec)
+    coc_summary, trace_results = bca.eval_group_and_sum(assignment_expressions=auto_ownership_spec,
+                                                        df=persons_df,
+                                                        locals_dict=locals_dict,
+                                                        df_alias='persons',
+                                                        group_by_column_names=coc_column_names,
+                                                        chunk_size=chunk_size,
+                                                        trace_rows=trace_rows)
 
-    if settings.get("dump", False) and settings.get("dump_auto_ownership", True):
-        output_dir = orca.eval_variable('output_dir')
-        csv_file_name = os.path.join(output_dir, 'auto_ownership.csv')
-        persons_df = persons_df[['hh_id', 'person_idx'] + list(assigned_columns.columns)]
-        persons_df.to_csv(csv_file_name, index=False)
+    result_prefix = 'AO_'
+    add_result_columns("coc_results", coc_summary, result_prefix)
+    add_summary_results(coc_summary, prefix=result_prefix, spec=auto_ownership_spec)
+
+    if trace_hh_id:
+
+        if trace_results is not None:
+
+            # add persons_df columns to trace_results
+            df = pd.concat([persons_df[trace_rows], trace_results], axis=1)
+            tracing.write_csv(df,
+                              file_name="auto_ownership_processor",
+                              index_label='person_id',
+                              columns=None,
+                              column_labels=['label', 'person'],
+                              transpose=True)

@@ -80,8 +80,10 @@ def add_grouped_results(df, summary_column_names, prefix='', spec=None):
                            " - did you forget to run demographics_processor?")
 
     grouped = df.groupby(coc_columns)
+
     aggregations = {column: 'sum' for column in summary_column_names}
     grouped = grouped.agg(aggregations)
+
     add_result_columns("coc_results", grouped, prefix)
 
     add_summary_results(grouped, prefix=prefix, spec=spec)

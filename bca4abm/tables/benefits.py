@@ -17,6 +17,11 @@ def coc_results():
 @orca.injectable()
 def coc_column_names(coc_results):
     column_names = coc_results.index.names
+
+    if column_names == [None]:
+        raise RuntimeError("coc_column_names not initialized"
+                           " - did you forget to run demographics_processor?")
+
     return column_names
 
 

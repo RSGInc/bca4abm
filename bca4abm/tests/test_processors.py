@@ -159,3 +159,22 @@ def test_physical_activity_processor():
                                 -37374708.6247, decimal=2)
         npt.assert_almost_equal(hdf['coc_results'].PA_benefit_risk_reduction.sum(),
                                 -37374708.6247, decimal=2)
+
+
+def test_chunked_person_trips_processor():
+
+    settings = orca.get_injectable("settings")
+
+    settings['chunk_size'] = 5
+    orca.add_injectable("settings", settings)
+
+    orca.run(["initialize_stores"])
+    orca.run(["demographics_processor"])
+    orca.run(["person_trips_processor"])
+    orca.run(['write_results'])
+
+    with orca.eval_variable('output_store_for_read') as hdf:
+        assert '/summary_results' in hdf.keys()
+        assert '/coc_results' in hdf.keys()
+        npt.assert_almost_equal(hdf['summary_results'].PT_total[0], 139004775.0)
+        npt.assert_almost_equal(hdf['coc_results'].PT_total.sum(), 139004775.0)

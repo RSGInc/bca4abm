@@ -7,6 +7,9 @@ import openmatrix as omx
 from bca4abm import bca4abm as bca
 from ..util.misc import missing_columns, add_result_columns, add_summary_results
 
+from bca4abm import tracing
+
+
 """
 Aggregate trips processor
 """
@@ -51,84 +54,16 @@ def get_omx_matrix(matrix_dir, omx_file_name, omx_key, close_after_read=True):
     return matrix
 
 
-def scalar_assign_variables(assignment_expressions, locals_d):
-    """
-    Evaluate a set of variable expressions from a spec in the context
-    of a given data table.
-
-    Python expressions are evaluated in the context of this function using
-    Python's eval function.
-    Users should take care that these expressions must result in
-    a scalar
-
-    Parameters
-    ----------
-    exprs : sequence of str
-    locals_d : Dict
-        This is a dictionary of local variables that will be the environment
-        for an evaluation of an expression that begins with @
-
-    Returns
-    -------
-    variables : pandas.DataFrame
-        Will have the index of `df` and columns of `exprs`.
-
-    """
-
-    # avoid trashing parameter when we add target
-    locals_d = locals_d.copy() if locals_d is not None else {}
-
-    l = []
-    # need to be able to identify which variables causes an error, which keeps
-    # this from being expressed more parsimoniously
-    for e in zip(assignment_expressions.target, assignment_expressions.expression):
-        target = e[0]
-        expression = e[1]
-
-        # print "\n%s = %s" % (target, expression)
-
-        try:
-            if expression.startswith('@'):
-                expression = expression[1:]
-
-            value = eval(expression, globals(), locals_d)
-
-            # print "\n%s = %s" % (target, value)
-
-            l.append((target, [value]))
-
-            # FIXME - do we want to update locals to allows us to ref previously assigned targets?
-            locals_d[target] = value
-        except Exception as err:
-            print "Variable %s expression failed for: %s" % (str(target), str(expression))
-            raise err
-
-    # since we allow targets to be recycled, we want to only keep the last usage
-    keepers = []
-    for statement in reversed(l):
-        # don't keep targets that staert with underscore
-        if statement[0].startswith('_'):
-            continue
-        # add statement to keepers list unless target is already in list
-        if not next((True for keeper in keepers if keeper[0] == statement[0]), False):
-            keepers.append(statement)
-
-    return pd.DataFrame.from_items(keepers)
-
-
 @orca.step()
 def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, settings, data_dir):
 
-    print "---------- aggregate_trips_processor"
-
-    # print aggregate_trips_manifest
+    tracing.info(__name__,
+                 "Running aggregate_trips_processor")
 
     assert not missing_columns(aggregate_trips_manifest,
                                settings['aggregate_data_manifest_column_map'].values())
 
-    locals_d = settings['locals']
-    if 'locals_aggregate_trips' in settings:
-        locals_d.update(settings['locals_aggregate_trips'])
+    locals_dict = bca.assign_variables_locals(settings, 'locals_aggregate_trips')
 
     results = None
     for row in aggregate_trips_manifest.itertuples(index=True):
@@ -136,24 +71,31 @@ def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, se
         # print "   %s" % row.description
 
         matrix_dir = os.path.join(data_dir, "base-data")
-        locals_d['base_trips'] = get_omx_matrix(matrix_dir, row.trip_file_name, row.trip_table_name)
-        locals_d['base_ivt'] = get_omx_matrix(matrix_dir, row.ivt_file_name, row.ivt_table_name)
-        locals_d['base_aoc'] = get_omx_matrix(matrix_dir, row.aoc_file_name, row.aoc_table_name)
-        locals_d['base_toll'] = get_omx_matrix(matrix_dir, row.toll_file_name, row.toll_table_name)
+        locals_dict['base_trips'] = \
+            get_omx_matrix(matrix_dir, row.trip_file_name, row.trip_table_name)
+        locals_dict['base_ivt'] = \
+            get_omx_matrix(matrix_dir, row.ivt_file_name, row.ivt_table_name)
+        locals_dict['base_aoc'] = \
+            get_omx_matrix(matrix_dir, row.aoc_file_name, row.aoc_table_name)
+        locals_dict['base_toll'] = \
+            get_omx_matrix(matrix_dir, row.toll_file_name, row.toll_table_name)
 
         matrix_dir = os.path.join(data_dir, "build-data")
-        locals_d['build_trips'] = get_omx_matrix(matrix_dir, row.trip_file_name,
-                                                 row.trip_table_name)
-        locals_d['build_ivt'] = get_omx_matrix(matrix_dir, row.ivt_file_name, row.ivt_table_name)
-        locals_d['build_aoc'] = get_omx_matrix(matrix_dir, row.aoc_file_name, row.aoc_table_name)
-        locals_d['build_toll'] = get_omx_matrix(matrix_dir, row.toll_file_name, row.toll_table_name)
+        locals_dict['build_trips'] = \
+            get_omx_matrix(matrix_dir, row.trip_file_name, row.trip_table_name)
+        locals_dict['build_ivt'] = \
+            get_omx_matrix(matrix_dir, row.ivt_file_name, row.ivt_table_name)
+        locals_dict['build_aoc'] = \
+            get_omx_matrix(matrix_dir, row.aoc_file_name, row.aoc_table_name)
+        locals_dict['build_toll'] = \
+            get_omx_matrix(matrix_dir, row.toll_file_name, row.toll_table_name)
 
-        locals_d['aoc_units'] = row.aoc_units
-        locals_d['toll_units'] = row.toll_units
-        locals_d['vot'] = row.vot
+        locals_dict['aoc_units'] = row.aoc_units
+        locals_dict['toll_units'] = row.toll_units
+        locals_dict['vot'] = row.vot
 
-        row_results = scalar_assign_variables(assignment_expressions=aggregate_trips_spec,
-                                              locals_d=locals_d)
+        row_results = bca.scalar_assign_variables(assignment_expressions=aggregate_trips_spec,
+                                                  locals_dict=locals_dict)
 
         assigned_column_names = row_results.columns.values
         row_results.insert(loc=0, column='description', value=row.description)

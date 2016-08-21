@@ -33,12 +33,12 @@ def physical_activity_processor(trips_with_demographics,
 
     trips_df = trips_with_demographics.to_frame()
 
-    locals_d = bca.assign_variables_locals(settings, settings_locals='locals_physical_activity')
-    locals_d['trips'] = trips_df
+    locals_dict = bca.assign_variables_locals(settings, 'locals_physical_activity')
+    locals_dict['trips'] = trips_df
 
-    assigned_columns = bca.assign_variables(assignment_expressions=physical_activity_trip_spec,
-                                            df=trips_df,
-                                            locals_d=locals_d)
+    assigned_columns, trace_results = bca.assign_variables(physical_activity_trip_spec,
+                                                           df=trips_df,
+                                                           locals_dict=locals_dict)
 
     # add assigned columns to local trips df
     trips_df = pd.concat([trips_df, assigned_columns], axis=1)
@@ -55,12 +55,12 @@ def physical_activity_processor(trips_with_demographics,
     persons_df = pd.merge(persons_df, persons_activity_df, on=['hh_id', 'person_idx'])
 
     # eval physical_activity_person_spec in context of merged trips_with_demographics
-    locals_d = {'settings': settings, 'persons': persons_df}
+    locals_dict = {'settings': settings, 'persons': persons_df}
     if 'locals_physical_activity' in settings:
-        locals_d.update(settings['locals_physical_activity'])
-    assigned_columns = bca.assign_variables(assignment_expressions=physical_activity_person_spec,
-                                            df=persons_df,
-                                            locals_d=locals_d)
+        locals_dict.update(settings['locals_physical_activity'])
+    assigned_columns, trace_results = bca.assign_variables(physical_activity_person_spec,
+                                                           df=persons_df,
+                                                           locals_dict=locals_dict)
 
     # merge aggregated assigned_columns to local persons_df
     persons_df = pd.concat([persons_df, assigned_columns], axis=1)
