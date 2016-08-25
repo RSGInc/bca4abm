@@ -56,9 +56,7 @@ def auto_ownership_processor(persons_merged,
 
         if trace_results is not None:
 
-            # add persons_df columns to trace_results
-            df = pd.concat([persons_df[trace_rows], trace_results], axis=1)
-            tracing.write_csv(df,
+            tracing.write_csv(trace_results,
                               file_name="auto_ownership_processor",
                               index_label='person_id',
                               columns=None,

@@ -264,6 +264,9 @@ def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, tra
     if trace_results is not None:
         trace_results = undupe_column_names(pd.DataFrame.from_items(trace_results))
 
+        # add df columns to trace_results
+        trace_results = pd.concat([df[trace_rows], trace_results], axis=1)
+
     return variables, trace_results
 
 
@@ -281,7 +284,8 @@ def assign_variables_locals(settings, locals_tag=None):
     return locals_dict
 
 
-def chunked_df(df, trace_rows, chunk_size):
+# generator for chunked iteration over dataframe by chunk_size
+def size_chunked_df(df, trace_rows, chunk_size):
     # generator to iterate over chooses in chunk_size chunks
     if chunk_size == 0:
         yield 0, df, trace_rows
@@ -296,37 +300,42 @@ def chunked_df(df, trace_rows, chunk_size):
             i += chunk_size
 
 
-# FIXME - need this for chunking physical activity processor
-# def hh_chunked_choosers(df, trace_rows):
-#     # generator to iterate over chooses in chunk_size chunks
-#     last_chooser = df['chunk_id'].max()
-#     i = 0
-#     while i <= last_chooser:
-#         chunk_me = (df['chunk_id'] == i)
-#         if trace_rows is not None:
-#             yield i, df[chunk_me]
-#         else:
-#             yield i, df[chunk_me], trace_rows[chunk_me]
-#         i += 1
+# generator for chunked iteration over dataframe by chunk_id
+def id_chunked_df(df, trace_rows, chunk_id_col):
+    # generator to iterate over chooses in chunk_size chunks
+    last_chooser = df[chunk_id_col].max()
+    i = 0
+    while i <= last_chooser:
+        chunk_me = (df[chunk_id_col] == i)
+        if trace_rows is None:
+            yield i, df[chunk_me], None
+        else:
+            yield i, df[chunk_me], trace_rows[chunk_me]
+        i += 1
+
+
+# return the appropriate generator for iterating over dataframe by either chunk_size or chunk_id
+def chunked_df(df, trace_rows, chunk_size=None, chunk_id_col='chunk_id'):
+    if chunk_size is None:
+        return id_chunked_df(df, trace_rows, chunk_id_col)
+    else:
+        return size_chunked_df(df, trace_rows, chunk_size)
 
 
 def eval_group_and_sum(assignment_expressions, df, locals_dict, group_by_column_names,
                        df_alias=None, chunk_size=0, trace_rows=None):
 
     if group_by_column_names == [None]:
-        raise RuntimeError("calculate_benefits: group_by_column_names not initialized")
+        raise RuntimeError("eval_group_and_sum: group_by_column_names not initialized")
 
-    summary = trace_results = trace_rows_chunk = None
+    summary = trace_results = None
     chunks = 0
 
-    for i, df_chunk, trace_rows_chunk in chunked_df(df, trace_rows_chunk, chunk_size):
+    for i, df_chunk, trace_rows_chunk in chunked_df(df, trace_rows, chunk_size):
 
         chunks += 1
 
         # print "eval_and_sum chunk %s i: %s" % (chunks, i)
-
-        if trace_rows is not None:
-            trace_rows_chunk = trace_rows[i: i+chunk_size]
 
         assigned_chunk, trace_chunk = assign_variables(assignment_expressions,
                                                        df_chunk,
