@@ -57,11 +57,11 @@ def person_trips_processor(trips_with_demographics,
 
         if trace_results is not None:
 
+            # FIXME - moved this into assign_variables
             # add trips_df columns to trace_results
-            df = pd.concat([trips_df[trace_rows], trace_results], axis=1)
-            tracing.write_csv(df,
+            # trace_results = pd.concat([trips_df[trace_rows], trace_results], axis=1)
+
+            tracing.write_csv(trace_results,
                               file_name="person_trips_processor",
                               index_label='trip_id',
-                              columns=None,
-                              column_labels=['label', 'trip'],
-                              transpose=True)
+                              column_labels=['label', 'trip'])

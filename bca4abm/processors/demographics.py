@@ -63,11 +63,7 @@ def demographics_processor(persons_merged, demographics_spec, settings,
 
         if trace_results is not None:
 
-            # add trips_df columns to trace_results
-            df = pd.concat([persons_df[trace_rows], trace_results], axis=1)
-            tracing.write_csv(df,
+            tracing.write_csv(trace_results,
                               file_name="demographics_processor",
                               index_label='person_idx',
-                              columns=None,
-                              column_labels=['label', 'person'],
-                              transpose=True)
+                              column_labels=['label', 'person'])

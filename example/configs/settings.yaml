@@ -1,15 +1,13 @@
 dump: True
 #dump_aggregate_trips: True
-#dump_auto_ownership: True
-#dump_demographics: True
 #dump_link: True
 #dump_link_daily: True
-#dump_physical_activity: True
 
 # trace household id; comment out for no trace
 trace_hh_id: 60
 
-chunk_size: 5
+chunk_size: 10
+hh_chunk_size: 5
 
 scenario_year: sample
 
