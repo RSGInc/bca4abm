@@ -64,6 +64,4 @@ def person_trips_processor(trips_with_demographics,
             tracing.write_csv(trace_results,
                               file_name="person_trips_processor",
                               index_label='trip_id',
-                              columns=None,
-                              column_labels=['label', 'trip'],
-                              transpose=True)
+                              column_labels=['label', 'trip'])

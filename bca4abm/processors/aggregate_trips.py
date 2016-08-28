@@ -57,6 +57,17 @@ def get_omx_matrix(matrix_dir, omx_file_name, omx_key, close_after_read=True):
 @orca.step()
 def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, settings, data_dir):
 
+    """
+    Compute aggregate trips benefits
+
+    The data manifest contains a list of trip count files (one for base, one for build)
+    along with their their corresponding in-vehicle-time (ivt), operating cost (aoc),
+    and toll skims.
+
+    Since the skims are all aligned numpy arrays , we can express their benefit calculation as
+    vector computations in the aggregate_trips_spec
+    """
+
     tracing.info(__name__,
                  "Running aggregate_trips_processor")
 
@@ -67,8 +78,6 @@ def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, se
 
     results = None
     for row in aggregate_trips_manifest.itertuples(index=True):
-
-        # print "   %s" % row.description
 
         matrix_dir = os.path.join(data_dir, "base-data")
         locals_dict['base_trips'] = \
@@ -107,8 +116,6 @@ def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, se
             results = results.append(row_results, ignore_index=True)
 
     results.reset_index(inplace=True)
-
-    # print "\nassigned_column_names\n", assigned_column_names
 
     add_summary_results(results, summary_column_names=assigned_column_names,
                         prefix='AT_', spec=aggregate_trips_spec)

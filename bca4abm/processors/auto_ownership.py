@@ -59,6 +59,4 @@ def auto_ownership_processor(persons_merged,
             tracing.write_csv(trace_results,
                               file_name="auto_ownership_processor",
                               index_label='person_id',
-                              columns=None,
-                              column_labels=['label', 'person'],
-                              transpose=True)
+                              column_labels=['label', 'person'])

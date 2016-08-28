@@ -66,6 +66,4 @@ def demographics_processor(persons_merged, demographics_spec, settings,
             tracing.write_csv(trace_results,
                               file_name="demographics_processor",
                               index_label='person_idx',
-                              columns=None,
-                              column_labels=['label', 'person'],
-                              transpose=True)
+                              column_labels=['label', 'person'])
