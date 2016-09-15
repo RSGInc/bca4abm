@@ -52,8 +52,16 @@ def demographics_processor(persons_merged, demographics_spec, settings,
     # for now, assume all assigned columns are coc, but this could cramp modelers style
     # if they want to create additional demographic columns for downstream use that aren't coc
     coc_columns = list(results.columns)
+
+    # create table with coc columns as indexes and a single column 'persons' with counts
+    # index                        persons
+    # coc_poverty coc_age
+    # False       False            20
+    #             True              3
+    # True        False             4
     coc_grouped = results.groupby(coc_columns)
     coc_grouped = coc_grouped[coc_columns[0]].agg({'persons': 'count'})
+
     orca.add_table('coc_results', pd.DataFrame(index=coc_grouped.index))
     add_result_columns('coc_results', coc_grouped)
 

@@ -25,7 +25,7 @@ def test_bad_custom_config_file(capsys):
     output_dir = os.path.join(os.path.dirname(__file__), 'output')
     orca.add_injectable("output_dir", output_dir)
 
-    custom_config_file = os.path.join(os.path.dirname(__file__), 'data', 'xlogging.yaml')
+    custom_config_file = os.path.join(os.path.dirname(__file__), 'configs', 'xlogging.yaml')
     tracing.config_logger(custom_config_file=custom_config_file)
 
     logger = logging.getLogger('bca4abm')

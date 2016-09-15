@@ -198,10 +198,16 @@ def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, tra
         a dataframe containing the eval result values for each assignment expression
     """
 
+    def is_local(target):
+        return target.startswith('_') and target.isupper()
+
+    def is_temp(target):
+        return target.startswith('_')
+
     def to_series(x, target=None):
         if x is None or np.isscalar(x):
             if target:
-                logger.warning("WARNING: assign_variables promoting scalar %s to series" % target)
+                logger.warn("WARNING: assign_variables promoting scalar %s to series" % target)
             return pd.Series([x] * len(df.index), index=df.index)
         return x
 
@@ -221,6 +227,7 @@ def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, tra
     local_keys = locals_dict.keys()
 
     l = []
+    assigned_locals = {}
     # need to be able to identify which variables causes an error, which keeps
     # this from being expressed more parsimoniously
     for e in zip(assignment_expressions.target, assignment_expressions.expression):
@@ -228,6 +235,16 @@ def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, tra
 
         if target in local_keys:
             logger.warn("assign_variables target obscures local_d name '%s'" % str(target))
+
+        if is_local(target):
+            x = eval(expression, globals(), locals_dict)
+            if not np.isscalar(x):
+                logger.warn("WARNING: assign_variables local %s is type %s (not scalar)" % (target, type(x)))
+
+            locals_dict[target] = x
+            assigned_locals[target] = x
+            print "assigning local %s = %s" % (target, x)
+            continue
 
         try:
             values = to_series(eval(expression, globals(), locals_dict), target=target)
@@ -254,7 +271,7 @@ def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, tra
     for statement in reversed(l):
         # statement is a tuple (<target_name>, <eval results in pandas.Series>)
         target_name = statement[0]
-        if not target_name.startswith('_') and target_name not in seen:
+        if not is_temp(target_name) and target_name not in seen:
             variables.insert(0, statement)
             seen.add(target_name)
 

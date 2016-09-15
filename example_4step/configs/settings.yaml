@@ -1,0 +1,11 @@
+provenance: example_4step.configs
+
+dump: True
+
+zone_demographics: mf.cval.csv
+zone_demographics_subdir: base-data
+
+
+coc_columns:
+  - coc_poverty
+  - coc_age

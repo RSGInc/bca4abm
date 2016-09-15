@@ -22,11 +22,16 @@ from bca4abm import bca4abm as bca
 
 from bca4abm.util.misc import expect_columns, missing_columns, extra_columns, get_setting
 
-parent_dir = os.path.dirname(__file__)
-orca.add_injectable("configs_dir", os.path.join(parent_dir, 'configs'))
-orca.add_injectable("data_dir", os.path.join(parent_dir, 'data'))
-orca.add_injectable("output_dir", os.path.join(parent_dir, 'output'))
 
+@pytest.fixture(scope="module", autouse=True)
+def inject_default_directories(request):
+
+    parent_dir = os.path.dirname(__file__)
+    orca.add_injectable("configs_dir", os.path.join(parent_dir, 'configs'))
+    orca.add_injectable("data_dir", os.path.join(parent_dir, 'data'))
+    orca.add_injectable("output_dir", os.path.join(parent_dir, 'output'))
+
+    request.addfinalizer(orca.clear_cache)
 
 def test_initialize():
 

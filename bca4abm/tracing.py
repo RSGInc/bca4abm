@@ -24,6 +24,18 @@ LOGGING_CONF_FILE_NAME = 'logging.yaml'
 tracers = {}
 
 
+import traceback
+
+def print_stack_trace():
+
+    try:
+        raise RuntimeError("print_stack_trace")
+    except RuntimeError, err:
+        print "---------------------------------------------------------------------------BEGIN"
+        print(traceback.format_exc())
+        print "---------------------------------------------------------------------------END"
+
+
 def delete_csv_files(output_dir):
     """
     Delete CSV files

@@ -22,6 +22,26 @@ from bca4abm import bca4abm as bca
 from bca4abm.util.misc import expect_columns, missing_columns, extra_columns, get_setting
 
 
+@pytest.fixture(scope="module", autouse=True)
+def inject_default_directories(request):
+
+    parent_dir = os.path.dirname(__file__)
+    orca.add_injectable("configs_dir", os.path.join(parent_dir, 'configs'))
+    orca.add_injectable("data_dir", os.path.join(parent_dir, 'data'))
+    orca.add_injectable("output_dir", os.path.join(parent_dir, 'output'))
+
+    request.addfinalizer(orca.clear_cache)
+
+
+def test_read_settings():
+
+    settings = orca.eval_variable('settings')
+
+    assert settings.get('provenance') == 'tests.configs'
+    assert settings.get('test_setting') == 'ping'
+    assert settings.get('missing_setting') is None
+
+
 def test_misc():
 
     # expect all of and only the columns specified by persons_column_map values
@@ -34,7 +54,8 @@ def test_misc():
     with pytest.raises(Exception):
         expect_columns(df, ['A', 'B', 'C'])
 
-    assert get_setting('scenario_year') == 'sample'
+    assert get_setting('test_setting') == 'ping'
+    assert get_setting("missing_setting") is None
 
 
 def test_defaults():
@@ -44,13 +65,6 @@ def test_defaults():
                               settings={}) == 'bca_results.h5'
     assert orca.eval_variable('output_store_file_name',
                               settings={'output_store': 'zorg.h5'}) == 'zorg.h5'
-
-
-def test_read_settings():
-
-    settings = orca.eval_variable('settings')
-    assert settings.get('persons') == 'persons.csv'
-    assert settings.get('store')is None
 
 
 def test_read_csv_table():
