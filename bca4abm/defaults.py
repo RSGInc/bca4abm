@@ -51,13 +51,6 @@ def hh_chunk_size(settings):
 def settings(configs_dir, settings_file_name):
 
     settings_file_path = os.path.join(configs_dir, settings_file_name)
-
-    # tracing.print_stack_trace()
-    #
-    #
-    # print "reading settings from (%s) (%s) %s" % (configs_dir, settings_file_name, settings_file_path,)
-
-
     with open(settings_file_path) as f:
         return yaml.load(f)
 

@@ -39,18 +39,8 @@ def test_settings():
     assert settings.get('provenance') == 'tests.4step.configs'
 
 
-# def test_read_zone_demographics_table():
-#
-#     settings = orca.eval_variable('settings')
-#
-#     assert settings.get('zone_demographics') == 'zone_demographics.csv'
-#     assert orca.eval_variable('input_source') == 'read_from_csv'
-#
-#     # expect all of and only the columns specified by persons_column_map values
-#     zones = orca.get_table('zone_demographics').to_frame()
-#     # assert expect_columns(persons,
-#     #                       settings['persons_column_map'].values())
-#
-#     assert zones.shape[0] == 25
+def test_read_zone_demographics_table():
 
+    zones = orca.get_table('zone_demographics').to_frame()
 
+    assert zones.shape[0] == 25

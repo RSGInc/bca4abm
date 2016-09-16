@@ -40,13 +40,14 @@ def auto_ownership_processor(persons_merged,
 
     trace_rows = trace_hh_id and persons_df['hh_id'] == trace_hh_id
 
-    coc_summary, trace_results = bca.eval_group_and_sum(assignment_expressions=auto_ownership_spec,
-                                                        df=persons_df,
-                                                        locals_dict=locals_dict,
-                                                        df_alias='persons',
-                                                        group_by_column_names=coc_column_names,
-                                                        chunk_size=chunk_size,
-                                                        trace_rows=trace_rows)
+    coc_summary, trace_results, trace_assigned_locals = \
+        bca.eval_group_and_sum(assignment_expressions=auto_ownership_spec,
+                               df=persons_df,
+                               locals_dict=locals_dict,
+                               df_alias='persons',
+                               group_by_column_names=coc_column_names,
+                               chunk_size=chunk_size,
+                               trace_rows=trace_rows)
 
     result_prefix = 'AO_'
     add_result_columns("coc_results", coc_summary, result_prefix)
@@ -60,3 +61,8 @@ def auto_ownership_processor(persons_merged,
                               file_name="auto_ownership_processor",
                               index_label='person_id',
                               column_labels=['label', 'person'])
+
+        if trace_assigned_locals is not None:
+
+            tracing.write_locals(trace_assigned_locals,
+                                 file_name="auto_ownership_processor_locals")

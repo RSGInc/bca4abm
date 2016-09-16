@@ -2,9 +2,10 @@ provenance: example_4step.configs
 
 dump: True
 
+trace_od: [5, 11]
+
 zone_demographics: mf.cval.csv
 zone_demographics_subdir: base-data
-
 
 coc_columns:
   - coc_poverty

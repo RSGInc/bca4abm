@@ -1,7 +1,7 @@
 Target,Expression
 _POVERTY_COLUMNS,zones.columns.map(lambda x: 'i1' in x)
 _AGE_COLUMNS,zones.columns.map(lambda x: 'a4' in x)
-_POVERTY_AGE_COLUMNS,list(set(_POVERTY_COLUMNS) & set(_AGE_COLUMNS))
+_POVERTY_AGE_COLUMNS,"np.logical_and(_POVERTY_COLUMNS, _AGE_COLUMNS)"
 #
 _coc_poverty,"zones.loc[:,_POVERTY_COLUMNS].sum(axis=1)"
 _coc_age,"zones.loc[:,_AGE_COLUMNS].sum(axis=1)"

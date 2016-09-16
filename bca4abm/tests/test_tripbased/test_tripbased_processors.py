@@ -33,6 +33,7 @@ def inject_default_directories(request):
 
     request.addfinalizer(orca.clear_cache)
 
+
 def test_initialize():
 
     orca.run(["initialize_stores"])

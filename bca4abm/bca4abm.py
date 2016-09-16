@@ -8,9 +8,6 @@ import numpy as np
 import pandas as pd
 import orca
 import os
-import yaml
-
-from .util.misc import expect_columns
 
 
 logger = logging.getLogger(__name__)
@@ -211,12 +208,13 @@ def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, tra
             return pd.Series([x] * len(df.index), index=df.index)
         return x
 
-    trace_results = None
+    trace_assigned_locals = trace_results = None
     if trace_rows is not None:
         # convert to numpy array so we can slice ndarrays as well as series
         trace_rows = np.asanyarray(trace_rows)
         if trace_rows.any():
             trace_results = []
+            trace_assigned_locals = {}
 
     # avoid touching caller's passed-in locals_d parameter (they may be looping)
     locals_dict = locals_dict.copy() if locals_dict is not None else {}
@@ -227,7 +225,6 @@ def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, tra
     local_keys = locals_dict.keys()
 
     l = []
-    assigned_locals = {}
     # need to be able to identify which variables causes an error, which keeps
     # this from being expressed more parsimoniously
     for e in zip(assignment_expressions.target, assignment_expressions.expression):
@@ -238,12 +235,9 @@ def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, tra
 
         if is_local(target):
             x = eval(expression, globals(), locals_dict)
-            if not np.isscalar(x):
-                logger.warn("WARNING: assign_variables local %s is type %s (not scalar)" % (target, type(x)))
-
             locals_dict[target] = x
-            assigned_locals[target] = x
-            print "assigning local %s = %s" % (target, x)
+            if trace_assigned_locals is not None:
+                trace_assigned_locals[target] = x
             continue
 
         try:
@@ -284,7 +278,7 @@ def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, tra
         # add df columns to trace_results
         trace_results = pd.concat([df[trace_rows], trace_results], axis=1)
 
-    return variables, trace_results
+    return variables, trace_results, trace_assigned_locals
 
 
 def assign_variables_locals(settings, locals_tag=None):
@@ -345,7 +339,7 @@ def eval_group_and_sum(assignment_expressions, df, locals_dict, group_by_column_
     if group_by_column_names == [None]:
         raise RuntimeError("eval_group_and_sum: group_by_column_names not initialized")
 
-    summary = trace_results = None
+    summary = trace_results = trace_assigned_locals = None
     chunks = 0
 
     for i, df_chunk, trace_rows_chunk in chunked_df(df, trace_rows, chunk_size):
@@ -354,11 +348,12 @@ def eval_group_and_sum(assignment_expressions, df, locals_dict, group_by_column_
 
         # print "eval_and_sum chunk %s i: %s" % (chunks, i)
 
-        assigned_chunk, trace_chunk = assign_variables(assignment_expressions,
-                                                       df_chunk,
-                                                       locals_dict=locals_dict,
-                                                       df_alias=df_alias,
-                                                       trace_rows=trace_rows_chunk)
+        assigned_chunk, trace_chunk, trace_assigned_locals_chunk = \
+            assign_variables(assignment_expressions,
+                             df_chunk,
+                             locals_dict=locals_dict,
+                             df_alias=df_alias,
+                             trace_rows=trace_rows_chunk)
 
         # concat in the group_by columns
         assigned_chunk = pd.concat([df_chunk[group_by_column_names], assigned_chunk], axis=1)
@@ -374,8 +369,13 @@ def eval_group_and_sum(assignment_expressions, df, locals_dict, group_by_column_
 
         if trace_results is None:
             trace_results = trace_chunk
-        else:
+        elif trace_chunk is not None:
             trace_results = pd.concat([trace_results, trace_chunk], axis=0)
+
+        if trace_assigned_locals is None:
+            trace_assigned_locals = trace_assigned_locals_chunk
+        elif trace_assigned_locals_chunk is not None:
+            trace_assigned_locals.update(trace_assigned_locals_chunk)
 
     if chunks > 1:
         # squash the accumulated chunk summaries by reapplying group and sum
@@ -386,13 +386,13 @@ def eval_group_and_sum(assignment_expressions, df, locals_dict, group_by_column_
             # trace_rows index values should match index of original df
             trace_results.index = df[trace_rows].index
 
-    return summary, trace_results
+    return summary, trace_results, trace_assigned_locals
 
 
 def eval_and_sum(assignment_expressions, df, locals_dict, df_alias=None,
                  chunk_size=0, trace_rows=None):
 
-    summary = trace_results = trace_rows_chunk = None
+    summary = trace_results = trace_assigned_locals = trace_rows_chunk = None
     chunks = 0
 
     for i, df_chunk, trace_rows_chunk in chunked_df(df, trace_rows, chunk_size):
@@ -401,11 +401,12 @@ def eval_and_sum(assignment_expressions, df, locals_dict, df_alias=None,
 
         # print "eval_and_sum chunk %s i: %s" % (chunks, i)
 
-        assigned_chunk, trace_chunk = assign_variables(assignment_expressions,
-                                                       df_chunk,
-                                                       locals_dict=locals_dict,
-                                                       df_alias=df_alias,
-                                                       trace_rows=trace_rows_chunk)
+        assigned_chunk, trace_chunk, trace_assigned_locals_chunk = \
+            assign_variables(assignment_expressions,
+                             df_chunk,
+                             locals_dict=locals_dict,
+                             df_alias=df_alias,
+                             trace_rows=trace_rows_chunk)
 
         # sum this chunk
         chunk_summary = assigned_chunk.sum()
@@ -418,8 +419,13 @@ def eval_and_sum(assignment_expressions, df, locals_dict, df_alias=None,
 
         if trace_results is None:
             trace_results = trace_chunk
-        else:
+        elif trace_chunk is not None:
             trace_results = pd.concat([trace_results, trace_chunk], axis=0)
+
+        if trace_assigned_locals is None:
+            trace_assigned_locals = trace_assigned_locals_chunk
+        elif trace_assigned_locals_chunk is not None:
+            trace_assigned_locals.update(trace_assigned_locals_chunk)
 
     if chunks > 1:
         # squash the accumulated chunk summaries by reapplying group and sum
@@ -428,7 +434,7 @@ def eval_and_sum(assignment_expressions, df, locals_dict, df_alias=None,
         # trace_rows index values should match index of original df
         trace_results.index = df[trace_rows].index
 
-    return summary, trace_results
+    return summary, trace_results, trace_assigned_locals
 
 
 def scalar_assign_variables(assignment_expressions, locals_dict):

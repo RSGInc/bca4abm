@@ -6,7 +6,7 @@ import openmatrix as omx
 
 
 from bca4abm import bca4abm as bca
-from ..util.misc import add_assigned_columns, missing_columns, add_result_columns, add_summary_results
+from ..util.misc import add_assigned_columns, add_result_columns, add_summary_results
 from bca4abm.util.misc import get_setting
 
 from bca4abm import tracing
@@ -24,9 +24,9 @@ def aggregate_demographics_spec(configs_dir):
     return bca.read_assignment_spec(f)
 
 
-
 @orca.step()
-def aggregate_demographics_processor(zone_demographics, aggregate_demographics_spec, settings):
+def aggregate_demographics_processor(zone_demographics, aggregate_demographics_spec,
+                                     settings, trace_od):
 
     print "---------- aggregate_demographics_processor"
 
@@ -36,23 +36,26 @@ def aggregate_demographics_processor(zone_demographics, aggregate_demographics_s
                  "Running aggregate_demographics_processor with %d zones"
                  % (len(zones_df), ))
 
+    if trace_od:
+        trace_orig, trace_dest = trace_od
+        trace_od_rows = (zones_df.index == trace_orig) | (zones_df.index == trace_dest)
+    else:
+        trace_od_rows = None
+
     # locals whose values will be accessible to the execution context
     # when the expressions in spec are applied to choosers
     locals_dict = bca.assign_variables_locals(settings, 'locals_demographics')
 
-
-    trace_rows =None
+    trace_rows = None
 
     # eval_variables evaluates each of the expressions in spec
     # in the context of each row in of the choosers dataframe
-    results, trace_results = bca.assign_variables(aggregate_demographics_spec,
-                                                  zones_df,
-                                                  locals_dict,
-                                                  df_alias='zones',
-                                                  trace_rows=trace_rows)
-
-    print "results:", results
-
+    results, trace_results, trace_assigned_locals = \
+        bca.assign_variables(aggregate_demographics_spec,
+                             zones_df,
+                             locals_dict,
+                             df_alias='zones',
+                             trace_rows=trace_od_rows)
 
     # add assigned columns to persons as they are needed by downstream processors
     add_assigned_columns("zone_demographics", results)
@@ -73,17 +76,19 @@ def aggregate_demographics_processor(zone_demographics, aggregate_demographics_s
         }
     )
 
-
     orca.add_table('coc_results', pd.DataFrame(index=coc_grouped.index))
     add_result_columns('coc_results', coc_grouped)
 
     add_summary_results(coc_grouped)
 
-    # if trace_hh_id:
-    #
-    #     if trace_results is not None:
-    #
-    #         tracing.write_csv(trace_results,
-    #                           file_name="demographics_processor",
-    #                           index_label='person_idx',
-    #                           column_labels=['label', 'person'])
+    if trace_results is not None:
+
+        tracing.write_csv(trace_results,
+                          file_name="aggregate_demographics_processor",
+                          index_label='zone',
+                          column_labels=['label', 'zone'])
+
+    if trace_assigned_locals is not None:
+
+        tracing.write_locals(trace_assigned_locals,
+                             file_name="aggregate_demographics_processor_locals")

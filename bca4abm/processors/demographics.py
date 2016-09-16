@@ -38,11 +38,12 @@ def demographics_processor(persons_merged, demographics_spec, settings,
 
     # eval_variables evaluates each of the expressions in spec
     # in the context of each row in of the choosers dataframe
-    results, trace_results = bca.assign_variables(demographics_spec,
-                                                  persons_df,
-                                                  locals_dict,
-                                                  df_alias='persons',
-                                                  trace_rows=trace_rows)
+    results, trace_results, trace_assigned_locals \
+        = bca.assign_variables(demographics_spec,
+                               persons_df,
+                               locals_dict,
+                               df_alias='persons',
+                               trace_rows=trace_rows)
 
     # add assigned columns to persons as they are needed by downstream processors
     add_assigned_columns("persons", results)
@@ -75,3 +76,8 @@ def demographics_processor(persons_merged, demographics_spec, settings,
                               file_name="demographics_processor",
                               index_label='person_idx',
                               column_labels=['label', 'person'])
+
+        if trace_assigned_locals is not None:
+
+            tracing.write_locals(trace_assigned_locals,
+                                 file_name="demographics_processor_locals")

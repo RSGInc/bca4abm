@@ -76,12 +76,13 @@ def eval_link_spec(link_spec, link_file_name, data_dir, link_file_column_map,
                                  file_name=link_file_name,
                                  column_map=link_file_column_map)
 
-        summary, trace_results = bca.eval_and_sum(link_spec,
-                                                  links_df,
-                                                  locals_dict,
-                                                  df_alias='links',
-                                                  chunk_size=0,
-                                                  trace_rows=None)
+        summary, trace_results, trace_assigned_locals = \
+            bca.eval_and_sum(link_spec,
+                             links_df,
+                             locals_dict,
+                             df_alias='links',
+                             chunk_size=0,
+                             trace_rows=None)
 
         results[scenario] = pd.DataFrame(data=summary).T
 

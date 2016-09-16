@@ -6,6 +6,8 @@ import os
 import sys
 import logging
 import logging.config
+import traceback
+
 
 import yaml
 
@@ -18,22 +20,16 @@ import orca
 TRACE_LOGGER = 'bca4abm.trace'
 BCA_LOGGER = 'bca4abm'
 CSV_FILE_TYPE = 'csv'
+TEXT_FILE_TYPE = 'txt'
 LOGGING_CONF_FILE_NAME = 'logging.yaml'
 
 # Tracers
 tracers = {}
 
 
-import traceback
-
 def print_stack_trace():
 
-    try:
-        raise RuntimeError("print_stack_trace")
-    except RuntimeError, err:
-        print "---------------------------------------------------------------------------BEGIN"
-        print(traceback.format_exc())
-        print "---------------------------------------------------------------------------END"
+    traceback.print_stack()
 
 
 def delete_csv_files(output_dir):
@@ -50,7 +46,7 @@ def delete_csv_files(output_dir):
     Nothing
     """
     for the_file in os.listdir(output_dir):
-        if the_file.endswith(CSV_FILE_TYPE):
+        if the_file.endswith(CSV_FILE_TYPE) or the_file.endswith(TEXT_FILE_TYPE):
             file_path = os.path.join(output_dir, the_file)
             try:
                 if os.path.isfile(file_path):
@@ -219,6 +215,21 @@ def config_logger(custom_config_file=None, basic=False):
     output_dir = orca.get_injectable('output_dir')
     logger.info("Deleting files in output_dir %s" % output_dir)
     delete_csv_files(output_dir)
+
+
+def write_locals(locals_dict, file_name):
+
+    file_name = '%s.%s' % (file_name, TEXT_FILE_TYPE)
+
+    file_path = log_file_path(file_name)
+
+    mode = 'a' if os.path.isfile(file_path) else 'w'
+
+    with open(file_path, mode=mode) as f:
+
+        for key, value in locals_dict.iteritems():
+            value = str(value)
+            f.write("%s = %s\n" % (key, value))
 
 
 def write_df_csv(df, file_path, index_label=None, columns=None, column_labels=None, transpose=True):

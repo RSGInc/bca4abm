@@ -20,7 +20,6 @@ import pytest
 # Also note that the following import statement has the side-effect of registering injectables:
 from bca4abm import bca4abm as bca
 
-from bca4abm.util.misc import expect_columns, missing_columns, extra_columns, get_setting
 
 @pytest.fixture(scope="module", autouse=True)
 def inject_default_directories(request):

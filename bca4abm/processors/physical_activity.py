@@ -75,7 +75,7 @@ def physical_activity_processor(trips_with_demographics,
         # slice persons_df for this chunk (chunk_id column merged in from households table)
         persons_chunk = persons_df[persons_df['chunk_id'] == chunk_id]
 
-        trip_activity, trip_trace_results = \
+        trip_activity, trip_trace_results, trip_trace_assigned_locals = \
             bca.assign_variables(physical_activity_trip_spec,
                                  trips_chunk,
                                  locals_dict=locals_dict,
@@ -90,6 +90,10 @@ def physical_activity_processor(trips_with_demographics,
                               index_label='trip_id',
                               column_labels=['label', 'trip'])
 
+        if trip_trace_assigned_locals is not None:
+            tracing.write_locals(trip_trace_assigned_locals,
+                                 file_name="physical_activity_processor_trips_locals")
+
         # sum trip activity for each unique person
         # concat the person_group_by_column_names columns into trip_activity
         trip_activity = pd.concat([trips_chunk[person_identity_columns], trip_activity], axis=1)
@@ -103,7 +107,7 @@ def physical_activity_processor(trips_with_demographics,
         # trace rows array for this chunk
         person_trace_rows = trace_hh_id and persons_chunk['hh_id'] == trace_hh_id
 
-        person_activity, person_trace_results = \
+        person_activity, person_trace_results, person_trace_assigned_locals = \
             bca.assign_variables(physical_activity_person_spec,
                                  persons_chunk,
                                  locals_dict=locals_dict,
@@ -117,6 +121,10 @@ def physical_activity_processor(trips_with_demographics,
                               file_name="physical_activity_processor_persons",
                               index_label='persons_merged_table_index',
                               column_labels=['label', 'person'])
+
+        if person_trace_assigned_locals is not None:
+            tracing.write_locals(person_trace_assigned_locals,
+                                 file_name="physical_activity_processor_persons_locals")
 
         # concat in the coc columns and summarize the chunk by coc
         person_activity = pd.concat([persons_chunk[coc_column_names], person_activity], axis=1)

@@ -44,7 +44,6 @@ def read_csv_file(data_dir, file_name, column_map=None):
 @orca.table(cache=True)
 def zone_demographics(data_dir, input_source, settings):
 
-
     column_map = None
     file_name = settings.get('zone_demographics')
 
@@ -54,6 +53,9 @@ def zone_demographics(data_dir, input_source, settings):
         data_dir=demographics_data_dir,
         file_name=file_name,
         column_map=column_map)
+
+    zones_df.index = zones_df.index + 1
+    zones_df.index.name = 'ZONE'
 
     zones_df = conflate_cval(zones_df)
 
