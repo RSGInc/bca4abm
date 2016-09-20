@@ -1,0 +1,4 @@
+Description,Target,Expression
+base scenario auto ownership cost,base_auto_ownership_cost, zones.base_hbomdcls * SAMPLE_CONSTANT
+build scenario auto ownership cost,build_auto_ownership_cost, zones.build_hbomdcls *SAMPLE_CONSTANT
+auto ownership cost benefit,diff_auto_ownership_cost, build_auto_ownership_cost - base_auto_ownership_cost

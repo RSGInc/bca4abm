@@ -230,6 +230,7 @@ def write_locals(locals_dict, file_name):
         for key, value in locals_dict.iteritems():
             value = str(value)
             f.write("%s = %s\n" % (key, value))
+            # print "%s = %s\n" % (key, value)
 
 
 def write_df_csv(df, file_path, index_label=None, columns=None, column_labels=None, transpose=True):

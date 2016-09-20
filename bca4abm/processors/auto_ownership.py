@@ -58,11 +58,11 @@ def auto_ownership_processor(persons_merged,
         if trace_results is not None:
 
             tracing.write_csv(trace_results,
-                              file_name="auto_ownership_processor",
+                              file_name="auto_ownership",
                               index_label='person_id',
                               column_labels=['label', 'person'])
 
         if trace_assigned_locals is not None:
 
             tracing.write_locals(trace_assigned_locals,
-                                 file_name="auto_ownership_processor_locals")
+                                 file_name="auto_ownership_locals")

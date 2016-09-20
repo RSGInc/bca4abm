@@ -245,8 +245,9 @@ def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, tra
         except Exception as err:
             logger.error("assign_variables failed target: %s expression: %s"
                          % (str(target), str(expression)))
-            # raise err
-            values = to_series(None, target=target)
+
+            # values = to_series(None, target=target)
+            raise err
 
         l.append((target, values))
 

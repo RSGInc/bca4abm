@@ -2,6 +2,32 @@ provenance: tests.4step.configs
 
 dump: True
 
-zone_demographics: mf.cval.csv
-zone_demographics_subdir: base-data
+trace_od: [5, 11]
 
+
+coc_columns:
+  - coc_poverty
+  - coc_age
+
+cval_file_name: mf.cval.csv
+
+locals_aggregate_demographics:
+  SAMPLE_CONSTANT: 42
+
+aggregate_zone_file_names:
+  - ma.hbcdcls.csv
+  - ma.hbohdcls.csv
+  - ma.hbomdcls.csv
+  - ma.hbrhdcls.csv
+  - ma.hbrldcls.csv
+  - ma.hbrmdcls.csv
+  - ma.hbsldcls.csv
+  - ma.hbsmdcls.csv
+  - ma.hbwhdcls.csv
+  - ma.hbwldcls.csv
+  - ma.nhbnwdcls.csv
+  - ma.nhbwdcls.csv
+  - ma.schdcls.csv
+
+locals_aggregate_zone:
+  SAMPLE_CONSTANT: 2000

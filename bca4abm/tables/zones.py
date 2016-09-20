@@ -41,22 +41,75 @@ def read_csv_file(data_dir, file_name, column_map=None):
     return df
 
 
+def read_and_concat_csv_files(data_dir, file_names, axis=1):
+
+    omnibus_df = None
+
+    for file_name in file_names:
+
+        df = read_csv_file(data_dir=data_dir, file_name=file_name)
+
+        if omnibus_df is None:
+            omnibus_df = df
+        else:
+            omnibus_df = pd.concat([omnibus_df, df], axis=axis)
+
+    return omnibus_df
+
+
 @orca.table(cache=True)
-def zone_demographics(data_dir, input_source, settings):
+def zone_cvals(data_dir, settings):
 
-    column_map = None
-    file_name = settings.get('zone_demographics')
+    file_name = settings.get('cval_file_name')
 
-    demographics_data_dir = os.path.join(data_dir, settings.get('zone_demographics_subdir', ''))
-
-    zones_df = read_csv_file(
-        data_dir=demographics_data_dir,
+    base_cvals_df = read_csv_file(
+        data_dir=os.path.join(data_dir, 'base-data'),
         file_name=file_name,
-        column_map=column_map)
+        column_map=None)
+
+    build_cvals_df = read_csv_file(
+        data_dir=os.path.join(data_dir, 'build-data'),
+        file_name=file_name,
+        column_map=None)
+
+    base_cvals_df.columns = ['base_%s' % c for c in base_cvals_df.columns.values]
+    build_cvals_df.columns = ['build_%s' % c for c in build_cvals_df.columns.values]
+
+    cvals_df = pd.concat([base_cvals_df, build_cvals_df], axis=1)
+
+    cvals_df.index = cvals_df.index + 1
+    cvals_df.index.name = 'ZONE'
+
+    # print "cvals_df: ", cvals_df.columns.values
+
+    return cvals_df
+
+
+@orca.table(cache=True)
+def zones(data_dir, settings):
+
+    file_names = settings.get('aggregate_zone_file_names')
+
+    base_zones_df = read_and_concat_csv_files(
+        data_dir=os.path.join(data_dir, 'base-data'),
+        file_names=file_names,
+        axis=1
+    )
+
+    build_zones_df = read_and_concat_csv_files(
+        data_dir=os.path.join(data_dir, 'build-data'),
+        file_names=file_names,
+        axis=1
+    )
+
+    base_zones_df.columns = ['base_%s' % c for c in base_zones_df.columns.values]
+    build_zones_df.columns = ['build_%s' % c for c in build_zones_df.columns.values]
+
+    zones_df = pd.concat([base_zones_df, build_zones_df], axis=1)
 
     zones_df.index = zones_df.index + 1
     zones_df.index.name = 'ZONE'
 
-    zones_df = conflate_cval(zones_df)
+    # print "zones_df: ", zones_df.columns.values
 
     return zones_df

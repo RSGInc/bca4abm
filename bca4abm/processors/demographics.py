@@ -73,11 +73,11 @@ def demographics_processor(persons_merged, demographics_spec, settings,
         if trace_results is not None:
 
             tracing.write_csv(trace_results,
-                              file_name="demographics_processor",
+                              file_name="demographics",
                               index_label='person_idx',
                               column_labels=['label', 'person'])
 
         if trace_assigned_locals is not None:
 
             tracing.write_locals(trace_assigned_locals,
-                                 file_name="demographics_processor_locals")
+                                 file_name="demographics_locals")

@@ -31,12 +31,12 @@ orca.run(['initialize_stores'])
 #calculates communities of concern (COC) / market segments based on mf.cval.csv
 orca.run(['aggregate_demographics_processor'])
 
-#each row in the data table to solve is an origin zone and this
-#processor calculates zonal auto ownership differences as well as the
-#differences in the destination choice logsums - ma.<purpose|income>dcls.csv
-#Maybe the ma.<purpose|income>dcls.csv files should be added to the
-#mf.cval.csv before input to the bca tool?
-# orca.run(['zone_aggregate_processor'])
+# each row in the data table to solve is an origin zone and this
+# processor calculates zonal auto ownership differences as well as the
+# differences in the destination choice logsums - ma.<purpose|income>dcls.csv
+# Maybe the ma.<purpose|income>dcls.csv files should be added to the
+# mf.cval.csv before input to the bca tool?
+orca.run(['aggregate_zone_processor'])
 
 #each row in the data table to solve is an OD pair and this processor
 #calculates trip differences.  It requires the access to input zone tables,

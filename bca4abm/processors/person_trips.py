@@ -63,11 +63,11 @@ def person_trips_processor(trips_with_demographics,
             # trace_results = pd.concat([trips_df[trace_rows], trace_results], axis=1)
 
             tracing.write_csv(trace_results,
-                              file_name="person_trips_processor",
+                              file_name="person_trips",
                               index_label='trip_id',
                               column_labels=['label', 'trip'])
 
         if trace_assigned_locals is not None:
 
             tracing.write_locals(trace_assigned_locals,
-                                 file_name="person_trips_processor_locals")
+                                 file_name="person_trips_locals")

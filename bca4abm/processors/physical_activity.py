@@ -86,13 +86,13 @@ def physical_activity_processor(trips_with_demographics,
         # we can just write them out when we see them without need to accumulate across chunks
         if trip_trace_results is not None:
             tracing.write_csv(trip_trace_results,
-                              file_name="physical_activity_processor_trips",
+                              file_name="physical_activity_trips",
                               index_label='trip_id',
                               column_labels=['label', 'trip'])
 
         if trip_trace_assigned_locals is not None:
             tracing.write_locals(trip_trace_assigned_locals,
-                                 file_name="physical_activity_processor_trips_locals")
+                                 file_name="physical_activity_trips_locals")
 
         # sum trip activity for each unique person
         # concat the person_group_by_column_names columns into trip_activity
@@ -118,13 +118,13 @@ def physical_activity_processor(trips_with_demographics,
         # we can just write them out when we see them without need to accumulate across chunks
         if person_trace_results is not None:
             tracing.write_csv(person_trace_results,
-                              file_name="physical_activity_processor_persons",
+                              file_name="physical_activity_persons",
                               index_label='persons_merged_table_index',
                               column_labels=['label', 'person'])
 
         if person_trace_assigned_locals is not None:
             tracing.write_locals(person_trace_assigned_locals,
-                                 file_name="physical_activity_processor_persons_locals")
+                                 file_name="physical_activity_persons_locals")
 
         # concat in the coc columns and summarize the chunk by coc
         person_activity = pd.concat([persons_chunk[coc_column_names], person_activity], axis=1)

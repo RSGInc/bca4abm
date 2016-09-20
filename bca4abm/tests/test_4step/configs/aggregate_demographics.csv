@@ -1,13 +1,14 @@
 Target,Expression
-_POVERTY_COLUMNS,zones.columns.map(lambda x: 'i1' in x)
-_AGE_COLUMNS,zones.columns.map(lambda x: 'a4' in x)
-_POVERTY_AGE_COLUMNS,list(set(_POVERTY_COLUMNS) & set(_AGE_COLUMNS))
+# local variables are expressions that start with an underscore and are _ALL_UPPERCASE
+_POVERTY_COLUMNS,cvals.columns.map(lambda x: x.startswith('base_') and 'i1' in x)
+_AGE_COLUMNS,cvals.columns.map(lambda x: x.startswith('base_') and 'a4' in x)
+_POVERTY_AGE_COLUMNS,"np.logical_and(_POVERTY_COLUMNS, _AGE_COLUMNS)"
 #
-_coc_poverty,"zones.loc[:,_POVERTY_COLUMNS].sum(axis=1)"
-_coc_age,"zones.loc[:,_AGE_COLUMNS].sum(axis=1)"
+_coc_poverty,"cvals.loc[:, _POVERTY_COLUMNS].sum(axis=1)"
+_coc_age,"cvals.loc[:, _AGE_COLUMNS].sum(axis=1)"
 #
-households, zones.sum(axis=1)
-coc_poverty_age,"zones.loc[:,_POVERTY_AGE_COLUMNS].sum(axis=1)"
-coc_poverty_only,_coc_poverty-coc_poverty_age
-coc_age_only,_coc_age-coc_poverty_age
-coc_none, households - (_coc_poverty+_coc_age)
+households,cvals.sum(axis=1)
+coc_poverty_age,"cvals.loc[:, _POVERTY_AGE_COLUMNS].sum(axis=1)"
+coc_poverty_only,_coc_poverty - coc_poverty_age
+coc_age_only,_coc_age - coc_poverty_age
+coc_none, households - (_coc_poverty + _coc_age)

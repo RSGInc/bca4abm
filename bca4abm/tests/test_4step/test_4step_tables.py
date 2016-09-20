@@ -39,8 +39,19 @@ def test_settings():
     assert settings.get('provenance') == 'tests.4step.configs'
 
 
-def test_read_zone_demographics_table():
+def test_read_zone_cval_table():
 
-    zones = orca.get_table('zone_demographics').to_frame()
+    zones = orca.get_table('zone_cvals').to_frame()
 
     assert zones.shape[0] == 25
+
+
+def test_read_zones_table():
+
+    zones = orca.get_table('zones').to_frame()
+
+    # number of zones in sample data
+    assert zones.shape[0] == 25
+
+    # 13 columns from build and base
+    assert zones.shape[1] == 26
