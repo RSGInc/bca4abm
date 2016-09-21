@@ -4,13 +4,18 @@ dump: True
 
 trace_od: [5, 11]
 
-
 coc_columns:
   - coc_poverty
   - coc_age
 
+
+# values available to all processors
+globals:
+  SAMPLE_GLOBAL_CONSTANT: 0.75
+
 cval_file_name: mf.cval.csv
 
+# values available to expressions in aggregate_demographics_processor
 locals_aggregate_demographics:
   SAMPLE_CONSTANT: 42
 
@@ -29,5 +34,6 @@ aggregate_zone_file_names:
   - ma.nhbwdcls.csv
   - ma.schdcls.csv
 
+# values available to expressions in aggregate_zone_processor
 locals_aggregate_zone:
   SAMPLE_CONSTANT: 2000
