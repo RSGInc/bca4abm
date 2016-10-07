@@ -74,7 +74,7 @@ def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, se
     assert not missing_columns(aggregate_trips_manifest,
                                settings['aggregate_data_manifest_column_map'].values())
 
-    locals_dict = bca.assign_variables_locals(settings, 'locals_aggregate_trips')
+    locals_dict = bca.assign_variables_locals(settings, 'aggregate_trips')
 
     results = None
     for row in aggregate_trips_manifest.itertuples(index=True):

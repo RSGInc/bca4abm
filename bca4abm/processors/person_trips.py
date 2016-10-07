@@ -36,7 +36,7 @@ def person_trips_processor(trips_with_demographics,
                  % (len(trips_with_demographics), chunk_size))
 
     # eval person_trips_spec in context of trips_with_demographics
-    locals_dict = bca.assign_variables_locals(settings, 'locals_person_trips')
+    locals_dict = bca.assign_variables_locals(settings, 'person_trips')
     locals_dict['trips'] = trips_df
 
     trace_rows = trace_hh_id and trips_df['hh_id'] == trace_hh_id

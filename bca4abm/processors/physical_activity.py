@@ -60,7 +60,7 @@ def physical_activity_processor(trips_with_demographics,
     # we need to use a compound key to group trips by person
     person_identity_columns = ['hh_id', 'person_idx']
 
-    locals_dict = bca.assign_variables_locals(settings, 'locals_physical_activity')
+    locals_dict = bca.assign_variables_locals(settings, 'physical_activity')
     trip_trace_rows = trace_hh_id and trips_df['hh_id'] == trace_hh_id
 
     coc_summary = None

@@ -44,7 +44,7 @@ def aggregate_demographics_processor(zone_cvals, aggregate_demographics_spec,
 
     # locals whose values will be accessible to the execution context
     # when the expressions in spec are applied to choosers
-    locals_dict = bca.assign_variables_locals(settings, 'locals_aggregate_demographics')
+    locals_dict = bca.assign_variables_locals(settings, 'aggregate_demographics')
 
     trace_rows = None
 

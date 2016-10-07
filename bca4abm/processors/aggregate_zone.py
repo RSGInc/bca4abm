@@ -43,7 +43,7 @@ def aggregate_zone_processor(zones, aggregate_zone_spec, settings, trace_od):
 
     # locals whose values will be accessible to the execution context
     # when the expressions in spec are applied to choosers
-    locals_dict = bca.assign_variables_locals(settings, 'locals_aggregate_zone')
+    locals_dict = bca.assign_variables_locals(settings, 'aggregate_zone')
 
     trace_rows = None
 

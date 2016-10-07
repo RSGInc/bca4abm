@@ -233,3 +233,16 @@ link_table_column_map:
   trk_vol: truck_volume
 
 link_daily_file_name: link_daily.csv
+
+link_daily_table_column_map:
+  distance: distance
+  dircode: dircode
+  time: time
+  congtime: congested_time
+  area_type: area_type
+  facl_type: facility_type_code
+  num_lanes: num_lanes
+  capacity: capacity
+  twoway: two_way
+  vol_total: total_volume
+  trk_vol: truck_volume

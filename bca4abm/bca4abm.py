@@ -282,7 +282,7 @@ def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, tra
     return variables, trace_results, trace_assigned_locals
 
 
-def assign_variables_locals(settings, locals_tag=None):
+def assign_variables_locals(settings, settings_tag=None):
     # locals whose values will be accessible to the execution context
     # when the expressions in spec are applied to choosers
     locals_dict = {
@@ -291,8 +291,10 @@ def assign_variables_locals(settings, locals_tag=None):
     }
     if 'globals' in settings:
         locals_dict.update(settings.get('globals'))
-    if locals_tag in settings:
-        locals_dict.update(settings.get(locals_tag))
+    if settings_tag:
+        locals_tag = "locals_%s" % settings_tag
+        if locals_tag in settings:
+            locals_dict.update(settings.get(locals_tag))
     return locals_dict
 
 

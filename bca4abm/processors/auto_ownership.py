@@ -36,7 +36,7 @@ def auto_ownership_processor(persons_merged,
                  "Running auto_ownership_processor with %d persons (chunk size = %s)"
                  % (len(persons_df), chunk_size))
 
-    locals_dict = bca.assign_variables_locals(settings, 'locals_auto_ownership')
+    locals_dict = bca.assign_variables_locals(settings, 'auto_ownership')
 
     trace_rows = trace_hh_id and persons_df['hh_id'] == trace_hh_id
 

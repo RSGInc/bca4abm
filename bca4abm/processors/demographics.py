@@ -32,7 +32,7 @@ def demographics_processor(persons_merged, demographics_spec, settings,
 
     # locals whose values will be accessible to the execution context
     # when the expressions in spec are applied to choosers
-    locals_dict = bca.assign_variables_locals(settings, 'locals_demographics')
+    locals_dict = bca.assign_variables_locals(settings, 'demographics')
 
     trace_rows = trace_hh_id and persons_df['hh_id'] == trace_hh_id
 

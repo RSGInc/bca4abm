@@ -1,0 +1,59 @@
+Description,Target,Expression
+# link volume calculations,,
+,_BAD_STUFF,"['pollutantID_2', 'pollutantID_3']"
+,_X,"EMISSIONS[['Ltype', 'Speed'] + _BAD_STUFF]"
+,_F,lambda x: x+1
+,_auto_volume_MD,links.svol + links.hvol
+,zort,_auto_volume_MD * CALIBRATION_INT
+# ,_auto_volume_PM,links_PM.@svol + links_PM.@hvol
+# ,_med_truck_volume_MD,links_MD.@mtvol
+# ,_med_truck_volume_PM,links_PM.@mtvol
+# ,_heavy_truck_volume_MD,links_MD.@htvol
+# ,_heavy_truck_volume_PM,links_PM.@htvol
+# ,_truck_volume_MD,_med_truck_volume_MD + _heavy_truck_volume_MD
+# ,_truck_volume_PM,_med_truck_volume_PM + _heavy_truck_volume_PM
+# ,_auto_volume_daily,LINK_PEAK_TOD_SHARE*_auto_volume_PM + LINK_OFFPEAK_TOD_SHARE*_auto_volume_MD
+# ,_med_truck_volume_daily,LINK_PEAK_TOD_SHARE*_med_truck_volume_PM + LINK_OFFPEAK_TOD_SHARE*_med_truck_volume_MD
+# ,_heavy_truck_volume_daily,LINK_PEAK_TOD_SHARE*_heavy_truck_volume_PM + LINK_OFFPEAK_TOD_SHARE*_heavy_truck_volume_MD
+# ,_truck_volume_daily,LINK_PEAK_TOD_SHARE*_truck_volume_PM + LINK_OFFPEAK_TOD_SHARE*_truck_volume_MD
+# ,_total_volume_daily,_auto_volume_daily + _truck_volume_daily
+# total vehicle miles travelled,_vmt_total,_total_volume_daily * links_daily.length
+# link type - freeway,_freeway,(links_daily.volume_delay_func==1) | (links_daily.volume_delay_func==10)
+# link type - arterial,_arterial,(links_daily.volume_delay_func==2) | (links_daily.volume_delay_func==4)
+# link type - collector,_collector,(links_daily.volume_delay_func==9)
+# # safety costs,,
+# indegree of to_nodes,_to_indegree,links_daily['j'].groupby(links_daily['j']).transform('count')
+# is to node an intersection,_is_intersection,(_to_indegree > 2)
+# Max total vol at to_nodes,_to_maxvol_daily,links_daily['_total_volume_daily'].groupby(links_daily['j']).transform('max')
+# Min total vol at to_nodes,_to_minvol_daily,links_daily['_total_volume_daily'].groupby(links_daily['j']).transform('min')
+# SPF - roadway segment,_rs_spf,np.exp(-11.63 + 1.33*np.log(_total_volume_daily) + np.log(links_daily.length))
+# SPF - intersection,_int_spf,np.exp(-10.99 + 1.07 * np.log(_to_maxvol_daily) + 0.23 * np.log(_to_minvol_daily))
+# number of RS crashes,_crashes_rs,CALIBRATION_RS * _rs_spf * CMF_RS
+# number of intersection crashes,_crashes_int,(CALIBRATION_INT * _int_spf * CMF_INT) * _is_intersection/_to_indegree
+# total RS PDO crash,_rs_crashes_pdo,_crashes_rs * RS_CRASH_PDO
+# total RS injury crash,_rs_crashes_inj,_crashes_rs * RS_CRASH_INJURY
+# total RS fatal crash,_rs_crashes_fat,_crashes_rs * RS_CRASH_FATAL
+# total INT PDO crash,_int_crashes_pdo,_crashes_int * INT_CRASH_PDO
+# total INT injury crash,_int_crashes_inj,_crashes_int * INT_CRASH_INJURY
+# total INT fatal crash,_int_crashes_fat,_crashes_int * INT_CRASH_FATAL
+# total annual  PDO crashes,_total_pdo_crashes,_rs_crashes_pdo + _int_crashes_pdo
+# total annual injury crashes,_total_inj_crashes,_rs_crashes_inj + _int_crashes_inj
+# total annual fatal crashes,_total_fat_crashes,_rs_crashes_fat + _int_crashes_fat
+# total crash cost,cost_crash,(_total_pdo_crashes*CRASH_COST_PDO+_total_inj_crashes*CRASH_COST_INJURY+_total_fat_crashes*CRASH_COST_FATAL) * DISCOUNT_RATE
+# # emissions costs,,
+# # surface water,,
+# water pollution cost,water_pollution_cost,_vmt_total * WATER_POLLUTION_COST * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+# # noise,,
+# Auto freeway noise cost,_auto_noise_cost_fwy,_freeway * _auto_volume_daily * (NOISE_COST_AUTO_FREEWAY /1000)
+# Med trucks freeway noise cost,_mtrucks_noise_cost_fwy,_freeway *_med_truck_volume_daily * (NOISE_COST_MEDTRUCKS_FREEWAY/1000)
+# Heavy trucks freeway noise cost,_htrucks_noise_cost_fwy,_freeway *_heavy_truck_volume_daily * (NOISE_COST_HEVTRUCKS_FREEWAY/1000)
+# Auto arterial noise cost,_auto_noise_cost_art,_arterial * _auto_volume_daily * (NOISE_COST_AUTO_ARTERIAL/1000)
+# Med trucks arterial noise cost,_mtrucks_noise_cost_art,_arterial *_med_truck_volume_daily * (NOISE_COST_MEDTRUCKS_ARTERIAL/1000)
+# Heavy trucks arterial noise cost,_htrucks_noise_cost_art,_arterial *_heavy_truck_volume_daily * (NOISE_COST_HEVTRUCKS_ARTERIAL/1000)
+# Auto collector noise cost,_auto_noise_cost_col,_collector * _auto_volume_daily * (NOISE_COST_AUTO_COLLECTOR/1000)
+# Med trucks collector noise cost,_mtrucks_noise_cost_col,_collector *_med_truck_volume_daily * (NOISE_COST_MEDTRUCKS_COLLECTOR/1000)
+# Heavy trucks collector noise cost,_htrucks_noise_cost_col,_collector *_heavy_truck_volume_daily * (NOISE_COST_HEVTRUCKS_COLLECTOR/1000)
+# ,_freeway_noise_cost,_auto_noise_cost_fwy + _mtrucks_noise_cost_fwy + _htrucks_noise_cost_fwy
+# ,_arterial_noise_cost,_auto_noise_cost_art + _mtrucks_noise_cost_art + _htrucks_noise_cost_art
+# ,_collector_noise_cost,_auto_noise_cost_col + _mtrucks_noise_cost_col + _htrucks_noise_cost_col
+# total noise cost,total_noise_cost,(_freeway_noise_cost + _arterial_noise_cost + _collector_noise_cost) * DISCOUNT_RATE * ANNUALIZATION_FACTOR

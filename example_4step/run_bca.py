@@ -50,7 +50,7 @@ orca.run(['aggregate_zone_processor'])
 # orca.run(['aggregate_trips_processor'])
 
 #daily will be linkMD1 * scalingFactorMD1 + linkPM2 * scalingFactorPM2
-# orca.run(['link_daily_processor'])
+orca.run(['link_daily_processor'])
 # orca.run(['link_processor'])
 
 #write results

@@ -4,7 +4,6 @@ dump: True
 
 trace_od: [5, 11]
 
-
 coc_columns:
   - coc_poverty
   - coc_age
@@ -41,3 +40,53 @@ aggregate_zone_file_names:
 # values available to expressions in aggregate_zone_processor
 locals_aggregate_zone:
   SAMPLE_CONSTANT: 2000
+
+link_daily_file_name: linksMD1.csv
+
+
+link_daily_table_column_map:
+  i: i
+  j: j
+  "@hvol": hvol
+  "@svol": svol
+  "@zone": zone
+
+# specify column name to enable od tracing (if not specified, just trace first link)
+# link_daily_od_column: zone
+
+locals_link_daily:
+  LINK_PEAK_TOD_SHARE_AUTO: 3.0
+  LINK_OFFPEAK_TOD_SHARE_AUTO: 8.7
+  LINK_PEAK_TOD_SHARE_TRANSIT: 3.2
+  LINK_OFFPEAK_TOD_SHARE_TRANSIT: 6.1
+  CMF_RS: 1.0
+  CALIBRATION_RS: 1.0
+  CMF_INT: 1.0
+  CALIBRATION_INT: 1.0
+  # Distribution of RS crashes
+  RS_CRASH_PDO: 0.679
+  RS_CRASH_INJURY: 0.308
+  RS_CRASH_FATAL: 0.013
+  # Distribution of INT crashes
+  INT_CRASH_PDO: 0.679
+  INT_CRASH_INJURY: 0.308
+  INT_CRASH_FATAL: 0.013
+  # Crash costs in Dollars
+  CRASH_COST_PDO: 2500
+  CRASH_COST_INJURY: 25000
+  CRASH_COST_FATAL: 100000
+  # Water pollution cost
+  WATER_POLLUTION_COST: 0.01625
+  # Noise pollution cost
+  NOISE_COST_AUTO_FREEWAY: 6.37
+  NOISE_COST_AUTO_ARTERIAL: 1.545
+  NOISE_COST_AUTO_COLLECTOR: 0.12
+  NOISE_COST_MEDTRUCKS_FREEWAY: 19.17
+  NOISE_COST_MEDTRUCKS_ARTERIAL: 10.945
+  NOISE_COST_MEDTRUCKS_COLLECTOR: 1.86
+  NOISE_COST_HEVTRUCKS_FREEWAY: 41.955
+  NOISE_COST_HEVTRUCKS_ARTERIAL: 44.17
+  NOISE_COST_HEVTRUCKS_COLLECTOR: 8.71
+
+tables_link_daily:
+  EMISSIONS: moves_2010_summer_running_rates.csv
