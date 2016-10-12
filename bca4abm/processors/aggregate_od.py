@@ -184,7 +184,6 @@ def aggregate_od_processor(zone_demographics, aggregate_od_spec, settings, data_
         print "closing %s" % od_skims.name
         od_skims.omx.close
 
-
     if trace_assigned_locals is not None:
         tracing.write_locals(trace_assigned_locals,
                              file_name="aggregate_od_locals")
