@@ -71,7 +71,7 @@ def add_tables_to_locals(data_dir, settings, settings_tag, locals_dict):
         file_list = settings.get(tables_tag)
         for var_name, filename in file_list.iteritems():
 
-            print "add_tables_to_locals %s = %s" % (var_name, filename)
+            # print "add_tables_to_locals %s = %s" % (var_name, filename)
 
             fpath = os.path.join(data_dir, filename)
             df = bca.read_csv_or_tsv(fpath, header=0, comment='#')
@@ -118,8 +118,6 @@ def eval_link_spec(link_spec, link_file_name, data_dir, link_file_column_map,
                              trace_rows=trace_rows)
 
         results[scenario] = pd.DataFrame(data=summary).T
-
-        print "trace_assigned_locals", trace_assigned_locals
 
         if trace_tag and trace_assigned_locals is not None:
             tracing.write_locals(trace_assigned_locals,
@@ -174,7 +172,6 @@ def link_processor(link_manifest, link_spec, settings, data_dir):
     if settings.get("dump", False) and settings.get("dump_link", True):
         output_dir = orca.eval_variable('output_dir')
         csv_file_name = os.path.join(output_dir, 'link_benefits.csv')
-        print "writing", csv_file_name
         results.to_csv(csv_file_name, index=False)
 
 
@@ -199,5 +196,4 @@ def link_daily_processor(link_daily_spec, settings, data_dir, trace_od):
     if settings.get("dump", False) and settings.get("dump_link_daily", True):
         output_dir = orca.eval_variable('output_dir')
         csv_file_name = os.path.join(output_dir, 'link_daily_benefits.csv')
-        print "writing", csv_file_name
         results.to_csv(csv_file_name, index=False)

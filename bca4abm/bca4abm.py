@@ -274,7 +274,11 @@ def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, tra
     variables = pd.DataFrame.from_items(variables)
 
     if trace_results is not None:
-        trace_results = undupe_column_names(pd.DataFrame.from_items(trace_results))
+
+        trace_results = pd.DataFrame.from_items(trace_results)
+        trace_results.index = df[trace_rows].index
+
+        trace_results = undupe_column_names(trace_results)
 
         # add df columns to trace_results
         trace_results = pd.concat([df[trace_rows], trace_results], axis=1)

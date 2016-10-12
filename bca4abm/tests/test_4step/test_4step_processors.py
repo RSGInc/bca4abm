@@ -49,6 +49,7 @@ def test_aggregate_demographics_processor():
     orca.run(["aggregate_demographics_processor"])
     orca.run(["aggregate_zone_processor"])
     orca.run(['link_daily_processor'])
+    orca.run(['aggregate_od_processor'])
     orca.run(['write_results'])
 
     # persons_merged = orca.eval_variable('persons_merged').to_frame()

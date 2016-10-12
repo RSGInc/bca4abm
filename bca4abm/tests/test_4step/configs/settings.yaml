@@ -90,3 +90,7 @@ locals_link_daily:
 
 tables_link_daily:
   EMISSIONS: moves_2010_summer_running_rates.csv
+
+aggregate_od_matrices:
+  assign_mfs: assign_mfs.omx
+  skims_mfs: skims_mfs.omx

@@ -1,0 +1,7 @@
+Description,Target,Expression
+#,,
+#,, auto peak
+#,,
+# assume peak occurs in AM for outbound and PM for inbound
+,assign_mf47_benefit,"assign_mfs_base['mf47'] - assign_mfs_build['mf47']"
+,assign_mf1_benefit,"skims_mfs_base['mf1'] - skims_mfs_build['mf1']"

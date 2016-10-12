@@ -13,7 +13,7 @@ from bca4abm import tracing
 
 
 """
-Aggregate demographics processor
+Aggregate zone processor
 """
 
 
@@ -55,6 +55,11 @@ def aggregate_zone_processor(zones, aggregate_zone_spec, settings, trace_od):
                              locals_dict,
                              df_alias='zones',
                              trace_rows=trace_od_rows)
+
+    # FIXME - just add summary results? isn't this supposed to be broken down by coc?
+
+    print "\n\naggregate_zone_processor - What are we supposed to be writing as results?"
+    print "                           Shouldn't this be broken down by coc?\n\n"
 
     if trace_results is not None:
 
