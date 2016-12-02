@@ -46,13 +46,12 @@ def get_omx_matrix(matrix_dir, omx_file_name, omx_key, close_after_read=True):
         return 0.0
     # print "reading %s / %s '%s'" % (matrix_dir, omx_file_name, omx_key)
     omx_file_name = os.path.join(matrix_dir, omx_file_name)
-    omx_file = omx.openFile(omx_file_name, 'r')
+    omx_file = omx.open_file(omx_file_name, 'r')
     matrix = omx_file[omx_key][:, :]
     if close_after_read:
         # print "closing %s / %s '%s'" % (matrix_dir, omx_file_name, omx_key)
         omx_file.close()
     return matrix
-
 
 @orca.step()
 def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, settings, data_dir):

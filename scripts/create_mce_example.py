@@ -36,8 +36,8 @@ def slice_skims(source_data_dir, dest_data_dir, file_name, max_zone):
     out_file_path = os.path.join(dest_data_dir, file_name)
 
     # process all skims
-    skims = omx.openFile(in_file_path)
-    skims_out = omx.openFile(out_file_path, 'w')
+    skims = omx.open_file(in_file_path)
+    skims_out = omx.open_file(out_file_path, 'w')
 
     skimsToProcess = skims.listMatrices()
     for skimName in skimsToProcess:

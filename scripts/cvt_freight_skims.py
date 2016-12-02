@@ -29,7 +29,7 @@ def cvt_to_omx(txt_file_name, omx_file_name, omx_key):
     print "cvt_to_omx   to %s / %s" % (omx_file_name, omx_key)
     # print m
 
-    omx_file = omx.openFile(omx_file_name, 'a')
+    omx_file = omx.open_file(omx_file_name, 'a')
     omx_setMatrix(omx_file, omx_key, data)
     omx_file.close()
 
@@ -63,7 +63,7 @@ cvt_freight_skims()
 # for skim_dir in ['base-data', 'build-data']:
 
 # omx_file_name = os.path.join(data_dir, skim_dir, 'skim.omx')
-# omx_file = omx.openFile(omx_file_name, 'r')
+# omx_file = omx.open_file(omx_file_name, 'r')
 #
 # print "----- ivt"
 # m = omx_file['ivt']

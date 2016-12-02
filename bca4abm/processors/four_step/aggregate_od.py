@@ -92,7 +92,7 @@ def add_skims_to_locals(full_local_name, omx_file_name, zone_count, local_od_ski
 
         print "add_skims_to_locals: %s : %s" % (full_local_name, omx_file_name)
 
-        omx_file = omx.openFile(omx_file_name, 'r')
+        omx_file = omx.open_file(omx_file_name, 'r')
 
         # for skimName in omx_file.listMatrices():
         #     print "aggregate_od_matrices %s: '%s'" % (full_local_name, skimName)
