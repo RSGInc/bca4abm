@@ -53,6 +53,7 @@ def get_omx_matrix(matrix_dir, omx_file_name, omx_key, close_after_read=True):
         omx_file.close()
     return matrix
 
+
 @orca.step()
 def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, settings, data_dir):
 

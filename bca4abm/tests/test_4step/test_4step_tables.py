@@ -52,4 +52,3 @@ def test_read_zones_table():
 
     # number of zones in sample data
     assert zones.shape[0] == 25
-

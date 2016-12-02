@@ -176,64 +176,6 @@ def link_processor(link_manifest, link_spec, settings, data_dir):
         results.to_csv(csv_file_name, index=False)
 
 
-def xeval_link_spec(link_spec, link_file_name, data_dir, link_file_column_map,
-                   settings, settings_tag, trace_tag=None, trace_od=None):
-
-    locals_dict = bca.assign_variables_locals(settings, settings_tag)
-
-    locals_dict = add_tables_to_locals(data_dir, settings, settings_tag, locals_dict)
-
-    results = {}
-
-    for scenario in ['base', 'build']:
-
-        link_data_subdir = 'base-data' if scenario == 'base' else 'build-data'
-
-        links_df = read_csv_file(data_dir=os.path.join(data_dir, link_data_subdir),
-                                 file_name=link_file_name,
-                                 column_map=link_file_column_map)
-
-        if trace_od:
-            od_column = settings.get('%s_od_column' % settings_tag, None)
-            if od_column:
-                o, d = trace_od
-                trace_rows = (links_df[od_column] == o) | (links_df[od_column] == d)
-            else:
-                # just dump first row
-                trace_rows = (links_df.index == 1)
-        else:
-            trace_rows = None
-
-        scenario_results, trace_results, trace_assigned_locals = \
-            bca.assign_variables(link_spec,
-                             links_df,
-                             locals_dict=locals_dict,
-                             df_alias='links',
-                             trace_rows=trace_rows)
-
-        results[scenario] = scenario_results
-
-        tracing.write_csv(scenario_results,
-                          file_name="%s_results" % scenario,
-                          transpose=False)
-
-        if trace_tag and trace_assigned_locals is not None:
-            tracing.write_locals(trace_assigned_locals,
-                                 file_name="%s_locals_%s" % (settings_tag, scenario))
-
-        if trace_results is not None:
-            tracing.write_csv(trace_results,
-                              file_name="%s_results_%s" % (settings_tag, scenario),
-                              index_label='index',
-                              column_labels=['label', 'link'])
-
-    results = results['build'] - results['base']
-
-    results.reset_index(drop=True, inplace=True)
-
-    return results
-
-
 @orca.step()
 def link_daily_processor(link_daily_spec, settings, data_dir, trace_od):
 
