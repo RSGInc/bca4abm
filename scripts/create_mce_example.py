@@ -9,8 +9,6 @@ import openmatrix as omx
 import itertools
 
 
-
-
 def slice_taz_file(source_data_dir, dest_data_dir, file_name, max_zone):
     in_file_path = os.path.join(source_data_dir, file_name)
     out_file_path = os.path.join(dest_data_dir, file_name)
@@ -62,20 +60,39 @@ def copy_slice(source_dir, dest_dir,
 
 
 TAZ_FILES = [
-    'mf.cval.csv',
-    'ma.hbomdcls.csv',
-    'ma.hbsldcls.csv',
-    'ma.nhbnwdcls.csv',
-    'ma.hbrhdcls.csv',
-    'ma.hbsmdcls.csv',
-    'ma.nhbwdcls.csv',
+    'ma.collpr.csv',
     'ma.hbcdcls.csv',
-    'ma.hbrldcls.csv',
-    'ma.hbwhdcls.csv',
-    'ma.schdcls.csv',
     'ma.hbohdcls.csv',
+    'ma.hboldcls.csv',
+    'ma.hbomdcls.csv',
+    'ma.hboprh.csv',
+    'ma.hboprl.csv',
+    'ma.hboprm.csv',
+    'ma.hbrhdcls.csv',
+    'ma.hbrldcls.csv',
     'ma.hbrmdcls.csv',
-    'ma.hbwldcls.csv'
+    'ma.hbrprh.csv',
+    'ma.hbrprl.csv',
+    'ma.hbrprm.csv',
+    'ma.hbshdcls.csv',
+    'ma.hbsldcls.csv',
+    'ma.hbsmdcls.csv',
+    'ma.hbsprh.csv',
+    'ma.hbsprl.csv',
+    'ma.hbsprm.csv',
+    'ma.hbwhdcls.csv',
+    'ma.hbwldcls.csv',
+    'ma.hbwmdcls.csv',
+    'ma.hbwprh.csv',
+    'ma.hbwprl.csv',
+    'ma.hbwprm.csv',
+    'ma.nhbnwdcls.csv',
+    'ma.nhbwdcls.csv',
+    'ma.nhnwpr.csv',
+    'ma.nhwpr.csv',
+    'ma.schdcls.csv',
+    'ma.schpr.csv',
+    'mf.cval.csv'
     ]
 
 SKIM_FILES = [
@@ -84,25 +101,17 @@ SKIM_FILES = [
 ]
 
 MAX_ZONE = 25
-SOURCE_BASE_DIR = '2040NB_Base'
-SOURCE_BUILD_DIR = '2040NB_Build'
 
 SOURCE_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'metro_mce_data')
 DEST_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'example_4step', 'data')
 
 
 copy_slice(
-    source_dir=os.path.join(SOURCE_DATA_DIR, '2040NB_Base'),
-    dest_dir=os.path.join(DEST_DATA_DIR, 'base-data'),
-    taz_file_names=TAZ_FILES,
-    skim_file_names=SKIM_FILES,
-    link_file_names=['base_linksMD1.csv', 'base_linksPM2.csv']
-)
-
-copy_slice(
-    source_dir=os.path.join(SOURCE_DATA_DIR, '2040NB_Build'),
+    source_dir=os.path.join(SOURCE_DATA_DIR, 'build-data'),
     dest_dir=os.path.join(DEST_DATA_DIR, 'build-data'),
     taz_file_names=TAZ_FILES,
     skim_file_names=SKIM_FILES,
-    link_file_names=['build_linksMD1.csv', 'build_linksPM2.csv']
+    link_file_names=['linksMD1.csv', 'linksPM2.csv']
 )
+
+# python ./scripts/create_mce_example.py

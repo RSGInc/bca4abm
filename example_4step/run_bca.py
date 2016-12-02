@@ -38,26 +38,22 @@ orca.run(['aggregate_demographics_processor'])
 # mf.cval.csv before input to the bca tool?
 orca.run(['aggregate_zone_processor'])
 
-#each row in the data table to solve is an OD pair and this processor
-#calculates trip differences.  It requires the access to input zone tables,
-#the COC coding, trip matrices and skim matrices.  The new
-#OD_aggregate_manifest.csv file tells this processor what data it can
-#use and how to reference it.  The following input data tables are required:
-#assign_mfs.omx, inputs and results of the zone aggregate processor, and skims_mfs.omx.
-# orca.run(['OD_aggregate_processor'])
+# each row in the data table to solve is an OD pair and this processor
+# calculates trip differences.  It requires the access to input zone tables,
+# the COC coding, trip matrices and skim matrices.  The new
+# OD_aggregate_manifest.csv file tells this processor what data it can
+# use and how to reference it.  The following input data tables are required:
+# assign_mfs.omx, inputs and results of the zone aggregate processor, and skims_mfs.omx.
+orca.run(['aggregate_od_processor'])
 
-#truck aggregate markets
+# # truck aggregate markets
 # orca.run(['aggregate_trips_processor'])
 
-#daily will be linkMD1 * scalingFactorMD1 + linkPM2 * scalingFactorPM2
+# daily will be linkMD1 * scalingFactorMD1 + linkPM2 * scalingFactorPM2
 orca.run(['link_daily_processor'])
-# orca.run(['link_processor'])
-
-
-orca.run(['aggregate_od_processor'])
 
 
 
 #write results
-orca.run(['write_results'])
+orca.run(['write_four_step_results'])
 orca.run(['print_results'])

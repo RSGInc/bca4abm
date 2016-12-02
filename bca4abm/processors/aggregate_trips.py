@@ -5,7 +5,7 @@ import numpy as np
 import openmatrix as omx
 
 from bca4abm import bca4abm as bca
-from ..util.misc import missing_columns, add_result_columns, add_summary_results
+from ..util.misc import missing_columns, add_summary_results
 
 from bca4abm import tracing
 

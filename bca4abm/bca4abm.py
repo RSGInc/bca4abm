@@ -75,10 +75,7 @@ def read_csv_or_stored_table(data_dir, input_source, settings, table_name, index
     return df
 
 
-def read_assignment_spec(fname,
-                         description_name="Description",
-                         target_name="Target",
-                         expression_name="Expression"):
+def read_assignment_spec(fname):
     """
     Read a CSV model specification into a Pandas DataFrame or Series.
 
@@ -87,18 +84,12 @@ def read_assignment_spec(fname,
 
     The CSV is required to have a header with column names. For example:
 
-        Description,Target,Expression
+        Description,Target,Expression,Silos
 
     Parameters
     ----------
     fname : str
         Name of a CSV spec file.
-    description_name : str, optional
-        Name of the column in `fname` that contains the component description.
-    target_name : str, optional
-        Name of the column in `fname` that contains the component target.
-    expression_name : str, optional
-        Name of the column in `fname` that contains the component expression.
 
     Returns
     -------
@@ -114,17 +105,19 @@ def read_assignment_spec(fname,
     # drop null expressions
     # cfg = cfg.dropna(subset=[expression_name])
 
-    cfg.rename(columns={target_name: 'target',
-                        expression_name: 'expression',
-                        description_name: 'description'},
-               inplace=True)
+    # map column names to lower case
+    cfg.columns = [x.lower() for x in cfg.columns]
 
     # backfill description
     if 'description' not in cfg.columns:
-        cfg.description = ''
+        cfg['description'] = ''
 
     cfg.target = cfg.target.str.strip()
     cfg.expression = cfg.expression.str.strip()
+
+    if 'silos' in cfg.columns:
+        cfg.silos.fillna('', inplace=True)
+        cfg.silos = cfg.silos.str.strip()
 
     return cfg
 

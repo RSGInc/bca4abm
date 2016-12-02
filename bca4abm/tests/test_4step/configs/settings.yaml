@@ -1,16 +1,23 @@
-provenance: tests.4step.configs
+provenance: tests.test_4step.configs
 
 dump: True
 
 trace_od: [5, 11]
 
-coc_columns:
+coc_silos:
   - coc_poverty
   - coc_age
+  - coc_any
+  - coc_none
+  - everybody
+
+# orig or dest
+trip_coc_end: orig
 
 # values available to all processors
 globals:
-  SAMPLE_GLOBAL_CONSTANT: 0.75
+  DISCOUNT_RATE: 0.75
+  ANNUALIZATION_FACTOR: 365
 
 # file name for cvals table csv data input file (expect versions in build and base data subdirs)
 cval_file_name: mf.cval.csv
@@ -36,10 +43,57 @@ aggregate_zone_file_names:
   - ma.nhbnwdcls.csv
   - ma.nhbwdcls.csv
   - ma.schdcls.csv
+  - mf.cval.csv
+  - ma.collpr.csv
+  - ma.hboprh.csv
+  - ma.hboprl.csv
+  - ma.hboprm.csv
+  - ma.hbrprh.csv
+  - ma.hbrprl.csv
+  - ma.hbrprm.csv
+  - ma.hbsprh.csv
+  - ma.hbsprl.csv
+  - ma.hbsprm.csv
+  - ma.hbwprh.csv
+  - ma.hbwprl.csv
+  - ma.hbwprm.csv
+  - ma.nhnwpr.csv
+  - ma.nhwpr.csv
+  - ma.schpr.csv
 
 # values available to expressions in aggregate_zone_processor
 locals_aggregate_zone:
-  SAMPLE_CONSTANT: 2000
+  ANNUAL_COST_PER_VEHICLE: 6611
+  # Average number of cars in HHs with 3+ cars
+  AVERAGE_AUTOS_IN_3PLUS: 3.5
+  # not sure what these should be
+  UPM_HBC: 1.0
+  VOT_HBC: 1.0
+  UPM_HBO: 1.0
+  VOT_HBO: 1.0
+  UPM_HBR: 1.0
+  VOT_HBR: 1.0
+  UPM_HBS: 1.0
+  VOT_HBS: 1.0
+  UPM_HBW: 1.0
+  UPM_HBW: 1.0
+  VOT_HBW: 1.0
+  UPM_NHBNW: 1.0
+  VOT_NHBNW: 1.0
+  UPM_NHBW: 1.0
+  VOT_NHBW: 1.0
+  UPM_SCH: 1.0
+  VOT_SCH: 1.0
+
+locals_OD_aggregate:
+  PASSENGER_TRAVEL_VOT: 14.66
+
+
+locals_aggregate_trips:
+
+
+aggregate_data_manifest_column_map:
+
 
 link_daily_file_name: linksMD1.csv
 
@@ -50,9 +104,14 @@ link_daily_table_column_map:
   "@hvol": hvol
   "@svol": svol
   "@zone": zone
+  "@mtvol": mtvol
+  "@htvol": htvol
+  length: length
+  num_lanes: num_lanes
+  volume_delay_func: vdf
 
 # specify column name to enable od tracing (if not specified, just trace first link)
-# link_daily_od_column: zone
+link_daily_od_column: zone
 
 locals_link_daily:
   LINK_PEAK_TOD_SHARE_AUTO: 3.0
@@ -94,3 +153,4 @@ tables_link_daily:
 aggregate_od_matrices:
   assign_mfs: assign_mfs.omx
   skims_mfs: skims_mfs.omx
+

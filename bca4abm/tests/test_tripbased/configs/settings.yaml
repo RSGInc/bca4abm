@@ -1,4 +1,4 @@
-provenance: tests.tripbased.configs
+provenance: tests.test_abm.configs
 
 dump: True
 #dump_aggregate_trips: True

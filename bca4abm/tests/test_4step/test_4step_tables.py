@@ -36,7 +36,7 @@ def inject_default_directories(request):
 def test_settings():
 
     settings = orca.eval_variable('settings')
-    assert settings.get('provenance') == 'tests.4step.configs'
+    assert settings.get('provenance') == 'tests.test_4step.configs'
 
 
 def test_read_zone_cval_table():
@@ -53,5 +53,3 @@ def test_read_zones_table():
     # number of zones in sample data
     assert zones.shape[0] == 25
 
-    # 13 columns from build and base
-    assert zones.shape[1] == 26

@@ -87,6 +87,12 @@ def zone_cvals(data_dir, settings):
 
 @orca.table(cache=True)
 def zones(data_dir, settings):
+    """
+    aggregate_zone_file_names in settings contains a list of file name
+    for zones table csv data input files (expect versions in build and base data subdirs)
+    data will be combined into a single table with columns names prefixed with 'base_' or 'build_'
+    (e.g.) if ma.hbcdcls.csv has a column 'hbcdcls' you will have 'base_hbcdcls' and 'build_hbcdcls'
+    """
 
     file_names = settings.get('aggregate_zone_file_names')
 
@@ -107,6 +113,7 @@ def zones(data_dir, settings):
 
     zones_df = pd.concat([base_zones_df, build_zones_df], axis=1)
 
+    # the default index is zero-based, so we can convert to 1-based zone ids simply by adding 1
     zones_df.index = zones_df.index + 1
     zones_df.index.name = 'ZONE'
 
