@@ -72,6 +72,12 @@ def zone_cvals(data_dir, settings):
         file_name=file_name,
         column_map=None)
 
+    #add external cocs
+    cocs_file_names = settings.get('ext_cocs_file_name')
+    cocs_df = read_csv_file(data_dir=data_dir, file_name=cocs_file_names)
+    base_cvals_df = pd.concat([base_cvals_df, cocs_df])
+    build_cvals_df = pd.concat([build_cvals_df, cocs_df])
+    
     base_cvals_df.columns = ['base_%s' % c for c in base_cvals_df.columns.values]
     build_cvals_df.columns = ['build_%s' % c for c in build_cvals_df.columns.values]
 
