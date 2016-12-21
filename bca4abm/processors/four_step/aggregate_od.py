@@ -189,4 +189,4 @@ def aggregate_od_processor(zone_demographics, aggregate_od_spec, settings, data_
         tracing.write_csv(trace_results,
                           file_name="aggregate_od",
                           index_label='index',
-                          column_labels=['label', 'link'])
+                          column_labels=['label', 'od'])
