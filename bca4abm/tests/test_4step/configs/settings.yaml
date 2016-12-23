@@ -88,7 +88,7 @@ locals_aggregate_zone:
   UPM_SCH: 1.0
   VOT_SCH: 1.0
 
-locals_OD_aggregate:
+locals_aggregate_od:
   PASSENGER_TRAVEL_VOT: 14.66
 
 
