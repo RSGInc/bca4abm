@@ -171,9 +171,9 @@ def aggregate_od_processor(zone_demographics, aggregate_od_spec, settings, data_
 
     add_aggregate_results(results, aggregate_od_spec, source='aggregate_od')
 
-    if settings.get("dump", False) and settings.get("dump_link_daily", True):
+    if settings.get("dump", False) and settings.get("dump_aggregate_od", True):
         output_dir = orca.eval_variable('output_dir')
-        csv_file_name = os.path.join(output_dir, 'link_daily_benefits.csv')
+        csv_file_name = os.path.join(output_dir, 'aggregate_od_benefits.csv')
         print "writing", csv_file_name
         results.to_csv(csv_file_name, index=False)
 
