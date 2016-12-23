@@ -110,7 +110,6 @@ def eval_link_spec(link_spec, link_file_names, data_dir, link_file_column_map,
                 suffix = "_" + link_file_names[i].replace(".csv", "")
                 links_df = links_df.join(links_df_add, how="outer", rsuffix=suffix)
 
-        print(links_df)
         if trace_od:
             od_column = settings.get('%s_od_column' % settings_tag, None)
             if od_column:
