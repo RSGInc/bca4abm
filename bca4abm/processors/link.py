@@ -82,7 +82,7 @@ def add_tables_to_locals(data_dir, settings, settings_tag, locals_dict):
     return locals_dict
 
 
-def eval_link_spec(link_spec, link_file_name, data_dir, link_file_column_map,
+def eval_link_spec(link_spec, link_file_names, data_dir, link_file_column_map,
                    settings, settings_tag, trace_tag=None, trace_od=None):
 
     locals_dict = bca.assign_variables_locals(settings, settings_tag)
@@ -95,10 +95,22 @@ def eval_link_spec(link_spec, link_file_name, data_dir, link_file_column_map,
 
         link_data_subdir = 'base-data' if scenario == 'base' else 'build-data'
 
-        links_df = read_csv_file(data_dir=os.path.join(data_dir, link_data_subdir),
-                                 file_name=link_file_name,
-                                 column_map=link_file_column_map)
+        for i in range(len(link_file_names)):
+            if i == 0:
+                links_df = read_csv_file(data_dir=os.path.join(data_dir, link_data_subdir),
+                                         file_name=link_file_names[0],
+                                         column_map=link_file_column_map)
+            else:
+                links_df_add = read_csv_file(data_dir=os.path.join(data_dir, link_data_subdir),
+                                             file_name=link_file_names[i],
+                                             column_map=link_file_column_map)
+                link_index_fields = settings['link_daily_index_fields']
+                links_df = links_df.set_index(link_index_fields)
+                links_df_add = links_df_add.set_index(link_index_fields)
+                suffix = "_" + link_file_names[i].replace(".csv", "")
+                links_df = links_df.join(links_df_add, how="outer",rsuffix=suffix)
 
+        print(links_df)
         if trace_od:
             od_column = settings.get('%s_od_column' % settings_tag, None)
             if od_column:
@@ -181,10 +193,10 @@ def link_daily_processor(link_daily_spec, settings, data_dir, trace_od):
 
     print "---------- link_daily_processor"
 
-    link_daily_file_name = settings['link_daily_file_name']
+    link_daily_file_names = settings['link_daily_file_names']
 
     results = eval_link_spec(link_daily_spec,
-                             link_daily_file_name,
+                             link_daily_file_names,
                              data_dir,
                              settings.get('link_daily_table_column_map', None),
                              settings,
