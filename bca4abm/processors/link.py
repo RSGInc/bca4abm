@@ -193,7 +193,10 @@ def link_daily_processor(link_daily_spec, settings, data_dir, trace_od):
 
     print "---------- link_daily_processor"
 
-    link_daily_file_names = settings['link_daily_file_names']
+    if 'link_daily_file_names' in settings['link_daily_file_names']:
+        link_daily_file_names = settings['link_daily_file_names']
+    else:
+        link_daily_file_names = settings['link_daily_file_name']
 
     results = eval_link_spec(link_daily_spec,
                              link_daily_file_names,
