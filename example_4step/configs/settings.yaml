@@ -1,23 +1,35 @@
+
+#### Global Settings
+
 provenance: example_4step.configs
 
 dump: True
 
 trace_od: [5, 11]
 
+# values available to all processors
+globals:
+  DISCOUNT_RATE: 1.0
+  ANNUALIZATION_FACTOR: 365
+
+#### Demographics / COCs Processor
+
+#specify cocs
+#note everybody is hard wired as 1.0 (100%)
+#note * in the expressions means the expression applies to all cocs
 coc_silos:
-  - coc_poverty
-  - coc_age
-  - coc_any
-  - coc_none
+  - coc_lowinc
+  - coc_medinc
+  - coc_highinc
+  - coc_veryhighinc
+  - coc_ext_minority
+  - coc_ext_lowengpro
+  - coc_ext_age18or65
+  - coc_lowinc_ext
   - everybody
 
 # orig or dest
 trip_coc_end: orig
-
-# values available to all processors
-globals:
-  DISCOUNT_RATE: 0.75
-  ANNUALIZATION_FACTOR: 365
 
 # file name for cvals table csv data input file (expect versions in build and base data subdirs)
 cval_file_name: mf.cval.csv
@@ -29,6 +41,8 @@ ext_cocs_file_name: cocs.csv
 locals_aggregate_demographics:
   SAMPLE_CONSTANT: 42
 
+#### Zones Processor
+
 # file name for zones table csv data input files (expect versions in build and base data subdirs)
 # data will be combined into a single table with columns names prefixed with 'base_' or 'build_'
 # (e.g.) if ma.hbcdcls.csv has a column 'hbcdcls' you will have 'base_hbcdcls' and 'build_hbcdcls'
@@ -36,13 +50,16 @@ aggregate_zone_file_names:
   - ma.hbcdcls.csv
   - ma.hbohdcls.csv
   - ma.hbomdcls.csv
+  - ma.hboldcls.csv
   - ma.hbrhdcls.csv
   - ma.hbrldcls.csv
   - ma.hbrmdcls.csv
   - ma.hbsldcls.csv
   - ma.hbsmdcls.csv
+  - ma.hbshdcls.csv
   - ma.hbwhdcls.csv
   - ma.hbwldcls.csv
+  - ma.hbwmdcls.csv
   - ma.nhbnwdcls.csv
   - ma.nhbwdcls.csv
   - ma.schdcls.csv
@@ -66,40 +83,69 @@ aggregate_zone_file_names:
 
 # values available to expressions in aggregate_zone_processor
 locals_aggregate_zone:
+  #auto ownership variables
   ANNUAL_COST_PER_VEHICLE: 6611
-  # Average number of cars in HHs with 3+ cars
   AVERAGE_AUTOS_IN_3PLUS: 3.5
-  # not sure what these should be
-  UPM_HBC: 1.0
-  VOT_HBC: 1.0
-  UPM_HBO: 1.0
-  VOT_HBO: 1.0
-  UPM_HBR: 1.0
-  VOT_HBR: 1.0
-  UPM_HBS: 1.0
-  VOT_HBS: 1.0
-  UPM_HBW: 1.0
-  UPM_HBW: 1.0
-  VOT_HBW: 1.0
-  UPM_NHBNW: 1.0
-  VOT_NHBNW: 1.0
-  UPM_NHBW: 1.0
-  VOT_NHBW: 1.0
-  UPM_SCH: 1.0
-  VOT_SCH: 1.0
+  #utilities per minute (IVT coefficients from Metro model)
+  UPM_HBC: 0.0532
+  UPM_HBO: 0.0215
+  UPM_HBR: 0.0215
+  UPM_HBS: 0.0215
+  UPM_HBW: 0.0361
+  UPM_NHBNW: 0.0250
+  UPM_NHBW: 0.0250
+  UPM_SCH: 0.42
+  #value-of-time ($/hour; currently all equal, USDOT)
+  VOT_HBC: 14.66
+  VOT_HBO: 14.66
+  VOT_HBR: 14.66
+  VOT_HBS: 14.66
+  VOT_HBW: 14.66
+  VOT_NHBNW: 14.66
+  VOT_NHBW: 14.66
+  VOT_SCH: 14.66
 
+#### OD Processor
+
+aggregate_od_matrices:
+  assign_mfs: assign_mfs.omx
+  skims_mfs: skims_mfs.omx
+  mode_choice_pa: mode_choice_pa.omx
+  park_cost: parking_cost.omx
+  
 locals_aggregate_od:
-  PASSENGER_TRAVEL_VOT: 14.66
-
-
-locals_aggregate_trips:
-
-
-aggregate_data_manifest_column_map:
-
+  #time-of-day factors
+  HBC_PK: 0.407
+  HBC_OP: 0.593
+  #value-of-time ($/hour; currently all equal, USDOT)
+  VOT_HBC: 14.66
+  VOT_HBO: 14.66
+  VOT_HBR: 14.66
+  VOT_HBS: 14.66
+  VOT_HBW: 14.66
+  VOT_NHBNW: 14.66
+  VOT_NHBW: 14.66
+  VOT_SCH: 14.66
+  VOT_MEDTRK: 25.00
+  VOT_HVYTRK: 38.00
+  VOT_DRIVE_TRANSIT: 14.66
+  #Simple ITHIM
+  POPULATION: 3000000
+  WALK_SPEED: 3
+  BIKE_SPEED: 10
+  AVG_WALK_TIME_GROWTH_RATIO: -0.00028 
+  AVG_BIKE_TIME_GROWTH_RATIO: -0.00030
+  DOLLARS_PER_DALY: 80000
+  
+#### Link Daily Processor
 
 link_daily_file_names:
   - linksMD1.csv
+  - linksPM2.csv
+
+link_daily_index_fields:
+  - i
+  - j
 
 link_daily_table_column_map:
   i: i
@@ -109,11 +155,16 @@ link_daily_table_column_map:
   "@zone": zone
   "@mtvol": mtvol
   "@htvol": htvol
+  "@speed": speed
   length: length
   num_lanes: num_lanes
-  volume_delay_func: vdf
+  volume_delay_func: volume_delay_func
+  "@urbrur": urbrur
+  "@divhwy": divhwy
+  "@waterf": waterf
+  "@noisef": noisef
 
-# specify column name to enable od tracing (if not specified, just trace first link)
+# specify column name to enable zone tracing for both the o and the d zone
 link_daily_od_column: zone
 
 locals_link_daily:
@@ -121,6 +172,14 @@ locals_link_daily:
   LINK_OFFPEAK_TOD_SHARE_AUTO: 8.7
   LINK_PEAK_TOD_SHARE_TRANSIT: 3.2
   LINK_OFFPEAK_TOD_SHARE_TRANSIT: 6.1
+  #SPF coefficients
+  SPF_RS_A: -11.63
+  SPF_RS_B: 1.33
+  SPF_RS_Y: 1.00
+  SPF_INT_A: -10.99
+  SPF_INT_B: 1.07
+  SPF_INT_Y: 0.23
+  #CMF settings
   CMF_RS: 1.0
   CALIBRATION_RS: 1.0
   CMF_INT: 1.0
@@ -149,12 +208,25 @@ locals_link_daily:
   NOISE_COST_HEVTRUCKS_FREEWAY: 41.955
   NOISE_COST_HEVTRUCKS_ARTERIAL: 44.17
   NOISE_COST_HEVTRUCKS_COLLECTOR: 8.71
+  #Vehicle operating cost
+  GAS_COST: 2.80
+  TRUCK_GAS_COST: 3.08
+  GALLON_TO_BTU: 120524
+  CAR_COST_PER_MILE: 0.0628
+  TRUCK_COST_PER_MILE: 0.5070
+  #emissions
+  GRAMS_TO_METRIC_TONS: 0.000001
+  CO2_COST: 51.81
+  PM25_COST: 459000
+  PM10_COST: 139000
+  NOX_COST: 7300
+  VOCS_COST: 37900
+  CO2_PTYPE: 98
+  PM25_PTYPE: 110
+  PM10_PTYPE: 100
+  NOX_PTYPE: 3
+  VOCS_PTYPE: 87
+  FUEL_CONSUMPTION_PTYPE: 92
 
 tables_link_daily:
   EMISSIONS: moves_2010_summer_running_rates.csv
-
-aggregate_od_matrices:
-  assign_mfs: assign_mfs.omx
-  skims_mfs: skims_mfs.omx
-
-

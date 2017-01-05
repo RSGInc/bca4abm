@@ -85,6 +85,10 @@ def add_tables_to_locals(data_dir, settings, settings_tag, locals_dict):
 def eval_link_spec(link_spec, link_file_names, data_dir, link_file_column_map,
                    settings, settings_tag, trace_tag=None, trace_od=None):
 
+    # we accept a single string as well as a list of strings
+    if isinstance(link_file_names, str):
+        link_file_names = [link_file_names]
+
     locals_dict = bca.assign_variables_locals(settings, settings_tag)
 
     locals_dict = add_tables_to_locals(data_dir, settings, settings_tag, locals_dict)

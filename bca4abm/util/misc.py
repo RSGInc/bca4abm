@@ -157,7 +157,7 @@ def add_aggregate_results(results, spec, source='', zonal=True):
                 aggregate_results.loc[new_row_index, silo] \
                     = (results[target] * zone_demographics[pct_col]).sum()
 
-        #target processed
+        # target processed
         seen.add(target)
 
     # no need to call orca.add_table so save results if we use local
