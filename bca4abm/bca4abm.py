@@ -152,6 +152,18 @@ def undupe_column_names(df, template="{} ({})"):
     return df
 
 
+class NumpyLogger(object):
+    def __init__(self, logger):
+        self.logger = logger
+        self.target = ''
+        self.expression = ''
+
+    def write(self, msg):
+        self.logger.error("numpy warning: %s" % (msg.rstrip()))
+
+        self.logger.error("expression: %s = %s"
+                     % (str(self.target), str(self.expression)))
+
 def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, trace_rows=None):
     """
     Evaluate a set of variable expressions from a spec in the context
@@ -187,6 +199,8 @@ def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, tra
     trace_df : pandas.DataFrame or None
         a dataframe containing the eval result values for each assignment expression
     """
+
+    np_logger = NumpyLogger(logger)
 
     def is_local(target):
         return target.startswith('_') and target.isupper()
@@ -234,9 +248,33 @@ def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, tra
             continue
 
         try:
+
+            def log_numpy_err(type, flag):
+                logger.error("assign_variables warning: %s: %s" % (type(err).__name__, str(err)))
+
+                logger.error("assign_variables expression: %s = %s"
+                             % (str(target), str(expression)))
+
+                print("numpy error (%s), with flag %s" % (type, flag))
+
+            # saved_handler = np.seterrcall(log_numpy_err)
+            # save_err = np.seterr(all='call')
+
+            # FIXME - log numpy warnings
+            np_logger.target = str(target)
+            np_logger.expression = str(expression)
+            saved_handler = np.seterrcall(np_logger)
+            save_err = np.seterr(all='log')
+
             values = to_series(eval(expression, globals(), locals_dict), target=target)
+
+            np.seterr(**save_err)
+            np.seterrcall(saved_handler)
+
         except Exception as err:
-            logger.error("assign_variables failed target: %s expression: %s"
+            logger.error("assign_variables error: %s: %s" % (type(err).__name__, str(err)))
+
+            logger.error("assign_variables expression: %s = %s"
                          % (str(target), str(expression)))
 
             # values = to_series(None, target=target)

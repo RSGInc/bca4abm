@@ -122,10 +122,16 @@ def add_aggregate_results(results, spec, source='', zonal=True):
     for e in reversed(zip(spec.target, spec.silos, spec.description)):
         target, silos, description = e
 
-        # no silos specified in expression file
-        # or target not in results (e.g. a temp variable)
-        # or we already handled a later occurrence of this same target
-        if not silos or target not in results.columns or target in seen:
+        # nothing to do if we already handled a later occurrence of this same target
+        if target in seen:
+            continue
+
+        # remember that we handled this target
+        seen.add(target)
+            
+        # don't add results if target not in results (e.g. a temp variable)
+        # or no silos specified in expression file
+        if target not in results.columns or not silos:
             continue
 
         # convert silos string to an array of silo names
@@ -157,7 +163,4 @@ def add_aggregate_results(results, spec, source='', zonal=True):
                 aggregate_results.loc[new_row_index, silo] \
                     = (results[target] * zone_demographics[pct_col]).sum()
 
-        # target processed
-        seen.add(target)
-
-    # no need to call orca.add_table so save results if we use local
+    # no need to call orca.add_table to save results if we use local

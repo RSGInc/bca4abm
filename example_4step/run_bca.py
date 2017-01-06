@@ -17,6 +17,15 @@ from bca4abm import tracing
 # the following import has the side-effect of registering injectables
 from bca4abm import bca4abm as bca
 
+import warnings
+warnings.simplefilter("always")
+
+# import logging
+# logging.captureWarnings(capture=True)
+
+old_settings = np.seterr(divide='raise', over='raise', invalid='raise', under='ignore')
+print "numpy.geterr: %s" % np.geterr()
+
 parent_dir = os.path.dirname(__file__)
 orca.add_injectable('configs_dir', os.path.join(parent_dir, 'configs'))
 orca.add_injectable('data_dir', os.path.join(parent_dir, 'data'))

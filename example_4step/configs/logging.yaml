@@ -9,8 +9,8 @@ logging:
 
   # Configuring the default (root) logger is highly recommended
   root:
-    level: !!python/name:logging.NOTSET
-    handlers: [console]
+    level: !!python/name:logging.WARN
+    handlers: [console, logfile]
 
   loggers:
 
@@ -36,7 +36,8 @@ logging:
       filename: !!python/object/apply:bca4abm.tracing.log_file_path ['bca.log']
       mode: w
       formatter: simpleFormatter
-      level: !!python/name:logging.NOTSET
+      #level: !!python/name:logging.NOTSET
+      level: !!python/name:logging.INFO
 
     tracefile:
       class: logging.FileHandler
