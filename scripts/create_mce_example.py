@@ -92,26 +92,30 @@ TAZ_FILES = [
     'ma.nhwpr.csv',
     'ma.schdcls.csv',
     'ma.schpr.csv',
-    'mf.cval.csv'
+    'mf.cval.csv',
+    'cocs.csv'
     ]
 
 SKIM_FILES = [
     'skims_mfs.omx',
-    'assign_mfs.omx'
+    'assign_mfs.omx',
+    'parking_cost.omx',
+    'mode_choice_pa.omx'
 ]
 
 MAX_ZONE = 25
 
-SOURCE_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'metro_mce_data')
+SOURCE_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'metro_mce', 'bc_setup', 'data')
 DEST_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'example_4step', 'data')
 
 
-copy_slice(
-    source_dir=os.path.join(SOURCE_DATA_DIR, 'build-data'),
-    dest_dir=os.path.join(DEST_DATA_DIR, 'build-data'),
-    taz_file_names=TAZ_FILES,
-    skim_file_names=SKIM_FILES,
-    link_file_names=['linksMD1.csv', 'linksPM2.csv']
-)
+for d in ['build-data', 'base-data']:
+    copy_slice(
+        source_dir=os.path.join(SOURCE_DATA_DIR, d),
+        dest_dir=os.path.join(DEST_DATA_DIR, d),
+        taz_file_names=TAZ_FILES,
+        skim_file_names=SKIM_FILES,
+        link_file_names=['linksMD1.csv', 'linksPM2.csv']
+    )
 
 # python ./scripts/create_mce_example.py
