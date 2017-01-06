@@ -128,7 +128,7 @@ def add_aggregate_results(results, spec, source='', zonal=True):
 
         # remember that we handled this target
         seen.add(target)
-            
+
         # don't add results if target not in results (e.g. a temp variable)
         # or no silos specified in expression file
         if target not in results.columns or not silos:

@@ -198,7 +198,7 @@ def link_daily_processor(link_daily_spec, settings, data_dir, trace_od):
 
     if 'link_daily_file_names' in settings:
         link_daily_file_names = settings['link_daily_file_names']
-    elif 'link_daily_file_names' in settings:
+    elif 'link_daily_file_name' in settings:
         link_daily_file_names = settings['link_daily_file_name']
     else:
         raise RuntimeError("no link_daily_file_names specified in settings file")
