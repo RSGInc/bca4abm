@@ -9,6 +9,7 @@ import pandas as pd
 import orca
 import yaml
 
+import tracing
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,9 @@ def hh_chunk_size(settings):
 
 @orca.injectable()
 def settings(configs_dir, settings_file_name):
-    with open(os.path.join(configs_dir, settings_file_name)) as f:
+
+    settings_file_path = os.path.join(configs_dir, settings_file_name)
+    with open(settings_file_path) as f:
         return yaml.load(f)
 
 

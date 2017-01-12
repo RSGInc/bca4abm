@@ -1,0 +1,65 @@
+Silos,Description,Target,Expression
+# identify cval columns for each number of autos group,,,
+,,_BASE_AUTO_1_COLNAMES,zones.columns.map(lambda x: x.startswith('base_') and 'c2' in x)
+,,_BASE_AUTO_2_COLNAMES,zones.columns.map(lambda x: x.startswith('base_') and 'c3' in x)
+,,_BASE_AUTO_3P_COLNAMES,zones.columns.map(lambda x: x.startswith('base_') and 'c4' in x)
+,,_BUILD_AUTO_1_COLNAMES,zones.columns.map(lambda x: x.startswith('build_') and 'c2' in x)
+,,_BUILD_AUTO_2_COLNAMES,zones.columns.map(lambda x: x.startswith('build_') and 'c3' in x)
+,,_BUILD_AUTO_3P_COLNAMES,zones.columns.map(lambda x: x.startswith('build_') and 'c4' in x)
+# calculate auto ownership,,,
+,Autos in HHs with 1 auto in base year,base_1_auto,"zones.loc[:, _BASE_AUTO_1_COLNAMES].sum(axis=1)"
+,Autos in HHs with 2 auto in base year,base_2_auto,"zones.loc[:, _BASE_AUTO_2_COLNAMES].sum(axis=1) * 2"
+,Autos in HHs with 3plus auto in base year,base_3p_auto,"zones.loc[:, _BASE_AUTO_3P_COLNAMES].sum(axis=1) * AVERAGE_AUTOS_IN_3PLUS"
+,Autos in HHs with 1 auto in build,build_1_auto,"zones.loc[:, _BUILD_AUTO_1_COLNAMES].sum(axis=1)"
+,Autos in HHs with 2 auto in build year,build_2_auto,"zones.loc[:, _BUILD_AUTO_2_COLNAMES].sum(axis=1) * 2"
+,Autos in HHs with 3plus auto in build year,build_3p_auto,"zones.loc[:, _BUILD_AUTO_3P_COLNAMES].sum(axis=1) * AVERAGE_AUTOS_IN_3PLUS"
+,base scenario auto ownership,base_auto_ownership,base_1_auto + base_2_auto + base_3p_auto
+,build scenario auto ownership,build_auto_ownership,build_1_auto + build_2_auto + build_3p_auto
+# calculate auto ownership benefit,,,
+,base scenario auto ownership cost,base_auto_ownership_cost,base_auto_ownership * ANNUAL_COST_PER_VEHICLE
+,build scenario auto ownership cost,build_auto_ownership_cost,build_auto_ownership * ANNUAL_COST_PER_VEHICLE
+*,auto ownership cost benefit,auto_ownership_benefit, build_auto_ownership_cost - base_auto_ownership_cost
+# calculate productions by purpose for accessibility benefit,,,
+,hbc productions in base scenario,base_prod_hbc,zones.base_hbcpr
+,hbo productions in base scenario,base_prod_hbo,zones.base_hboprl + zones.base_hboprm + zones.base_hboprh
+,hbr productions in base scenario,base_prod_hbr,zones.base_hbrprl + zones.base_hbrprm + zones.base_hbrprh
+,hbs productions in base scenario,base_prod_hbs,zones.base_hbsprl + zones.base_hbsprm + zones.base_hbsprh
+,hbw productions in base scenario,base_prod_hbw,zones.base_hbwprl + zones.base_hbwprm + zones.base_hbwprh
+,nhbnw productions in base scenario,base_prod_nhbnw,zones.base_nhnwpr
+,nhbw productions in base scenario,base_prod_nhbw,zones.base_nhwpr
+,sch productions in base scenario,base_prod_sch,zones.base_schpr
+,hbc productions in build scenario,build_prod_hbc,zones.build_hbcpr
+,hbo productions in build scenario,build_prod_hbo,zones.build_hboprl + zones.build_hboprm + zones.build_hboprh
+,hbr productions in build scenario,build_prod_hbr,zones.build_hbrprl + zones.build_hbrprm + zones.build_hbrprh
+,hbs productions in build scenario,build_prod_hbs,zones.build_hbsprl + zones.build_hbsprm + zones.build_hbsprh
+,hbw productions in build scenario,build_prod_hbw,zones.build_hbwprl + zones.build_hbwprm + zones.build_hbwprh
+,nhbnw productions in build scenario,build_prod_nhbnw,zones.build_nhnwpr
+,nhbw productions in build scenario,build_prod_nhbw,zones.build_nhwpr
+,sch productions in build scenario,build_prod_sch,zones.build_schpr
+#get logsums by purpose,,,
+,hbc logsum in base scenario,base_ls_hbc,zones.base_hbcdcls
+,hbo logsum in base scenario,base_ls_hbo,zones.base_hboldcls + zones.base_hbomdcls + zones.base_hbohdcls
+,hbr logsum in base scenario,base_ls_hbr,zones.base_hbrldcls + zones.base_hbrmdcls + zones.base_hbrhdcls
+,hbs logsum in base scenario,base_ls_hbs,zones.base_hbsldcls + zones.base_hbsmdcls + zones.base_hbshdcls
+,hbw logsum in base scenario,base_ls_hbw,zones.base_hbwldcls + zones.base_hbwmdcls + zones.base_hbwhdcls
+,nhbnw logsum in base scenario,base_ls_nhbnw,zones.base_nhbnwdcls
+,nhbw logsum in base scenario,base_ls_nhbw,zones.base_nhbwdcls
+,sch logsum in base scenario,base_ls_sch,zones.base_schdcls
+,hbc logsum in build scenario,build_ls_hbc,zones.build_hbcdcls
+,hbo logsum in build scenario,build_ls_hbo,zones.build_hboldcls + zones.build_hbomdcls + zones.build_hbohdcls
+,hbr logsum in build scenario,build_ls_hbr,zones.build_hbrldcls + zones.build_hbrmdcls + zones.build_hbrhdcls
+,hbs logsum in build scenario,build_ls_hbs,zones.build_hbsldcls + zones.build_hbsmdcls + zones.build_hbshdcls
+,hbw logsum in build scenario,build_ls_hbw,zones.build_hbwldcls + zones.build_hbwmdcls + zones.build_hbwhdcls
+,nhbnw logsum in build scenario,build_ls_nhbnw,zones.build_nhbnwdcls
+,nhbw logsum in build scenario,build_ls_nhbw,zones.build_nhbwdcls
+,sch logsum in build scenario,build_ls_sch,zones.build_schdcls
+#calculate accessibility benefit,,,
+,,access_benefit_hbc,(0.5*(base_prod_hbc + build_prod_hbc)*(build_ls_hbc - base_ls_hbc)/UPM_HBC)*(VOT_HBC/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR
+,,access_benefit_hbo,(0.5*(base_prod_hbo + build_prod_hbo)*(build_ls_hbo - base_ls_hbo)/UPM_HBO)*(VOT_HBO/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR
+,,access_benefit_hbr,(0.5*(base_prod_hbr + build_prod_hbr)*(build_ls_hbr - base_ls_hbr)/UPM_HBR)*(VOT_HBR/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR
+,,access_benefit_hbs,(0.5*(base_prod_hbs + build_prod_hbs)*(build_ls_hbs - base_ls_hbs)/UPM_HBS)*(VOT_HBS/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR
+,,access_benefit_hbw,(0.5*(base_prod_hbw + build_prod_hbw)*(build_ls_hbw - base_ls_hbw)/UPM_HBW)*(VOT_HBW/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR
+,,access_benefit_nhbnw,(0.5*(base_prod_nhbnw + build_prod_nhbnw)*(build_ls_nhbnw - base_ls_nhbnw)/UPM_NHBNW)*(VOT_NHBNW/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR
+,,access_benefit_nhbw,(0.5*(base_prod_nhbw + build_prod_nhbw)*(build_ls_nhbw - base_ls_nhbw)/UPM_NHBW)*(VOT_NHBW/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR
+,,access_benefit_sch,(0.5*(base_prod_sch + build_prod_sch)*(build_ls_sch - base_ls_sch)/UPM_SCH)*(VOT_SCH/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR
+*,accessibility benefit,access_benefit_total,access_benefit_hbc + access_benefit_hbo + access_benefit_hbr + access_benefit_hbs + access_benefit_hbw + access_benefit_nhbnw + access_benefit_nhbw + access_benefit_sch

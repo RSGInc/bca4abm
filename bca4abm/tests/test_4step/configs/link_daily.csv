@@ -1,0 +1,17 @@
+Silos,Description,Target,Expression
+,,_auto_volume,links.svol + links.hvol
+,,_med_truck_volume,links.mtvol
+,,_heavy_truck_volume,links.htvol
+,,_total_truck_volume,_med_truck_volume + _heavy_truck_volume
+,,_total_volume,_auto_volume + _total_truck_volume
+#
+,road ID,_road_ID,"links[['i','j']].min(axis=1).astype(str) + links[['i','j']].max(axis=1).astype(str)"
+,total segment volume (sum of two directions),_seg_volume,_total_volume.groupby(_road_ID).transform('sum')
+,max leg volume from in links at to_node,_max_in_vol,_seg_volume.groupby(links['j']).transform('max')
+,max leg volume from out links at to_node,_max_out_vol,"links['j'].apply(lambda x, links, seg_volume: max(seg_volume[links.i==x]) if (links.i==x).any() else 0.0, args=(links, _seg_volume,))"
+,min leg volume from in links at to_node,_min_in_vol,_seg_volume.groupby(links['j']).transform('min')
+,min leg volume from out links at to_node,_min_out_vol,"links['j'].apply(lambda x, links, seg_volume: min(seg_volume[links.i==x]) if (links.i==x).any() else 0.0, args=(links, _seg_volume,))"
+,max volume at to_node,_max_vol,"pd.concat([_max_in_vol,_max_out_vol],axis=1).max(axis=1)"
+,min volume at to_node,_min_vol,"pd.concat([_min_in_vol,_min_out_vol],axis=1).min(axis=1)"
+#
+*,,max_in_vol,_max_in_vol

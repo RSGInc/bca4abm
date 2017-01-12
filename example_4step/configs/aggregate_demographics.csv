@@ -1,0 +1,25 @@
+Silos,Description,Target,Expression
+# identify cval columns for each income group,,,
+,,_LOW_INCOME_COLNAMES,cvals.columns.map(lambda x: x.startswith('base_') and 'i1' in x)
+,,_MED_INCOME_COLNAMES,cvals.columns.map(lambda x: x.startswith('base_') and 'i2' in x )
+,,_HIGH_INCOME_COLNAMES,cvals.columns.map(lambda x: x.startswith('base_') and 'i3' in x )
+,,_VERYHIGH_INCOME_COLNAMES,cvals.columns.map(lambda x: x.startswith('base_') and 'i4' in x )
+,,_BASE_COLNAMES,cvals.columns.map(lambda x: x.startswith('base_'))
+# count hhs in each group,,,
+,,households,"cvals.loc[:, _BASE_COLNAMES].sum(axis=1)"
+,,coc_lowinc_count,"cvals.loc[:, _LOW_INCOME_COLNAMES].sum(axis=1)"
+,,coc_medinc_count,"cvals.loc[:, _MED_INCOME_COLNAMES].sum(axis=1)"
+,,coc_highinc_count,"cvals.loc[:, _HIGH_INCOME_COLNAMES].sum(axis=1)"
+,,coc_veryhighinc_count,"cvals.loc[:, _VERYHIGH_INCOME_COLNAMES].sum(axis=1)"
+#calculate percent of hhs by zone in each group; note everybody is hardwired as 1 (100%),,,
+,,coc_lowinc,coc_lowinc_count/households
+,,coc_medinc,coc_medinc_count/households
+,,coc_highinc,coc_highinc_count/households
+,,coc_veryhighinc,coc_veryhighinc_count/households
+#get externally defined COCs as well,,,
+,,coc_ext_minority,cvals.base_minority
+,,coc_ext_lowengpro,cvals.base_lowengpro
+,,coc_ext_age18or65,cvals.base_age18or65
+,,coc_lowinc_ext,cvals.base_lowinc
+#check calculations,,,
+*,total hhs for each coc,hhs_for_the_coc,households

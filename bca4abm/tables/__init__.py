@@ -6,3 +6,4 @@ import trips
 import households
 import persons
 import benefits
+import zones

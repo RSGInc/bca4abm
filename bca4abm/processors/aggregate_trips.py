@@ -5,7 +5,7 @@ import numpy as np
 import openmatrix as omx
 
 from bca4abm import bca4abm as bca
-from ..util.misc import missing_columns, add_result_columns, add_summary_results
+from ..util.misc import missing_columns, add_summary_results
 
 from bca4abm import tracing
 
@@ -46,7 +46,7 @@ def get_omx_matrix(matrix_dir, omx_file_name, omx_key, close_after_read=True):
         return 0.0
     # print "reading %s / %s '%s'" % (matrix_dir, omx_file_name, omx_key)
     omx_file_name = os.path.join(matrix_dir, omx_file_name)
-    omx_file = omx.openFile(omx_file_name, 'r')
+    omx_file = omx.open_file(omx_file_name, 'r')
     matrix = omx_file[omx_key][:, :]
     if close_after_read:
         # print "closing %s / %s '%s'" % (matrix_dir, omx_file_name, omx_key)
@@ -74,7 +74,7 @@ def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, se
     assert not missing_columns(aggregate_trips_manifest,
                                settings['aggregate_data_manifest_column_map'].values())
 
-    locals_dict = bca.assign_variables_locals(settings, 'locals_aggregate_trips')
+    locals_dict = bca.assign_variables_locals(settings, 'aggregate_trips')
 
     results = None
     for row in aggregate_trips_manifest.itertuples(index=True):

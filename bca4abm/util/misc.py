@@ -20,11 +20,6 @@ def mapped_columns(*column_maps):
     return list(result)
 
 
-def get_setting(key):
-    settings = orca.eval_variable('settings')
-    return settings.get(key)
-
-
 def add_assigned_columns(base_dfname, from_df):
 
     for col in from_df.columns:
@@ -64,29 +59,12 @@ def add_summary_results(df, summary_column_names=None, prefix='', spec=None):
 
     # if it has more than one row, sum the columns
     if df.shape[0] > 1:
+        # print "#\n#\n# transposing\n#\n#\n"
         df = pd.DataFrame(df.sum()).T
 
     add_targets_to_data_dictionary(df.columns, prefix, spec)
 
     add_result_columns("summary_results", df, prefix)
-
-
-def add_grouped_results(df, summary_column_names, prefix='', spec=None):
-    # summarize everything
-    coc_columns = orca.get_injectable('coc_column_names')
-
-    if coc_columns == [None]:
-        raise RuntimeError("add_grouped_results: coc_column_names not initialized"
-                           " - did you forget to run demographics_processor?")
-
-    grouped = df.groupby(coc_columns)
-
-    aggregations = {column: 'sum' for column in summary_column_names}
-    grouped = grouped.agg(aggregations)
-
-    add_result_columns("coc_results", grouped, prefix)
-
-    add_summary_results(grouped, prefix=prefix, spec=spec)
 
 
 def missing_columns(table, expected_column_names):
@@ -118,3 +96,71 @@ def expect_columns(table, expected_column_names):
         raise RuntimeError('expect_columns MISSING [%s] EXTRA:[%s]' % (missing, extra))
 
     return True
+
+
+WILDCARD = '*'
+
+
+def add_aggregate_results(results, spec, source='', zonal=True):
+
+    if 'silos' not in spec.columns:
+        raise RuntimeError('No Silo column in spec')
+
+    if zonal:
+        all_silos = orca.get_injectable('coc_silos')
+        zone_demographics = orca.get_table('zone_demographics').to_frame()
+    else:
+        all_silos = ['everybody']
+        zone_demographics = None
+
+    # use orca cached table instead of getting a copy
+    # aggregate_results = orca.get_table('aggregate_results').to_frame()
+    aggregate_results = orca.get_table('aggregate_results').local
+
+    # target can appear more than once, so this ensures we only use the final one
+    seen = set()
+    for e in reversed(zip(spec.target, spec.silos, spec.description)):
+        target, silos, description = e
+
+        # nothing to do if we already handled a later occurrence of this same target
+        if target in seen:
+            continue
+
+        # remember that we handled this target
+        seen.add(target)
+
+        # don't add results if target not in results (e.g. a temp variable)
+        # or no silos specified in expression file
+        if target not in results.columns or not silos:
+            continue
+
+        # convert silos string to an array of silo names
+        if silos == WILDCARD:
+            silo_names = all_silos
+        else:
+            silo_names = silos.split(';')
+
+        new_row_index = len(aggregate_results)
+        aggregate_results.loc[new_row_index, 'Processor'] = source
+        aggregate_results.loc[new_row_index, 'Target'] = target
+        aggregate_results.loc[new_row_index, 'Description'] = description
+
+        for silo in silo_names:
+
+            if '=' in silo:
+                # check for specified percent coefficient of form 'everybody=coc_poverty'
+                # rhs could (as in this case) be a known coc, or it could be
+                # some other coefficient computed in aggregated_demographics
+                silo, pct_col = silo.split('=', 1)
+            else:
+                pct_col = silo
+
+            # print "target %s, silo %s, pct_col %s" % (target, silo, pct_col)
+
+            if pct_col == 'everybody':
+                aggregate_results.loc[new_row_index, silo] = results[target].sum()
+            else:
+                aggregate_results.loc[new_row_index, silo] \
+                    = (results[target] * zone_demographics[pct_col]).sum()
+
+    # no need to call orca.add_table to save results if we use local

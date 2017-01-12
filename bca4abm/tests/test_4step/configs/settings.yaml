@@ -1,0 +1,159 @@
+provenance: tests.test_4step.configs
+
+dump: True
+
+trace_od: [5, 11]
+
+coc_silos:
+  - coc_poverty
+  - coc_age
+  - coc_any
+  - coc_none
+  - everybody
+
+# orig or dest
+trip_coc_end: orig
+
+# values available to all processors
+globals:
+  DISCOUNT_RATE: 0.75
+  ANNUALIZATION_FACTOR: 365
+
+# file name for cvals table csv data input file (expect versions in build and base data subdirs)
+cval_file_name: mf.cval.csv
+
+# file name for external cocs table csv data input file (expect versions in build and base data subdirs)
+ext_cocs_file_name: cocs.csv
+
+# values available to expressions in aggregate_demographics_processor
+locals_aggregate_demographics:
+  SAMPLE_CONSTANT: 42
+
+# file name for zones table csv data input files (expect versions in build and base data subdirs)
+# data will be combined into a single table with columns names prefixed with 'base_' or 'build_'
+# (e.g.) if ma.hbcdcls.csv has a column 'hbcdcls' you will have 'base_hbcdcls' and 'build_hbcdcls'
+aggregate_zone_file_names:
+  - ma.hbcdcls.csv
+  - ma.hbohdcls.csv
+  - ma.hbomdcls.csv
+  - ma.hbrhdcls.csv
+  - ma.hbrldcls.csv
+  - ma.hbrmdcls.csv
+  - ma.hbsldcls.csv
+  - ma.hbsmdcls.csv
+  - ma.hbwhdcls.csv
+  - ma.hbwldcls.csv
+  - ma.nhbnwdcls.csv
+  - ma.nhbwdcls.csv
+  - ma.schdcls.csv
+  - mf.cval.csv
+  - ma.collpr.csv
+  - ma.hboprh.csv
+  - ma.hboprl.csv
+  - ma.hboprm.csv
+  - ma.hbrprh.csv
+  - ma.hbrprl.csv
+  - ma.hbrprm.csv
+  - ma.hbsprh.csv
+  - ma.hbsprl.csv
+  - ma.hbsprm.csv
+  - ma.hbwprh.csv
+  - ma.hbwprl.csv
+  - ma.hbwprm.csv
+  - ma.nhnwpr.csv
+  - ma.nhwpr.csv
+  - ma.schpr.csv
+
+# values available to expressions in aggregate_zone_processor
+locals_aggregate_zone:
+  ANNUAL_COST_PER_VEHICLE: 6611
+  # Average number of cars in HHs with 3+ cars
+  AVERAGE_AUTOS_IN_3PLUS: 3.5
+  # not sure what these should be
+  UPM_HBC: 1.0
+  VOT_HBC: 1.0
+  UPM_HBO: 1.0
+  VOT_HBO: 1.0
+  UPM_HBR: 1.0
+  VOT_HBR: 1.0
+  UPM_HBS: 1.0
+  VOT_HBS: 1.0
+  UPM_HBW: 1.0
+  UPM_HBW: 1.0
+  VOT_HBW: 1.0
+  UPM_NHBNW: 1.0
+  VOT_NHBNW: 1.0
+  UPM_NHBW: 1.0
+  VOT_NHBW: 1.0
+  UPM_SCH: 1.0
+  VOT_SCH: 1.0
+
+locals_aggregate_od:
+  PASSENGER_TRAVEL_VOT: 14.66
+
+
+locals_aggregate_trips:
+
+
+aggregate_data_manifest_column_map:
+
+
+link_daily_file_names:
+  - linksMD1.csv
+
+link_daily_table_column_map:
+  i: i
+  j: j
+  "@hvol": hvol
+  "@svol": svol
+  "@zone": zone
+  "@mtvol": mtvol
+  "@htvol": htvol
+  length: length
+  num_lanes: num_lanes
+  volume_delay_func: vdf
+
+# specify column name to enable od tracing (if not specified, just trace first link)
+link_daily_od_column: zone
+
+locals_link_daily:
+  LINK_PEAK_TOD_SHARE_AUTO: 3.0
+  LINK_OFFPEAK_TOD_SHARE_AUTO: 8.7
+  LINK_PEAK_TOD_SHARE_TRANSIT: 3.2
+  LINK_OFFPEAK_TOD_SHARE_TRANSIT: 6.1
+  CMF_RS: 1.0
+  CALIBRATION_RS: 1.0
+  CMF_INT: 1.0
+  CALIBRATION_INT: 1.0
+  # Distribution of RS crashes
+  RS_CRASH_PDO: 0.679
+  RS_CRASH_INJURY: 0.308
+  RS_CRASH_FATAL: 0.013
+  # Distribution of INT crashes
+  INT_CRASH_PDO: 0.679
+  INT_CRASH_INJURY: 0.308
+  INT_CRASH_FATAL: 0.013
+  # Crash costs in Dollars
+  CRASH_COST_PDO: 2500
+  CRASH_COST_INJURY: 25000
+  CRASH_COST_FATAL: 100000
+  # Water pollution cost
+  WATER_POLLUTION_COST: 0.01625
+  # Noise pollution cost
+  NOISE_COST_AUTO_FREEWAY: 6.37
+  NOISE_COST_AUTO_ARTERIAL: 1.545
+  NOISE_COST_AUTO_COLLECTOR: 0.12
+  NOISE_COST_MEDTRUCKS_FREEWAY: 19.17
+  NOISE_COST_MEDTRUCKS_ARTERIAL: 10.945
+  NOISE_COST_MEDTRUCKS_COLLECTOR: 1.86
+  NOISE_COST_HEVTRUCKS_FREEWAY: 41.955
+  NOISE_COST_HEVTRUCKS_ARTERIAL: 44.17
+  NOISE_COST_HEVTRUCKS_COLLECTOR: 8.71
+
+tables_link_daily:
+  EMISSIONS: moves_2010_summer_running_rates.csv
+
+aggregate_od_matrices:
+  assign_mfs: assign_mfs.omx
+  skims_mfs: skims_mfs.omx
+

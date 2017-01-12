@@ -1,0 +1,69 @@
+Silos,Description,Target,Expression
+#,,,
+,,_BASE_AUTO_1_COLUMNS,zones.columns.map(lambda x: x.startswith('base_') and 'c2' in x)
+,,_BASE_AUTO_2_COLUMNS,zones.columns.map(lambda x: x.startswith('base_') and 'c3' in x)
+,,_BASE_AUTO_3P_COLUMNS,zones.columns.map(lambda x: x.startswith('base_') and 'c4' in x)
+,,_BUILD_AUTO_1_COLUMNS,zones.columns.map(lambda x: x.startswith('base_') and 'c2' in x)
+,,_BUILD_AUTO_2_COLUMNS,zones.columns.map(lambda x: x.startswith('base_') and 'c3' in x)
+,,_BUILD_AUTO_3P_COLUMNS,zones.columns.map(lambda x: x.startswith('base_') and 'c4' in x)
+#,,,
+,Autos in HHs with 1 auto in base year,base_1_auto,"zones.loc[:, _BASE_AUTO_1_COLUMNS].sum(axis=1)"
+,Autos in HHs with 2 auto in base year,base_2_auto,"zones.loc[:,_BASE_AUTO_2_COLUMNS].sum(axis=1) * 2"
+,Autos in HHs with 3plus auto in base year,base_3p_auto,"zones.loc[:,_BASE_AUTO_3P_COLUMNS].sum(axis=1) * AVERAGE_AUTOS_IN_3PLUS"
+,Autos in HHs with 1 auto in build,build_1_auto,"zones.loc[:,_BUILD_AUTO_1_COLUMNS].sum(axis=1)"
+,Autos in HHs with 2 auto in build year,build_2_auto,"zones.loc[:,_BUILD_AUTO_2_COLUMNS].sum(axis=1) * 2"
+,Autos in HHs with 3plus auto in build year,build_3p_auto,"zones.loc[:,_BUILD_AUTO_3P_COLUMNS].sum(axis=1) * AVERAGE_AUTOS_IN_3PLUS"
+,base scenario auto ownership,base_auto_ownership,base_1_auto + base_2_auto + base_3p_auto
+,build scenario auto ownership,build_auto_ownership,build_1_auto + build_2_auto + build_3p_auto
+,base scenario auto ownership cost,base_auto_ownership_cost,base_auto_ownership * ANNUAL_COST_PER_VEHICLE
+,build scenario auto ownership cost,build_auto_ownership_cost,build_auto_ownership * ANNUAL_COST_PER_VEHICLE
+*,auto ownership cost benefit,diff_auto_ownership_cost, build_auto_ownership_cost - base_auto_ownership_cost
+#,,,using HHs instead of productions for logsum benefits,,
+,total hbc productions from origin zone in base scenario,base_prod_hbc,zones.base_hbcpr
+,total hbo productions from origin zone in base scenario,base_prod_hbo,zones.base_hboprl + zones.base_hboprm + zones.base_hboprh
+,total hbr productions from origin zone in base scenario,base_prod_hbr,zones.base_hbrprl + zones.base_hbrprm + zones.base_hbrprh
+,total hbs productions from origin zone in base scenario,base_prod_hbs,zones.base_hbsprl + zones.base_hbsprm + zones.base_hbsprh
+,total hbw productions from origin zone in base scenario,base_prod_hbw,zones.base_hbwprl + zones.base_hbwprm + zones.base_hbwprh
+,total nhbnw productions from origin zone in base scenario,base_prod_nhbnw,zones.base_nhnwpr
+,total nhbw productions from origin zone in base scenario,base_prod_nhbw,zones.base_nhwpr
+,total sch productions from origin zone in base scenario,base_prod_sch,zones.base_schpr
+,total hbc productions from origin zone in build scenario,build_prod_hbc,zones.build_hbcpr
+,total hbo productions from origin zone in build scenario,build_prod_hbo,zones.build_hboprl + zones.build_hboprm + zones.build_hboprh
+,total hbr productions from origin zone in build scenario,build_prod_hbr,zones.build_hbrprl + zones.build_hbrprm + zones.build_hbrprh
+,total hbs productions from origin zone in build scenario,build_prod_hbs,zones.build_hbsprl + zones.build_hbsprm + zones.build_hbsprh
+,total hbw productions from origin zone in build scenario,build_prod_hbw,zones.build_hbwprl + zones.build_hbwprm + zones.build_hbwprh
+,total nhbnw productions from origin zone in build scenario,build_prod_nhbnw,zones.build_nhnwpr
+,total nhbw productions from origin zone in build scenario,build_prod_nhbw,zones.build_nhwpr
+,total sch productions from origin zone in build scenario,build_prod_sch,zones.build_schpr
+,avg hbc logsum from origin zone in base scenario,base_ls_hbc,zones.base_hbcdcls
+# fixme avg hbo logsum from origin zone in base scenario,base_ls_hbo,zones.base_hbodcls
+,avg hbo logsum from origin zone in base scenario,base_ls_hbo,zones.base_hbohdcls
+# fixme avg hbr logsum from origin zone in base scenario,base_ls_hbr,zones.base_hbrdcls
+,avg hbr logsum from origin zone in base scenario,base_ls_hbr,zones.base_hbrhdcls
+# fixme avg hbs logsum from origin zone in base scenario,base_ls_hbs,zones.base_hbsdcls
+,avg hbs logsum from origin zone in base scenario,base_ls_hbs,zones.base_hbsmdcls
+# fixme avg hbw logsum from origin zone in base scenario,base_ls_hbw,zones.base_hbwdcls
+,avg hbw logsum from origin zone in base scenario,base_ls_hbw,zones.base_hbwhdcls
+,avg nhbnw logsum from origin zone in base scenario,base_ls_nhbnw,zones.base_nhbnwdcls
+,avg nhbw logsum from origin zone in base scenario,base_ls_nhbw,zones.base_nhbwdcls
+,avg sch logsum from origin zone in base scenario,base_ls_sch,zones.base_schdcls
+,avg hbc logsum from origin zone in build scenario,build_ls_hbc,zones.build_hbcdcls
+# fixme avg hbo logsum from origin zone in build scenario,build_ls_hbo,zones.build_hbodcls
+,avg hbo logsum from origin zone in build scenario,build_ls_hbo,zones.build_hbohdcls
+# fixme avg hbr logsum from origin zone in build scenario,build_ls_hbr,zones.build_hbrdcls
+,avg hbr logsum from origin zone in build scenario,build_ls_hbr,zones.build_hbrhdcls
+# fixme avg hbs logsum from origin zone in build scenario,build_ls_hbs,zones.build_hbsdcls
+,avg hbs logsum from origin zone in build scenario,build_ls_hbs,zones.build_hbsmdcls
+# fixme avg hbw logsum from origin zone in build scenario,build_ls_hbw,zones.build_hbwdcls
+,avg hbw logsum from origin zone in build scenario,build_ls_hbw,zones.build_hbwhdcls
+,avg nhbnw logsum from origin zone in build scenario,build_ls_nhbnw,zones.build_nhbnwdcls
+,avg nhbw logsum from origin zone in build scenario,build_ls_nhbw,zones.build_nhbwdcls
+,avg sch logsum from origin zone in build scenario,build_ls_sch,zones.build_schdcls
+*,,roh_benefit_hbc,(0.5*(base_prod_hbc + build_prod_hbc)*(build_ls_hbc - base_ls_hbc)/UPM_HBC)*(VOT_HBC/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR
+*,,roh_benefit_hbo,(0.5*(base_prod_hbo + build_prod_hbo)*(build_ls_hbo - base_ls_hbo)/UPM_HBO)*(VOT_HBO/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR
+*,,roh_benefit_hbr,(0.5*(base_prod_hbr + build_prod_hbr)*(build_ls_hbr - base_ls_hbr)/UPM_HBR)*(VOT_HBR/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR
+*,,roh_benefit_hbs,(0.5*(base_prod_hbs + build_prod_hbs)*(build_ls_hbs - base_ls_hbs)/UPM_HBS)*(VOT_HBS/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR
+*,,roh_benefit_hbw,(0.5*(base_prod_hbw + build_prod_hbw)*(build_ls_hbw - base_ls_hbw)/UPM_HBW)*(VOT_HBW/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR
+*,,roh_benefit_nhbnw,(0.5*(base_prod_nhbnw + build_prod_nhbnw)*(build_ls_nhbnw - base_ls_nhbnw)/UPM_NHBNW)*(VOT_NHBNW/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR
+*,,roh_benefit_nhbw,(0.5*(base_prod_nhbw + build_prod_nhbw)*(build_ls_nhbw - base_ls_nhbw)/UPM_NHBW)*(VOT_NHBW/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR
+*,,roh_benefit_sch,(0.5*(base_prod_sch + build_prod_sch)*(build_ls_sch - base_ls_sch)/UPM_SCH)*(VOT_SCH/60)* DISCOUNT_RATE * ANNUALIZATION_FACTOR

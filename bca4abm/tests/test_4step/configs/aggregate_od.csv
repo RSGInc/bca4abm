@@ -1,0 +1,8 @@
+Silos,Description,Target,Expression
+#,,
+#,, auto peak
+#,,
+# assume peak occurs in AM for outbound and PM for inbound
+*,mf47 benefit,assign_mf47_benefit,"assign_mfs_base['mf47'] - assign_mfs_build['mf47']"
+*,mf1 benefit,assign_mf1_benefit,"skims_mfs_base['mf1'] - skims_mfs_build['mf1']"
+*,bogus benefit,assign_bogus_benefit,"skims_mfs_base['mf1'] - skims_mfs_build['mf47']"

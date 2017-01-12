@@ -1,0 +1,21 @@
+Silos,Description,Target,Expression
+#,,, local variables are expressions that start with an underscore and are _ALL_UPPERCASE
+,,_POVERTY_COLUMNS,cvals.columns.map(lambda x: x.startswith('base_') and 'i1' in x)
+,,_AGE_COLUMNS,cvals.columns.map(lambda x: x.startswith('base_') and 'a4' in x)
+,,_POVERTY_OR_AGE_COLUMNS,"np.logical_or(_POVERTY_COLUMNS, _AGE_COLUMNS)"
+,,_LOW_INCOME_COLUMNS,cvals.columns.map(lambda x: x.startswith('base_') and ( 'i1' in x or 'i2' in x))
+,,_MED_INCOME_COLUMNS,cvals.columns.map(lambda x: x.startswith('base_') and 'i3' in x )
+,,_HIGH_INCOME_COLUMNS,cvals.columns.map(lambda x: x.startswith('base_') and 'i4' in x )
+#,,,counts
+*,number of households,households,cvals.sum(axis=1)
+,,coc_poverty_count,"cvals.loc[:, _POVERTY_COLUMNS].sum(axis=1)"
+,,coc_age_count,"cvals.loc[:, _AGE_COLUMNS].sum(axis=1)"
+,,coc_any_count,"cvals.loc[:, _POVERTY_OR_AGE_COLUMNS].sum(axis=1)"
+,,coc_none_count,households-coc_any_count
+#,,,percentages
+,,coc_poverty,coc_poverty_count/households
+,,coc_age,coc_age_count/households
+,,coc_any,coc_any_count/households
+,,coc_none,coc_none_count/households
+#,,,this is hardwired so no need to assign it here
+# everybody,1
