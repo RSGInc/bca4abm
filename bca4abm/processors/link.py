@@ -86,7 +86,7 @@ def eval_link_spec(link_spec, link_file_names, data_dir,
                    link_file_column_map, link_index_fields,
                    settings, settings_tag, trace_tag=None, trace_od=None):
 
-    # we accept a single string as well as a dict of {suffix: filename}
+    # accept a single string as well as a dict of {suffix: filename}
     if isinstance(link_file_names, str):
         link_file_names = {"": link_file_names}
 
