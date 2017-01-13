@@ -1,6 +1,8 @@
 Silos,Description,Target,Expression
 ,,_auto_volume,links.svol + links.hvol
 ,,_med_truck_volume,links.mtvol
+# check that the suffix is appended
+,,_med_truck_volume,links.mtvol_dupe
 ,,_heavy_truck_volume,links.htvol
 ,,_total_truck_volume,_med_truck_volume + _heavy_truck_volume
 ,,_total_volume,_auto_volume + _total_truck_volume

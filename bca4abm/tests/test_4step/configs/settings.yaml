@@ -99,7 +99,8 @@ aggregate_data_manifest_column_map:
 
 
 link_daily_file_names:
-  - linksMD1.csv
+  "": linksMD1.csv
+  dupe: linksMD1.csv
 
 link_daily_table_column_map:
   i: i
