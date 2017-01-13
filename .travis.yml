@@ -13,8 +13,9 @@ install:
 - conda update -q conda
 - conda info -a
 - |
-  conda create -q -c synthicity -n test-environment python=$TRAVIS_PYTHON_VERSION cytoolz ipython-notebook jinja2 matplotlib numpy pandas pandana patsy pip pytables pytest pyyaml scipy statsmodels toolz
+  conda create -q -c synthicity -n test-environment python=$TRAVIS_PYTHON_VERSION cytoolz ipython-notebook jinja2 matplotlib numpy pandas pandana patsy pip pytables pytest pyyaml scipy statsmodels
 - source activate test-environment
+- pip install toolz
 - pip install bottle orca prettytable simplejson zbox
 - pip install openmatrix
 - pip install pytest-cov coveralls pep8 pytest-xdist
