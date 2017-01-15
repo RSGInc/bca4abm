@@ -140,8 +140,8 @@ locals_aggregate_od:
 #### Link Daily Processor
 
 link_daily_file_names:
-  - linksMD1.csv
-  - linksPM2.csv
+  "": linksMD1.csv
+  linksPM2: linksPM2.csv
 
 link_daily_index_fields:
   - i

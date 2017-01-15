@@ -82,12 +82,13 @@ def add_tables_to_locals(data_dir, settings, settings_tag, locals_dict):
     return locals_dict
 
 
-def eval_link_spec(link_spec, link_file_names, data_dir, link_file_column_map,
+def eval_link_spec(link_spec, link_file_names, data_dir,
+                   link_file_column_map, link_index_fields,
                    settings, settings_tag, trace_tag=None, trace_od=None):
 
-    # we accept a single string as well as a list of strings
+    # accept a single string as well as a dict of {suffix: filename}
     if isinstance(link_file_names, str):
-        link_file_names = [link_file_names]
+        link_file_names = {"": link_file_names}
 
     locals_dict = bca.assign_variables_locals(settings, settings_tag)
 
@@ -99,20 +100,25 @@ def eval_link_spec(link_spec, link_file_names, data_dir, link_file_column_map,
 
         link_data_subdir = 'base-data' if scenario == 'base' else 'build-data'
 
-        for i in range(len(link_file_names)):
-            if i == 0:
-                links_df = read_csv_file(data_dir=os.path.join(data_dir, link_data_subdir),
-                                         file_name=link_file_names[0],
-                                         column_map=link_file_column_map)
-            else:
-                links_df_add = read_csv_file(data_dir=os.path.join(data_dir, link_data_subdir),
-                                             file_name=link_file_names[i],
-                                             column_map=link_file_column_map)
-                link_index_fields = settings['link_daily_index_fields']
-                links_df = links_df.set_index(link_index_fields, drop=False)
-                links_df_add = links_df_add.set_index(link_index_fields, drop=False)
-                suffix = "_" + link_file_names[i].replace(".csv", "")
-                links_df = links_df.join(links_df_add, how="outer", rsuffix=suffix)
+        df_list = []
+        for suffix, link_file_name in link_file_names.iteritems():
+
+            df = read_csv_file(data_dir=os.path.join(data_dir, link_data_subdir),
+                               file_name=link_file_name,
+                               column_map=link_file_column_map)
+
+            if link_index_fields:
+                df.set_index(link_index_fields, drop=True, inplace=True)
+            if suffix:
+                df = df.add_suffix("_" + suffix)
+
+            df_list.append(df)
+
+        links_df = pd.concat(df_list, axis=1)
+
+        # copy index fields into columns
+        if link_index_fields:
+            links_df = links_df.reset_index().set_index(link_index_fields, drop=False)
 
         if trace_od:
             od_column = settings.get('%s_od_column' % settings_tag, None)
@@ -164,10 +170,13 @@ def link_processor(link_manifest, link_spec, settings, data_dir):
 
     for row in link_manifest.itertuples(index=True):
 
+        link_index_fields = None
+
         row_results = eval_link_spec(link_spec,
                                      row.link_file_name,
                                      data_dir,
                                      settings.get('link_table_column_map', None),
+                                     link_index_fields,
                                      settings,
                                      settings_tag='link')
 
@@ -207,6 +216,7 @@ def link_daily_processor(link_daily_spec, settings, data_dir, trace_od):
                              link_daily_file_names,
                              data_dir,
                              settings.get('link_daily_table_column_map', None),
+                             settings.get('link_daily_index_fields', None),
                              settings,
                              settings_tag='link_daily',
                              trace_tag='link_daily',
