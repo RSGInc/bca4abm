@@ -141,7 +141,7 @@ locals_aggregate_od:
 
 link_daily_file_names:
   "": linksMD1.csv
-  linksPM2: linksPM2.csv
+  PM2: linksPM2.csv
 
 link_daily_index_fields:
   - i

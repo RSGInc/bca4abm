@@ -1,11 +1,11 @@
 Silos,Description,Target,Expression
 # link volume calculations,,,
 ,,_auto_volume_MD,links.svol + links.hvol
-,,_auto_volume_PM,links.svol_linksPM2 + links.hvol_linksPM2
+,,_auto_volume_PM,links.svol_PM2 + links.hvol_PM2
 ,,_med_truck_volume_MD,links.mtvol
-,,_med_truck_volume_PM,links.mtvol_linksPM2
+,,_med_truck_volume_PM,links.mtvol_PM2
 ,,_heavy_truck_volume_MD,links.htvol
-,,_heavy_truck_volume_PM,links.htvol_linksPM2
+,,_heavy_truck_volume_PM,links.htvol_PM2
 ,,_truck_volume_MD,_med_truck_volume_MD + _heavy_truck_volume_MD
 ,,_truck_volume_PM,_med_truck_volume_PM + _heavy_truck_volume_PM
 ,,_auto_volume_daily,LINK_PEAK_TOD_SHARE_AUTO *_auto_volume_PM + LINK_OFFPEAK_TOD_SHARE_AUTO * _auto_volume_MD
@@ -14,29 +14,29 @@ Silos,Description,Target,Expression
 ,,_truck_volume_daily,LINK_PEAK_TOD_SHARE_AUTO * _truck_volume_PM + LINK_OFFPEAK_TOD_SHARE_AUTO * _truck_volume_MD
 ,,_total_volume_daily,_auto_volume_daily + _truck_volume_daily
 ,,_length_MD,links.length
-,,_length_PM,links.length_linksPM2
+,,_length_PM,links.length_PM2
 ,,_length,"pd.concat([_length_MD,_length_PM],axis=1).max(axis=1)"
 ,,_waterf_MD,links.waterf
-,,_waterf_PM,links.waterf_linksPM2
+,,_waterf_PM,links.waterf_PM2
 ,,_waterf,"pd.concat([_waterf_MD,_waterf_PM],axis=1).max(axis=1)"
 ,,_noisef_MD,links.noisef
-,,_noisef_PM,links.noisef_linksPM2
+,,_noisef_PM,links.noisef_PM2
 ,,_noisef,"pd.concat([_noisef_MD, _noisef_PM],axis=1).max(axis=1)"
 ,,_vmt_total,_total_volume_daily * _length
 ,,_freeway_MD,links.volume_delay_func==1
 ,,_arterial_MD,(links.volume_delay_func==2) | (links.volume_delay_func==4)
 ,,_collector_MD,links.volume_delay_func==9
 ,,_ramp_MD,links.volume_delay_func==10
-,,_freeway_PM,links.volume_delay_func_linksPM2==1
-,,_arterial_PM,(links.volume_delay_func_linksPM2==2) | (links.volume_delay_func_linksPM2==4)
-,,_collector_PM,links.volume_delay_func_linksPM2==9
-,,_ramp_PM,links.volume_delay_func_linksPM2==10
+,,_freeway_PM,links.volume_delay_func_PM2==1
+,,_arterial_PM,(links.volume_delay_func_PM2==2) | (links.volume_delay_func_PM2==4)
+,,_collector_PM,links.volume_delay_func_PM2==9
+,,_ramp_PM,links.volume_delay_func_PM2==10
 ,,_freeway,_freeway_MD | _freeway_PM
 ,,_arterial,_arterial_MD | _arterial_PM
 ,,_collector,_collector_MD | _collector_PM
 ,,_ramp,_ramp_MD | _ramp_PM
 ,,_speed_MD,links.speed
-,,_speed_PM,links.speed_linksPM2
+,,_speed_PM,links.speed_PM2
 ,,_speed,"pd.concat([_speed_MD,_speed_PM],axis=1).max(axis=1)"
 # safety costs - intersection computations at to_node,,,
 ,indegree of to_node,_to_indegree,links.i.groupby(links.j).transform('count')
