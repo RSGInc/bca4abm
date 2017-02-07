@@ -16,4 +16,5 @@ def write_four_step_results(output_dir, aggregate_results, summary_results, sett
     if settings.get("dump", False):
 
         csv_file_name = os.path.join(output_dir, 'aggregate_results.csv')
+        print "writing", csv_file_name
         df.to_csv(csv_file_name, index=False)

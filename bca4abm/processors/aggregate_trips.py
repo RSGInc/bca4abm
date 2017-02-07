@@ -124,7 +124,7 @@ def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, se
         # for troubleshooting, write table with benefits for each row in manifest
         output_store['aggregate_trips'] = results
 
-    if settings.get("dump", False) and settings.get("dump_aggregate_trips", True):
+    if settings.get("dump", False):
         output_dir = orca.eval_variable('output_dir')
         csv_file_name = os.path.join(output_dir, 'aggregate_trips_benefits.csv')
         print "writing", csv_file_name

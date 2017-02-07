@@ -1,8 +1,5 @@
 provenance: tests.configs
 
 dump: True
-#dump_aggregate_trips: True
-#dump_link: True
-#dump_link_daily: True
 
 test_setting: ping
