@@ -64,6 +64,12 @@ def aggregate_zone_processor(zones, aggregate_zone_spec, settings, trace_od):
 
     add_aggregate_results(results, aggregate_zone_spec, source='aggregate_zone')
 
+    if settings.get("dump", False):
+        output_dir = orca.eval_variable('output_dir')
+        csv_file_name = os.path.join(output_dir, 'aggregate_zone_benefits.csv')
+        print "writing", csv_file_name
+        results.to_csv(csv_file_name, index=False)
+
     if trace_results is not None:
 
         # tracing.write_csv(results,

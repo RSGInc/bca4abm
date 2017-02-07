@@ -43,6 +43,7 @@ def write_abm_results(output_dir, coc_results, summary_results, settings):
 
         csv_file_name = os.path.join(output_dir, 'coc_results.csv')
         df = coc_results.to_frame()
+        print "writing", csv_file_name
         df.to_csv(csv_file_name, index=True)
 
         csv_file_name = os.path.join(output_dir, 'summary_results.csv')
@@ -54,4 +55,5 @@ def write_abm_results(output_dir, coc_results, summary_results, settings):
         # add the description from the data dictionary
         df['Description'] = df.Target.map(data_dict)
 
+        print "writing", csv_file_name
         df.to_csv(csv_file_name, index=False)

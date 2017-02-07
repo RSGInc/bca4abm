@@ -1,9 +1,7 @@
 provenance: tests.test_abm.configs
 
 dump: True
-#dump_aggregate_trips: True
-#dump_link: True
-#dump_link_daily: True
+
 
 # trace household id; comment out for no trace
 trace_hh_id: 60

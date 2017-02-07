@@ -129,8 +129,6 @@ def aggregate_od_processor(zone_demographics, aggregate_od_spec, settings, data_
 
     tracing.info(__name__, "Running aggregate_od_processor")
 
-    tracing.write_csv(zone_demographics.to_frame(), file_name="zone_demographics", transpose=False)
-
     zones_index = zone_demographics.index
     zone_count = len(zones_index)
 
@@ -171,7 +169,7 @@ def aggregate_od_processor(zone_demographics, aggregate_od_spec, settings, data_
 
     add_aggregate_results(results, aggregate_od_spec, source='aggregate_od')
 
-    if settings.get("dump", False) and settings.get("dump_aggregate_od", True):
+    if settings.get("dump", False):
         output_dir = orca.eval_variable('output_dir')
         csv_file_name = os.path.join(output_dir, 'aggregate_od_benefits.csv')
         print "writing", csv_file_name

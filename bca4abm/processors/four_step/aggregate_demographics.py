@@ -69,8 +69,15 @@ def aggregate_demographics_processor(zone_cvals, aggregate_demographics_spec,
                              df_alias='cvals',
                              trace_rows=trace_od_rows)
 
-    orca.add_table('zone_demographics', pd.DataFrame(index=results.index))
-    add_assigned_columns("zone_demographics", results)
+    # orca.add_table('zone_demographics', pd.DataFrame(index=results.index))
+    # add_assigned_columns("zone_demographics", results)
+    orca.add_table('zone_demographics', results)
+
+    if settings.get("dump", False):
+        output_dir = orca.eval_variable('output_dir')
+        csv_file_name = os.path.join(output_dir, 'zone_demographics.csv')
+        print "writing", csv_file_name
+        results.to_csv(csv_file_name, index=False)
 
     # expression file can use silos column to designate result targets (e.g. count of households)
     add_aggregate_results(results, aggregate_demographics_spec, source='aggregate_demographics')
