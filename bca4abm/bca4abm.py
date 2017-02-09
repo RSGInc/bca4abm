@@ -393,7 +393,8 @@ def eval_group_and_sum(assignment_expressions, df, locals_dict, group_by_column_
                              trace_rows=trace_rows_chunk)
 
         # concat in the group_by columns
-        assigned_chunk = pd.concat([df_chunk[group_by_column_names], assigned_chunk], axis=1)
+        for c in group_by_column_names:
+            assigned_chunk[c] = df_chunk[c]
 
         # sum this chunk
         chunk_summary = assigned_chunk.groupby(group_by_column_names).sum()
