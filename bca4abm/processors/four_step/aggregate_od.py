@@ -34,10 +34,9 @@ class ODSkims(object):
         whether to transpose the matrix before flattening. (i.e. act as a D-O instead of O-D skim)
     """
 
-    def __init__(self, name, length, omx, transpose=False, skims_dict={}):
+    def __init__(self, name, length, omx, transpose=False):
 
-        # allows skims dict to be shared between OD and transposed (DO) ODSkims objects
-        self.skims = skims_dict
+        self.skims = {}
 
         self.length = length
         self.name = name
