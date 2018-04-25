@@ -2,67 +2,69 @@
 # Copyright (C) 2016 RSG Inc
 # See full license in LICENSE.txt.
 
-import orca
 import pandas as pd
 import numpy as np
 import os
-
-from bca4abm import tracing
-
-
+import warnings
+import logging
 
 
-#startup
-# there is something a little bit too opaque about this:
+from activitysim.core import inject_defaults
+
 # the following import has the side-effect of registering injectables
+from activitysim.core.steps import utility_steps
 from bca4abm import bca4abm as bca
 
-import warnings
+
+from activitysim.core import tracing
+from activitysim.core import pipeline
+from activitysim.core import inject
+
+from activitysim.core.config import handle_standard_args
+from activitysim.core.config import setting
+
+parent_dir = os.path.dirname(__file__)
+
+
+# Add (and handle) 'standard' activitysim arguments:
+#     --config : specify path to config_dir
+#     --output : specify path to output_dir
+#     --data   : specify path to data_dir
+#     --models : specify run_list name
+#     --resume : resume_after
+handle_standard_args()
+
+tracing.config_logger()
+
 warnings.simplefilter("always")
 
-# import logging
-# logging.captureWarnings(capture=True)
+logging.captureWarnings(capture=True)
 
 old_settings = np.seterr(divide='raise', over='raise', invalid='raise', under='ignore')
 print "numpy.geterr: %s" % np.geterr()
 
-parent_dir = os.path.dirname(__file__)
-orca.add_injectable('configs_dir', os.path.join(parent_dir, 'configs'))
-orca.add_injectable('data_dir', os.path.join(parent_dir, 'data'))
-orca.add_injectable('output_dir', os.path.join(parent_dir, 'output'))
-tracing.config_logger()
 
-orca.add_injectable('input_source', 'read_from_csv')
-orca.run(['initialize_stores'])
+t0 = tracing.print_elapsed_time()
 
+MODELS = setting('models')
 
-#each row in the data table to solve is an origin zone and this processor
-#calculates communities of concern (COC) / market segments based on mf.cval.csv
-orca.run(['aggregate_demographics_processor'])
+# If you provide a resume_after argument to pipeline.run
+# the pipeline manager will attempt to load checkpointed tables from the checkpoint store
+# and resume pipeline processing on the next submodel step after the specified checkpoint
+resume_after = setting('resume_after', None)
 
-# each row in the data table to solve is an origin zone and this
-# processor calculates zonal auto ownership differences as well as the
-# differences in the destination choice logsums - ma.<purpose|income>dcls.csv
-# Maybe the ma.<purpose|income>dcls.csv files should be added to the
-# mf.cval.csv before input to the bca tool?
-orca.run(['aggregate_zone_processor'])
+if resume_after:
+    print "resume_after", resume_after
 
-# each row in the data table to solve is an OD pair and this processor
-# calculates trip differences.  It requires the access to input zone tables,
-# the COC coding, trip matrices and skim matrices.  The new
-# OD_aggregate_manifest.csv file tells this processor what data it can
-# use and how to reference it.  The following input data tables are required:
-# assign_mfs.omx, inputs and results of the zone aggregate processor, and skims_mfs.omx.
-orca.run(['aggregate_od_processor'])
+input_source = 'read_from_csv'
+# input_source = 'read_from_store'
+# input_source = 'update_store_from_csv'
+inject.add_injectable('input_source', input_source)
 
-# # truck aggregate markets
-# orca.run(['aggregate_trips_processor'])
+pipeline.run(models=MODELS, resume_after=resume_after)
 
-# daily will be linkMD1 * scalingFactorMD1 + linkPM2 * scalingFactorPM2
-orca.run(['link_daily_processor'])
+# tables will no longer be available after pipeline is closed
+pipeline.close_pipeline()
 
+t0 = tracing.print_elapsed_time("all models", t0)
 
-
-#write results
-orca.run(['write_four_step_results'])
-orca.run(['print_results'])

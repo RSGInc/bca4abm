@@ -1,20 +1,17 @@
+# bca4abm
+# See full license in LICENSE.txt.
+
+import logging
+
 import os
-import orca
 import pandas as pd
 
+from activitysim.core import inject
 
-@orca.step()
-def write_four_step_results(output_dir, aggregate_results, summary_results, settings):
 
-    print "---------- write_four_step_results"
+logger = logging.getLogger(__name__)
 
-    df = aggregate_results.to_frame()
+@inject.step()
+def finalize_four_step_results(output_dir, aggregate_results, summary_results, settings):
 
-    with orca.eval_variable('output_store') as output_store:
-        output_store['aggregate_results'] = df
-
-    if settings.get("dump", False):
-
-        csv_file_name = os.path.join(output_dir, 'aggregate_results.csv')
-        print "writing", csv_file_name
-        df.to_csv(csv_file_name, index=False)
+    pass

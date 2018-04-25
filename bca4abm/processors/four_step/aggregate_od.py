@@ -1,5 +1,9 @@
+# bca4abm
+# See full license in LICENSE.txt.
+
+import logging
+
 import os
-import orca
 import pandas as pd
 import numpy as np
 import openmatrix as omx
@@ -9,11 +13,22 @@ from bca4abm import bca4abm as bca
 from ...util.misc import add_summary_results
 from ...util.misc import add_aggregate_results
 
-from bca4abm import tracing
+from activitysim.core import config
+from activitysim.core import inject
+from activitysim.core import tracing
+from activitysim.core import pipeline
 
+logger = logging.getLogger(__name__)
 
 """
 Aggregate OD processor
+
+each row in the data table to solve is an OD pair and this processor
+calculates trip differences.  It requires the access to input zone tables,
+the COC coding, trip matrices and skim matrices.  The new
+OD_aggregate_manifest.csv file tells this processor what data it can
+use and how to reference it.  The following input data tables are required:
+assign_mfs.omx, inputs and results of the zone aggregate processor, and skims_mfs.omx.
 """
 
 
@@ -70,8 +85,7 @@ class ODSkims(object):
             omx_key = '__'.join(key)
         else:
             raise RuntimeError("Unexpected skim key type %s" % type(key))
-        tracing.info(__name__,
-                     message="ODSkims loading %s from omx %s as %s" % (key, self.name, omx_key,))
+        logger.info("ODSkims loading %s from omx %s as %s" % (key, self.name, omx_key,))
 
         print "ODSkims loading %s from omx %s as %s" % (key, self.name, omx_key,)
         try:
@@ -80,11 +94,16 @@ class ODSkims(object):
             raise RuntimeError("Could not find skim with key '%s' in %s" % (omx_key, self.name))
 
 
-@orca.injectable()
+@inject.injectable()
 def aggregate_od_spec(configs_dir):
 
     f = os.path.join(configs_dir, "aggregate_od.csv")
     return bca.read_assignment_spec(f)
+
+
+@inject.injectable()
+def aggregate_od_settings(configs_dir):
+    return config.read_model_settings(configs_dir, 'aggregate_od.yaml')
 
 
 def add_skims_to_locals(full_local_name, omx_file_name, zone_count, local_od_skims):
@@ -121,12 +140,14 @@ def create_skim_locals_dict(settings, data_dir, zone_count):
     return local_od_skims
 
 
-@orca.step()
-def aggregate_od_processor(zone_demographics, aggregate_od_spec, settings, data_dir, trace_od):
+@inject.step()
+def aggregate_od_processor(
+        zone_demographics,
+        aggregate_od_spec,
+        aggregate_od_settings,
+        settings, data_dir, trace_od):
 
-    print "---------- aggregate_od_processor"
-
-    tracing.info(__name__, "Running aggregate_od_processor")
+    logger.info("Running aggregate_od_processor")
 
     zones_index = zone_demographics.index
     zone_count = len(zones_index)
@@ -145,7 +166,8 @@ def aggregate_od_processor(zone_demographics, aggregate_od_spec, settings, data_
 
     # locals whose values will be accessible to the execution context
     # when the expressions in spec are applied to choosers
-    locals_dict = bca.assign_variables_locals(settings, 'aggregate_od')
+    locals_dict = config.get_model_constants(aggregate_od_settings)
+    locals_dict.update(config.setting('globals'))
 
     # add ODSkims to locals (note: we use local_skims list later to close omx files)
     local_skims = create_skim_locals_dict(settings, data_dir, zone_count)
@@ -166,24 +188,20 @@ def aggregate_od_processor(zone_demographics, aggregate_od_spec, settings, data_
                                chunk_size=0,
                                trace_rows=trace_od_rows)
 
-    add_aggregate_results(results, aggregate_od_spec, source='aggregate_od')
+    pipeline.replace_table("aggregate_od_benefits", results)
 
-    if settings.get("dump", False):
-        output_dir = orca.eval_variable('output_dir')
-        csv_file_name = os.path.join(output_dir, 'aggregate_od_benefits.csv')
-        print "writing", csv_file_name
-        results.to_csv(csv_file_name, index=False)
+    add_aggregate_results(results, aggregate_od_spec, source='aggregate_od')
 
     for local_name, od_skims in local_skims.iteritems():
         print "closing %s" % od_skims.name
         od_skims.omx.close
-
-    if trace_assigned_locals is not None:
-        tracing.write_locals(trace_assigned_locals,
-                             file_name="aggregate_od_locals")
 
     if trace_results is not None:
         tracing.write_csv(trace_results,
                           file_name="aggregate_od",
                           index_label='index',
                           column_labels=['label', 'od'])
+
+        if trace_assigned_locals:
+            tracing.write_csv(trace_assigned_locals, file_name="aggregate_od_locals")
+

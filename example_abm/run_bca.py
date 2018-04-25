@@ -2,39 +2,70 @@
 # Copyright (C) 2016 RSG Inc
 # See full license in LICENSE.txt.
 
-import orca
 import pandas as pd
 import numpy as np
 import os
+import warnings
+import logging
 
-# there is something a little bit too opaque about this:
+
+from activitysim.core import inject_defaults
+
 # the following import has the side-effect of registering injectables
+from activitysim.core.steps import utility_steps
 from bca4abm import bca4abm as bca
 
-from bca4abm import tracing
+
+from activitysim.core import tracing
+from activitysim.core import pipeline
+from activitysim.core import inject
+
+from activitysim.core.config import handle_standard_args
+from activitysim.core.config import setting
 
 parent_dir = os.path.dirname(__file__)
 
-orca.add_injectable('configs_dir', os.path.join(parent_dir, 'configs'))
-orca.add_injectable('data_dir', os.path.join(parent_dir, 'data'))
-orca.add_injectable('output_dir', os.path.join(parent_dir, 'output'))
+
+# Add (and handle) 'standard' activitysim arguments:
+#     --config : specify path to config_dir
+#     --output : specify path to output_dir
+#     --data   : specify path to data_dir
+#     --models : specify run_list name
+#     --resume : resume_after
+handle_standard_args()
 
 tracing.config_logger()
+
+warnings.simplefilter("always")
+
+logging.captureWarnings(capture=True)
+
+old_settings = np.seterr(divide='raise', over='raise', invalid='raise', under='ignore')
+print "numpy.geterr: %s" % np.geterr()
+
+
+t0 = tracing.print_elapsed_time()
+
+MODELS = setting('models')
+
+# If you provide a resume_after argument to pipeline.run
+# the pipeline manager will attempt to load checkpointed tables from the checkpoint store
+# and resume pipeline processing on the next submodel step after the specified checkpoint
+resume_after = setting('resume_after', None)
+
+if resume_after:
+    print "resume_after", resume_after
 
 input_source = 'read_from_csv'
 # input_source = 'read_from_store'
 # input_source = 'update_store_from_csv'
-orca.add_injectable('input_source', input_source)
+inject.add_injectable('input_source', input_source)
 
-orca.run(['initialize_stores'])
+pipeline.run(models=MODELS, resume_after=resume_after)
 
-orca.run(['demographics_processor'])
-orca.run(['person_trips_processor'])
-orca.run(['auto_ownership_processor'])
-orca.run(['physical_activity_processor'])
-orca.run(['aggregate_trips_processor'])
-orca.run(['link_daily_processor'])
-orca.run(['link_processor'])
+# tables will no longer be available after pipeline is closed
+pipeline.close_pipeline()
 
-orca.run(['write_abm_results'])
-orca.run(['print_results'])
+t0 = tracing.print_elapsed_time("all models", t0)
+
+

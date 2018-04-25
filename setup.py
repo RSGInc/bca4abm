@@ -7,7 +7,6 @@ setup(
     install_requires=[
         'numpy >= 1.8.0',
         'openmatrix >= 0.2.2',
-        'orca >= 1.1',
         'pandas >= 0.13.1',
         'pyyaml >= 3.0',
         'tables >= 3.1.0',

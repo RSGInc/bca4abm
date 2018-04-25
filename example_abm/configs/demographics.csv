@@ -1,5 +1,6 @@
 Target,Expression
+# coc flags are integer (0,1) rather than boolean as ints store more efficiently in pipeline
 # compare hh_income to federal poverty threshold based on hh_size
 _poverty_threshold, (persons.hh_size==1)*POVERTY_1 + (persons.hh_size>1)*POVERTY_2 + (persons.hh_size - 2).clip(lower=0)*POVERTY_N
-coc_poverty, persons.hh_income <= _poverty_threshold
-coc_age, persons.person_age > 65
+coc_poverty, (persons.hh_income <= _poverty_threshold)*1
+coc_age, (persons.person_age > 65)*1

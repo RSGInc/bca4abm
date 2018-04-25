@@ -3,7 +3,6 @@ import os.path
 import pytest
 import numpy.testing as npt
 import pandas as pd
-import orca
 import pandas.util.testing as pdt
 import pytest
 

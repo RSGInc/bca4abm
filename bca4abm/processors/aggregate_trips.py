@@ -1,13 +1,21 @@
+# bca4abm
+# See full license in LICENSE.txt.
+
+import logging
 import os
-import orca
 import pandas as pd
 import numpy as np
 import openmatrix as omx
 
+from activitysim.core import config
+from activitysim.core import inject
+from activitysim.core import tracing
+from activitysim.core import pipeline
+
 from bca4abm import bca4abm as bca
 from ..util.misc import missing_columns, add_summary_results
 
-from bca4abm import tracing
+logger = logging.getLogger(__name__)
 
 
 """
@@ -15,13 +23,18 @@ Aggregate trips processor
 """
 
 
-@orca.injectable()
+@inject.injectable()
 def aggregate_trips_spec(configs_dir):
     f = os.path.join(configs_dir, 'aggregate_trips.csv')
     return bca.read_assignment_spec(f)
 
 
-@orca.injectable()
+@inject.injectable()
+def aggregate_trips_settings(configs_dir):
+    return config.read_model_settings(configs_dir, 'aggregate_trips.yaml')
+
+
+@inject.injectable()
 def aggregate_trips_manifest(data_dir, settings):
     fname = os.path.join(data_dir, 'aggregate_data_manifest.csv')
 
@@ -54,8 +67,12 @@ def get_omx_matrix(matrix_dir, omx_file_name, omx_key, close_after_read=True):
     return matrix
 
 
-@orca.step()
-def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, settings, data_dir):
+@inject.step()
+def aggregate_trips_processor(
+        aggregate_trips_manifest,
+        aggregate_trips_settings,
+        aggregate_trips_spec,
+        settings, data_dir):
 
     """
     Compute aggregate trips benefits
@@ -68,13 +85,13 @@ def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, se
     vector computations in the aggregate_trips_spec
     """
 
-    tracing.info(__name__,
-                 "Running aggregate_trips_processor")
+    logger.info("Running aggregate_trips_processor")
 
     assert not missing_columns(aggregate_trips_manifest,
                                settings['aggregate_data_manifest_column_map'].values())
 
-    locals_dict = bca.assign_variables_locals(settings, 'aggregate_trips')
+    locals_dict = config.get_model_constants(aggregate_trips_settings)
+    locals_dict.update(config.setting('globals'))
 
     results = None
     for row in aggregate_trips_manifest.itertuples(index=True):
@@ -120,12 +137,6 @@ def aggregate_trips_processor(aggregate_trips_manifest, aggregate_trips_spec, se
     add_summary_results(results, summary_column_names=assigned_column_names,
                         prefix='AT_', spec=aggregate_trips_spec)
 
-    with orca.eval_variable('output_store') as output_store:
-        # for troubleshooting, write table with benefits for each row in manifest
-        output_store['aggregate_trips'] = results
+    # for troubleshooting, write table with benefits for each row in manifest
+    pipeline.replace_table("aggregate_trips_benefits", results)
 
-    if settings.get("dump", False):
-        output_dir = orca.eval_variable('output_dir')
-        csv_file_name = os.path.join(output_dir, 'aggregate_trips_benefits.csv')
-        print "writing", csv_file_name
-        results.to_csv(csv_file_name, index=False)

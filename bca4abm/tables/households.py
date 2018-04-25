@@ -1,14 +1,24 @@
+# bca4abm
+# See full license in LICENSE.txt.
+
+import logging
+
 import os.path
 import numpy as np
-import orca
 import pandas as pd
+
+from activitysim.core import inject
 
 from bca4abm import bca4abm as bca
 
 
-# this caches all the columns that are computed on the trips table
-@orca.table(cache=True)
-def households(data_dir, input_source, settings):
+logger = logging.getLogger(__name__)
+
+
+@inject.table()
+def households(data_dir, input_source, settings, hh_chunk_size):
+
+    logger.debug("reading households table")
 
     base_households = bca.read_csv_or_stored_table(table_name="base_households",
                                                    index_col="hh_id",
@@ -38,22 +48,18 @@ def households(data_dir, input_source, settings):
 
     households = pd.merge(base_households, build_households, left_index=True, right_index=True)
 
+    # - assign chunk_ids
+    chunk_ids = pd.Series(range(len(households)), households.index)
+    if hh_chunk_size > 0:
+        chunk_ids = np.floor(chunk_ids.div(hh_chunk_size)).astype(int)
+    assert 'chunk_id' not in households.columns
+    households['chunk_id'] = chunk_ids
+
+
     return households
 
 
-# this assigns a chunk_id to each household based on the chunk_size setting
-@orca.column("households", cache=True)
-def chunk_id(households, hh_chunk_size):
-
-    chunk_ids = pd.Series(range(len(households)), households.index)
-
-    if hh_chunk_size > 0:
-        chunk_ids = np.floor(chunk_ids.div(hh_chunk_size)).astype(int)
-
-    return chunk_ids
-
-
-orca.broadcast(cast='households',
+inject.broadcast(cast='households',
                onto='persons',
                cast_index=True,
                onto_on='hh_id')

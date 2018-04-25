@@ -2,7 +2,6 @@ import os.path
 
 import numpy.testing as npt
 import pandas as pd
-import orca
 import pandas.util.testing as pdt
 import pytest
 
@@ -108,29 +107,6 @@ def test_persons_merged_table():
     assert persons_merged.shape[0] == 27
 
 
-def test_persons_merged_table_from_store():
-
-    settings = orca.eval_variable('settings')
-
-    with orca.eval_variable('input_store_for_write') as hdf:
-        assert '/persons' not in hdf.keys()
-
-    orca.add_injectable('input_source', 'update_store_from_csv')
-
-    persons_merged = orca.get_table('persons_merged').to_frame()
-    assert 'person_gender' in persons_merged.columns
-    assert 'hh_income' in persons_merged.columns
-
-    persons = orca.get_table('persons').to_frame()
-    assert (persons_merged.person_type == persons.person_type).all()
-
-    with orca.eval_variable('input_store_for_read') as hdf:
-        assert '/persons' in hdf.keys()
-        assert expect_columns(hdf['persons'],
-                              settings['persons_column_map'].values())
-        assert '/base_households' in hdf.keys()
-        assert '/build_households' in hdf.keys()
-
 
 def test_read_base_trips_table():
 
@@ -141,7 +117,8 @@ def test_read_base_trips_table():
 
     # expect all of and only the columns specified by column_map values
     raw_columns = mapped_columns(settings['basetrips_column_map'],
-                                 settings['basetrips_buildlos_column_map']) + ['build', 'base']
+                                 settings['basetrips_buildlos_column_map']) \
+                  + ['build', 'base', 'person_id']
     assert expect_columns(trips, raw_columns)
 
     assert trips.shape[0] == 123
@@ -156,7 +133,8 @@ def test_read_build_trips_table():
 
     # expect all of and only the columns specified by persons_column_map values
     raw_columns = mapped_columns(settings['buildtrips_column_map'],
-                                 settings['buildtrips_baselos_column_map']) + ['build', 'base']
+                                 settings['buildtrips_baselos_column_map'])\
+                  + ['build', 'base', 'person_id']
 
     assert expect_columns(trips, raw_columns)
 
@@ -172,29 +150,6 @@ def test_disaggregate_trips_table():
     assert 'base_auto_time' in trips.columns
 
     assert trips.shape[0] == 250
-
-
-def test_disaggregate_trips_table_from_store():
-
-    settings = orca.eval_variable('settings')
-    data_dir = orca.eval_variable('data_dir')
-    orca.add_injectable('input_source', 'update_store_from_csv')
-
-    with orca.eval_variable('input_store_for_write') as hdf:
-        assert '/basetrips' not in hdf.keys()
-        assert '/buildtrips' not in hdf.keys()
-
-    trips = orca.get_table('disaggregate_trips').to_frame()
-    assert 'build_auto_time' in trips.columns
-    assert 'base_auto_time' in trips.columns
-
-    assert trips.shape[0] == 250
-
-    with orca.eval_variable('input_store_for_read') as hdf:
-        assert '/basetrips' in hdf.keys()
-        assert '/buildtrips' in hdf.keys()
-        assert hdf['basetrips'].shape[0] == 123
-        assert hdf['buildtrips'].shape[0] == 127
 
 
 def test_trips_with_demographics_table():
