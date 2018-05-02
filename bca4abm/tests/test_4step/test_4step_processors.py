@@ -1,62 +1,75 @@
 import os.path
 
-import pytest
+import logging
 import numpy.testing as npt
 import pandas as pd
-import pandas.util.testing as pdt
+import orca
+
 import pytest
+import yaml
 
+from activitysim.core import tracing
+from activitysim.core import pipeline
+from activitysim.core import inject
 
-# orca injectables complicate matters because the decorators are executed at module load time
-# and since py.test collects modules and loads them at the start of a run
-# if a test method does something that has a lasting side-effect, then that side effect
-# will carry over not just to subsequent test functions, but to subsequently called modules
-# for instance, columns added with add_column will remain attached to orca tables
-# pytest-xdist allows us to run py.test with the --boxed option which runs every function
-# with a brand new python interpreter
-# py.test --boxed --cov bca4abm
 
 # Also note that the following import statement has the side-effect of registering injectables:
 from bca4abm import bca4abm as bca
 
 
-@pytest.fixture(scope="module", autouse=True)
-def inject_default_directories(request):
-
-    parent_dir = os.path.dirname(__file__)
-    orca.add_injectable("configs_dir", os.path.join(parent_dir, 'configs'))
-    orca.add_injectable("data_dir", os.path.join(parent_dir, 'data'))
-    orca.add_injectable("output_dir", os.path.join(parent_dir, 'output'))
-
-    request.addfinalizer(orca.clear_cache)
+def teardown_function(func):
+    orca.clear_cache()
+    inject.reinject_decorated_tables()
 
 
-def test_initialize():
+def close_handlers():
 
-    orca.run(["initialize_stores"])
+    loggers = logging.Logger.manager.loggerDict
+    for name in loggers:
+        logger = logging.getLogger(name)
+        logger.handlers = []
+        logger.propagate = True
+        logger.setLevel(logging.NOTSET)
 
-    with orca.eval_variable('output_store_for_read') as hdf:
-        assert hdf.keys() == []
+
+def inject_settings(chunk_size=None, trace_hh_id=None, trace_od=None):
+
+    configs_dir = os.path.join(os.path.dirname(__file__), 'configs')
+    orca.add_injectable("configs_dir", configs_dir)
+
+    output_dir = os.path.join(os.path.dirname(__file__), 'output')
+    orca.add_injectable("output_dir", output_dir)
+
+    data_dir = os.path.join(os.path.dirname(__file__), 'data')
+    orca.add_injectable("data_dir", data_dir)
+
+    with open(os.path.join(configs_dir, 'settings.yaml')) as f:
+        settings = yaml.load(f)
+        if chunk_size is not None:
+            settings['chunk_size'] = chunk_size
+        if trace_hh_id is not None:
+            settings['trace_hh_id'] = trace_hh_id
+        if trace_od is not None:
+            settings['trace_od'] = trace_od
+
+    orca.add_injectable("settings", settings)
+
+    return settings
 
 
-def test_aggregate_demographics_processor():
+def test_run_4step():
 
-    # persons_merged = orca.eval_variable('persons_merged').to_frame()
-    # assert "coc_age" not in persons_merged.columns
+    settings = inject_settings(
+        chunk_size=None,
+        trace_hh_id=None,
+        trace_od=None)
 
-    orca.run(["initialize_stores"])
-    orca.run(["aggregate_demographics_processor"])
-    orca.run(["aggregate_zone_processor"])
-    orca.run(['link_daily_processor'])
-    orca.run(['aggregate_od_processor'])
-    orca.run(['write_four_step_results'])
-    orca.run(['print_results'])
+    orca.clear_cache()
 
-    # persons_merged = orca.eval_variable('persons_merged').to_frame()
-    # assert "coc_age" in persons_merged.columns
-    #
-    # with orca.eval_variable('output_store_for_read') as hdf:
-    #     assert '/summary_results' in hdf.keys()
-    #     assert '/coc_results' in hdf.keys()
-    #     npt.assert_equal(hdf['summary_results'].persons[0], 27)
-    #     npt.assert_equal(hdf['coc_results'].persons.sum(), 27)
+    tracing.config_logger()
+
+    MODELS = settings['models']
+
+    pipeline.run(models=MODELS, resume_after=None)
+
+    pipeline.close_pipeline()

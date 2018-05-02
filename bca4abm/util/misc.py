@@ -35,14 +35,11 @@ def add_result_columns(base_dfname, from_df, prefix=''):
 
     dest_df = inject.get_table(base_dfname).to_frame()
 
-    #fix
     if prefix:
-        save_column_names = from_df.columns.values
-        from_df.columns = [prefix + c for c in save_column_names]
-        assign_in_place(dest_df, from_df)
-        from_df.columns = save_column_names
-    else:
-        assign_in_place(dest_df, from_df)
+        from_df = from_df.copy()
+        from_df.columns = [prefix + c for c in from_df.columns.values]
+
+    assign_in_place(dest_df, from_df)
 
     pipeline.replace_table(base_dfname, dest_df)
 
@@ -71,7 +68,6 @@ def add_summary_results(df, summary_column_names=None, prefix='', spec=None):
 
     # if it has more than one row, sum the columns
     if df.shape[0] > 1:
-        #print "#\n#\n# transposing\n#\n#\n"
         df = pd.DataFrame(df.sum()).T
 
     add_targets_to_data_dictionary(df.columns, prefix, spec)
@@ -127,8 +123,6 @@ def add_aggregate_results(results, spec, source='', zonal=True):
 
     aggregate_results = inject.get_table('aggregate_results').to_frame()
 
-    #print "\nspec\n", spec
-
     # target can appear more than once, so this ensures we only use the final one
     seen = set()
     for e in reversed(zip(spec.target, spec.silos, spec.description)):
@@ -144,7 +138,6 @@ def add_aggregate_results(results, spec, source='', zonal=True):
         # don't add results if target not in results (e.g. a temp variable)
         # or no silos specified in expression file
         if target not in results.columns or not silos:
-            #print "---------------- add_aggregate_results skipping target", target
             continue
 
         # convert silos string to an array of silo names
@@ -168,7 +161,7 @@ def add_aggregate_results(results, spec, source='', zonal=True):
             else:
                 pct_col = silo
 
-            #print "target %s, silo %s, pct_col %s" % (target, silo, pct_col)
+            # print "target %s, silo %s, pct_col %s" % (target, silo, pct_col)
 
             if pct_col == 'everybody':
                 aggregate_results.loc[new_row_index, silo] = results[target].sum()

@@ -16,14 +16,11 @@ logger = logging.getLogger(__name__)
 
 
 @inject.table()
-def persons(data_dir, input_source, settings):
+def persons(data_dir, settings):
 
     logger.debug("reading persons table")
 
-    df = bca.read_csv_or_stored_table(table_name="persons",
-                                      data_dir=data_dir,
-                                      input_source=input_source,
-                                      settings=settings)
+    df = bca.read_csv_table(table_name="persons", data_dir=data_dir, settings=settings)
 
     # just to be explicit
     assert 'person_id' not in df.columns
@@ -36,5 +33,6 @@ def persons(data_dir, input_source, settings):
 # merge table casting households onto persons
 @inject.table()
 def persons_merged(persons, households):
+
     return inject.merge_tables(target=persons.name,
-                             tables=[persons, households])
+                               tables=[persons, households])

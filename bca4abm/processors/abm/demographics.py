@@ -35,6 +35,7 @@ def demographics_spec(configs_dir):
 def demographics_settings(configs_dir):
     return config.read_model_settings(configs_dir, 'demographics.yaml')
 
+
 @inject.step()
 def demographics_processor(
         persons, persons_merged,
@@ -53,7 +54,7 @@ def demographics_processor(
     locals_dict = config.get_model_constants(demographics_settings)
     locals_dict.update(config.setting('globals'))
 
-    trace_rows = trace_hh_id and persons_df['hh_id'] == trace_hh_id
+    trace_rows = trace_hh_id and persons_df['household_id'] == trace_hh_id
 
     # eval_variables evaluates each of the expressions in spec
     # in the context of each row in of the choosers dataframe
@@ -65,14 +66,9 @@ def demographics_processor(
                                   trace_rows=trace_rows)
 
     # add assigned columns to persons as they are needed by downstream processors
-    #add_assigned_columns("persons", results)
-
-    #####################
-
     persons = persons.to_frame()
     assign_in_place(persons, results)
     pipeline.replace_table("persons", persons)
-    #####################
 
     # coc groups with counts
     # TODO - should we allow specifying which assigned columns are coc (e.g. in settings?)
@@ -89,7 +85,7 @@ def demographics_processor(
     #             True              3
     # True        False             4
     coc_grouped = results.groupby(coc_columns)
-    coc_grouped = coc_grouped[coc_columns[0]].agg({'persons': 'count'})
+    coc_grouped = coc_grouped[coc_columns[0]].count().to_frame(name='persons')
 
     pipeline.replace_table("coc_results", coc_grouped)
 
@@ -106,4 +102,3 @@ def demographics_processor(
 
         if trace_assigned_locals:
             tracing.write_csv(trace_assigned_locals, file_name="demographics_locals")
-

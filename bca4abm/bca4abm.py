@@ -23,7 +23,7 @@ def read_csv_or_tsv(fpath, header='infer', usecols=None, comment=None):
     if fpath.endswith('.tsv'):
         sep = '\t'
     elif fpath.endswith('.txt'):
-        sep = '\s+'
+        sep = '\\s+'
     else:
         sep = ','
 
@@ -60,22 +60,6 @@ def read_csv_table(data_dir, settings, table_name, index_col=None):
             df.set_index(index_col, inplace=True)
         else:
             df.index.names = [index_col]
-
-    return df
-
-
-def read_csv_or_stored_table(data_dir, input_source, settings, table_name, index_col=None):
-
-    if input_source in ['read_from_csv', 'update_store_from_csv']:
-        df = read_csv_table(data_dir, settings, table_name=table_name, index_col=index_col)
-        if input_source == 'update_store_from_csv':
-            print "updating store with table %s" % table_name
-            with orca.eval_variable('input_store_for_update') as input_store:
-                input_store[table_name] = df
-    else:
-        with orca.eval_variable('input_store_for_read') as input_store:
-            print "reading table %s from store" % table_name
-            df = input_store[table_name]
 
     return df
 
@@ -297,7 +281,7 @@ def scalar_assign_variables(assignment_expressions, locals_dict):
     # avoid trashing parameter when we add target
     locals_dict = locals_dict.copy() if locals_dict is not None else {}
 
-    l = []
+    target_history = []
     # need to be able to identify which variables causes an error, which keeps
     # this from being expressed more parsimoniously
     for e in zip(assignment_expressions.target, assignment_expressions.expression):
@@ -314,7 +298,7 @@ def scalar_assign_variables(assignment_expressions, locals_dict):
 
             # print "\n%s = %s" % (target, value)
 
-            l.append((target, [value]))
+            target_history.append((target, [value]))
 
             # FIXME - do we want to update locals to allows us to ref previously assigned targets?
             locals_dict[target] = value
@@ -325,7 +309,7 @@ def scalar_assign_variables(assignment_expressions, locals_dict):
 
     # since we allow targets to be recycled, we want to only keep the last usage
     keepers = []
-    for statement in reversed(l):
+    for statement in reversed(target_history):
         # don't keep targets that staert with underscore
         if statement[0].startswith('_'):
             continue

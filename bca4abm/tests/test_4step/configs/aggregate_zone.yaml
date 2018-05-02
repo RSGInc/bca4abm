@@ -1,0 +1,23 @@
+# values available to expressions in aggregate_zone_processor
+CONSTANTS:
+  #auto ownership variables
+  ANNUAL_COST_PER_VEHICLE: 6611
+  AVERAGE_AUTOS_IN_3PLUS: 3.5
+  #utilities per minute (IVT coefficients from Metro model)
+  UPM_HBC: 0.0532
+  UPM_HBO: 0.0215
+  UPM_HBR: 0.0215
+  UPM_HBS: 0.0215
+  UPM_HBW: 0.0361
+  UPM_NHBNW: 0.0250
+  UPM_NHBW: 0.0250
+  UPM_SCH: 0.42
+  #value-of-time ($/hour; currently all equal, USDOT)
+  VOT_HBC: 14.66
+  VOT_HBO: 14.66
+  VOT_HBR: 14.66
+  VOT_HBS: 14.66
+  VOT_HBW: 14.66
+  VOT_NHBNW: 14.66
+  VOT_NHBW: 14.66
+  VOT_SCH: 14.66

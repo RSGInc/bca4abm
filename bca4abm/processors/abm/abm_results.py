@@ -10,6 +10,7 @@ from activitysim.core import pipeline
 
 logger = logging.getLogger(__name__)
 
+
 @inject.step()
 def finalize_abm_results(coc_results, summary_results, settings):
 
@@ -25,7 +26,7 @@ def finalize_abm_results(coc_results, summary_results, settings):
 
         # one column for each coc column
         for coc in coc_column_names:
-            coc_silos[coc] = df[df[coc] == True][assigned_column_names].sum()
+            coc_silos[coc] = df[df[coc] != 0][assigned_column_names].sum()
         # plus an extra column for 'any coc'
         coc_silos['any_coc'] = df[df[coc_column_names].any(axis=1)][assigned_column_names].sum()
         coc_silos.sort_index(inplace=True)

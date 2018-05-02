@@ -38,6 +38,7 @@ def aggregate_demographics_spec(configs_dir):
 def aggregate_demographics_settings(configs_dir):
     return config.read_model_settings(configs_dir, 'aggregate_demographics.yaml')
 
+
 @inject.step()
 def aggregate_demographics_processor(
         zone_cvals,
@@ -99,5 +100,3 @@ def aggregate_demographics_processor(
 
         if trace_assigned_locals:
             tracing.write_csv(trace_assigned_locals, file_name="aggregate_demographics_locals")
-
-

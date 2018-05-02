@@ -37,13 +37,14 @@ output_tables:
     - coc_results
     - coc_silos
     - summary_results
+    # - aggregate_trips
 
 
 ### table definitions
 
 base_households: base_households.csv
 base_households_column_map:
-  hhno: hh_id
+  hhno: household_id
   hhincome: hh_income
   hhsize: hh_size
   hhexpfac: hh_expansion_factor
@@ -51,13 +52,13 @@ base_households_column_map:
 
 build_households: build_households.csv
 build_households_column_map:
-  hhno: hh_id
+  hhno: household_id
   hhvehs: build_vehicles
 
 persons: persons.csv
 persons_column_map:
   pno: person_idx
-  hhno: hh_id
+  hhno: household_id
   pptyp: person_type
   pgend: person_gender
   pagey: person_age
@@ -65,7 +66,7 @@ persons_column_map:
 basetrips: basetrips_normal.csv
 basetrips_column_map:
   pno: person_idx
-  hhno: hh_id
+  hhno: household_id
   tour: tour_idx
   half: half_tour_idx
   tseg: half_tour_seg_idx
@@ -86,7 +87,7 @@ basetrips_column_map:
 basetrips_buildlos: basetrips_buildlos.csv
 basetrips_buildlos_column_map:
   pno: person_idx
-  hhno: hh_id
+  hhno: household_id
   tour: tour_idx
   half: half_tour_idx
   tseg: half_tour_seg_idx
@@ -104,7 +105,7 @@ basetrips_buildlos_column_map:
 buildtrips: buildtrips_normal.csv
 buildtrips_column_map:
   pno: person_idx
-  hhno: hh_id
+  hhno: household_id
   tour: tour_idx
   half: half_tour_idx
   tseg: half_tour_seg_idx
@@ -124,7 +125,7 @@ buildtrips_column_map:
 buildtrips_baselos: buildtrips_baselos.csv
 buildtrips_baselos_column_map:
   pno: person_idx
-  hhno: hh_id
+  hhno: household_id
   tour: tour_idx
   half: half_tour_idx
   tseg: half_tour_seg_idx

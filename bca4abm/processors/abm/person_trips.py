@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 Person trips processor
 """
 
+
 @inject.injectable()
 def person_trips_spec(configs_dir):
     f = os.path.join(configs_dir, 'person_trips.csv')
@@ -31,6 +32,7 @@ def person_trips_spec(configs_dir):
 @inject.injectable()
 def person_trips_settings(configs_dir):
     return config.read_model_settings(configs_dir, 'person_trips.yaml')
+
 
 @inject.step()
 def person_trips_processor(
@@ -56,7 +58,7 @@ def person_trips_processor(
 
     locals_dict['trips'] = trips_df
 
-    trace_rows = trace_hh_id and trips_df['hh_id'] == trace_hh_id
+    trace_rows = trace_hh_id and trips_df['household_id'] == trace_hh_id
 
     coc_summary, trace_results, trace_assigned_locals = \
         bca.eval_group_and_sum(assignment_expressions=person_trips_spec,
@@ -86,4 +88,3 @@ def person_trips_processor(
 
         if trace_assigned_locals:
             tracing.write_csv(trace_assigned_locals, file_name="person_trips_locals")
-

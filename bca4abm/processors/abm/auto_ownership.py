@@ -53,7 +53,7 @@ def auto_ownership_processor(
     locals_dict = config.get_model_constants(auto_ownership_settings)
     locals_dict.update(config.setting('globals'))
 
-    trace_rows = trace_hh_id and persons_df['hh_id'] == trace_hh_id
+    trace_rows = trace_hh_id and persons_df['household_id'] == trace_hh_id
 
     coc_summary, trace_results, trace_assigned_locals = \
         bca.eval_group_and_sum(assignment_expressions=auto_ownership_spec,
@@ -79,4 +79,3 @@ def auto_ownership_processor(
 
         if trace_assigned_locals:
             tracing.write_csv(trace_assigned_locals, file_name="auto_ownership_locals")
-

@@ -169,8 +169,8 @@ def eval_link_spec(link_spec, link_file_names, data_dir,
                               column_labels=['label', 'link'])
 
             if trace_assigned_locals:
-                tracing.write_csv(trace_assigned_locals, file_name="%s_locals_%s" % (trace_tag, scenario))
-
+                tracing.write_csv(trace_assigned_locals,
+                                  file_name="%s_locals_%s" % (trace_tag, scenario))
 
     results = results['build'] - results['base']
 
@@ -245,4 +245,3 @@ def link_daily_processor(
         add_aggregate_results(results, link_daily_spec, source='link_daily', zonal=False)
     else:
         add_summary_results(results, prefix='LD_', spec=link_daily_spec)
-

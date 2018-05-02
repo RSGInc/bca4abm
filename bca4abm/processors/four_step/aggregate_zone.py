@@ -87,7 +87,6 @@ def aggregate_zone_processor(
 
     add_aggregate_results(results, aggregate_zone_spec, source='aggregate_zone')
 
-
     if trace_results is not None:
 
         # tracing.write_csv(results,
@@ -101,5 +100,3 @@ def aggregate_zone_processor(
 
         if trace_assigned_locals:
             tracing.write_csv(trace_assigned_locals, file_name="aggregate_zone_locals")
-
-

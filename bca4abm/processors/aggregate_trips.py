@@ -139,4 +139,3 @@ def aggregate_trips_processor(
 
     # for troubleshooting, write table with benefits for each row in manifest
     pipeline.replace_table("aggregate_trips_benefits", results)
-

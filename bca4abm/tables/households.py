@@ -16,35 +16,19 @@ logger = logging.getLogger(__name__)
 
 
 @inject.table()
-def households(data_dir, input_source, settings, hh_chunk_size):
+def households(data_dir, settings, hh_chunk_size):
 
     logger.debug("reading households table")
 
-    base_households = bca.read_csv_or_stored_table(table_name="base_households",
-                                                   index_col="hh_id",
-                                                   data_dir=data_dir,
-                                                   input_source=input_source,
-                                                   settings=settings)
+    base_households = bca.read_csv_table(table_name="base_households",
+                                         index_col="household_id",
+                                         data_dir=data_dir,
+                                         settings=settings)
 
-    # base_households = bca.read_csv_table(
-    #     data_dir, settings,
-    #     table_name="base_households",
-    #     index_col="hh_id")
-
-    # print "\nbase_households\n", base_households
-
-    build_households = bca.read_csv_or_stored_table(table_name="build_households",
-                                                    index_col="hh_id",
-                                                    data_dir=data_dir,
-                                                    input_source=input_source,
-                                                    settings=settings)
-
-    # build_households = bca.read_csv_table(
-    #     data_dir, settings,
-    #     table_name="build_households",
-    #     index_col="hh_id")
-
-    # print "\nbuild_households\n", build_households
+    build_households = bca.read_csv_table(table_name="build_households",
+                                          index_col="household_id",
+                                          data_dir=data_dir,
+                                          settings=settings)
 
     households = pd.merge(base_households, build_households, left_index=True, right_index=True)
 
@@ -55,11 +39,10 @@ def households(data_dir, input_source, settings, hh_chunk_size):
     assert 'chunk_id' not in households.columns
     households['chunk_id'] = chunk_ids
 
-
     return households
 
 
 inject.broadcast(cast='households',
-               onto='persons',
-               cast_index=True,
-               onto_on='hh_id')
+                 onto='persons',
+                 cast_index=True,
+                 onto_on='household_id')

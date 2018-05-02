@@ -204,4 +204,3 @@ def aggregate_od_processor(
 
         if trace_assigned_locals:
             tracing.write_csv(trace_assigned_locals, file_name="aggregate_od_locals")
-

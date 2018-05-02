@@ -8,13 +8,8 @@ import os
 import warnings
 import logging
 
-
-from activitysim.core import inject_defaults
-
 # the following import has the side-effect of registering injectables
-from activitysim.core.steps import utility_steps
 from bca4abm import bca4abm as bca
-
 
 from activitysim.core import tracing
 from activitysim.core import pipeline
@@ -56,10 +51,6 @@ resume_after = setting('resume_after', None)
 if resume_after:
     print "resume_after", resume_after
 
-input_source = 'read_from_csv'
-# input_source = 'read_from_store'
-# input_source = 'update_store_from_csv'
-inject.add_injectable('input_source', input_source)
 
 pipeline.run(models=MODELS, resume_after=resume_after)
 

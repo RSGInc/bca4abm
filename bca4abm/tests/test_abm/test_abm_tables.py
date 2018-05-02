@@ -5,6 +5,8 @@ import pandas as pd
 import pandas.util.testing as pdt
 import pytest
 
+import orca
+
 
 # orca injectables complicate matters because the decorators are executed at module load time
 # and since py.test collects modules and loads them at the start of a run
@@ -32,44 +34,10 @@ def inject_default_directories(request):
     request.addfinalizer(orca.clear_cache)
 
 
-def test_settings():
-
-    settings = orca.eval_variable('settings')
-    assert settings.get('provenance') == 'tests.test_abm.configs'
-
-
-def test_read_persons_table_from_store():
-
-    settings = orca.eval_variable('settings')
-    assert settings.get('persons') == 'persons.csv'
-
-    data_dir = orca.eval_variable('data_dir')
-    orca.add_injectable('input_source', 'update_store_from_csv')
-
-    with orca.eval_variable('input_store_for_write') as hdf:
-        assert '/persons' not in hdf.keys()
-
-    df = bca.read_csv_or_stored_table(table_name="persons",
-                                      data_dir=data_dir,
-                                      input_source='update_store_from_csv',
-                                      settings=settings)
-
-    assert expect_columns(df,
-                          settings['persons_column_map'].values())
-
-    assert df.shape[0] == 27
-
-    with orca.eval_variable('input_store_for_read') as hdf:
-        assert '/persons' in hdf.keys()
-        assert expect_columns(hdf['persons'],
-                              settings['persons_column_map'].values())
-
-
 def test_read_persons_table():
 
     settings = orca.eval_variable('settings')
     assert settings.get('persons') == 'persons.csv'
-    assert orca.eval_variable('input_source') == 'read_from_csv'
 
     # expect all of and only the columns specified by persons_column_map values
     persons = orca.get_table('persons').to_frame()
@@ -107,7 +75,6 @@ def test_persons_merged_table():
     assert persons_merged.shape[0] == 27
 
 
-
 def test_read_base_trips_table():
 
     settings = orca.eval_variable('settings')
@@ -116,9 +83,9 @@ def test_read_base_trips_table():
     trips = orca.get_table('base_trips').to_frame()
 
     # expect all of and only the columns specified by column_map values
-    raw_columns = mapped_columns(settings['basetrips_column_map'],
-                                 settings['basetrips_buildlos_column_map']) \
-                  + ['build', 'base', 'person_id']
+    raw_columns = \
+        mapped_columns(settings['basetrips_column_map'],
+                       settings['basetrips_buildlos_column_map']) + ['build', 'base', 'person_id']
     assert expect_columns(trips, raw_columns)
 
     assert trips.shape[0] == 123
@@ -132,9 +99,9 @@ def test_read_build_trips_table():
     trips = orca.get_table('build_trips').to_frame()
 
     # expect all of and only the columns specified by persons_column_map values
-    raw_columns = mapped_columns(settings['buildtrips_column_map'],
-                                 settings['buildtrips_baselos_column_map'])\
-                  + ['build', 'base', 'person_id']
+    raw_columns = \
+        mapped_columns(settings['buildtrips_column_map'],
+                       settings['buildtrips_baselos_column_map']) + ['build', 'base', 'person_id']
 
     assert expect_columns(trips, raw_columns)
 

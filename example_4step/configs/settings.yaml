@@ -16,7 +16,6 @@ models:
   - aggregate_zone_processor
   - aggregate_od_processor
   - link_daily_processor
-  #- finalize_four_step_results
   - write_data_dictionary
   - write_tables
 

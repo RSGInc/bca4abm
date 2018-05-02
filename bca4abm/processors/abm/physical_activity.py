@@ -68,14 +68,10 @@ def physical_activity_processor(
                 "(hh_chunk_size size = %s)"
                 % (len(trips_df), len(persons_df), hh_chunk_size))
 
-    # because the persons table doesn't have an identity column
-    # we need to use a compound key to group trips by person
-    person_identity_columns = ['hh_id', 'person_idx']
-
     locals_dict = config.get_model_constants(physical_activity_settings)
     locals_dict.update(config.setting('globals'))
 
-    trip_trace_rows = trace_hh_id and trips_df['hh_id'] == trace_hh_id
+    trip_trace_rows = trace_hh_id and trips_df.household_id == trace_hh_id
 
     coc_summary = None
     chunks = 0
@@ -109,17 +105,14 @@ def physical_activity_processor(
                                   file_name="physical_activity_trips_locals")
 
         # sum trip activity for each unique person
-        # concat the person_group_by_column_names columns into trip_activity
-        trip_activity = pd.concat([trips_chunk[person_identity_columns], trip_activity], axis=1)
-        # sum to the person level (person_identity_columns will be index for resulting dataframe)
-        trip_activity = trip_activity.groupby(person_identity_columns).sum()
+        trip_activity = trip_activity.groupby(trips_chunk.person_id).sum()
 
         # merge person-level trip activity sums into persons_chunk
         persons_chunk = pd.merge(persons_chunk, trip_activity,
-                                 left_on=person_identity_columns, right_index=True)
+                                 left_index=True, right_index=True)
 
         # trace rows array for this chunk
-        person_trace_rows = trace_hh_id and persons_chunk['hh_id'] == trace_hh_id
+        person_trace_rows = trace_hh_id and persons_chunk['household_id'] == trace_hh_id
 
         person_activity, person_trace_results, person_trace_assigned_locals = \
             assign.assign_variables(physical_activity_person_spec,
@@ -137,8 +130,8 @@ def physical_activity_processor(
                               column_labels=['label', 'person'])
 
             if person_trace_assigned_locals:
-                tracing.write_csv(person_trace_assigned_locals, file_name="physical_activity_persons_locals")
-
+                tracing.write_csv(person_trace_assigned_locals,
+                                  file_name="physical_activity_persons_locals")
 
         # concat in the coc columns and summarize the chunk by coc
         person_activity = pd.concat([persons_chunk[coc_column_names], person_activity], axis=1)
