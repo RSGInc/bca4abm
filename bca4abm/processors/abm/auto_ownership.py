@@ -22,14 +22,13 @@ auto ownership processor
 
 
 @inject.injectable()
-def auto_ownership_spec(configs_dir):
-    f = os.path.join(configs_dir, "auto_ownership.csv")
-    return bca.read_assignment_spec(f)
+def auto_ownership_spec():
+    return bca.read_assignment_spec('auto_ownership.csv')
 
 
 @inject.injectable()
-def auto_ownership_settings(configs_dir):
-    return config.read_model_settings(configs_dir, 'auto_ownership.yaml')
+def auto_ownership_settings():
+    return config.read_model_settings('auto_ownership.yaml')
 
 
 @inject.step()

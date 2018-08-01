@@ -95,15 +95,13 @@ class ODSkims(object):
 
 
 @inject.injectable()
-def aggregate_od_spec(configs_dir):
-
-    f = os.path.join(configs_dir, "aggregate_od.csv")
-    return bca.read_assignment_spec(f)
+def aggregate_od_spec():
+    return bca.read_assignment_spec('aggregate_od.csv')
 
 
 @inject.injectable()
-def aggregate_od_settings(configs_dir):
-    return config.read_model_settings(configs_dir, 'aggregate_od.yaml')
+def aggregate_od_settings():
+    return config.read_model_settings('aggregate_od.yaml')
 
 
 def add_skims_to_locals(full_local_name, omx_file_name, zone_count, local_od_skims):

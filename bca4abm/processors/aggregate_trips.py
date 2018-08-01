@@ -24,14 +24,13 @@ Aggregate trips processor
 
 
 @inject.injectable()
-def aggregate_trips_spec(configs_dir):
-    f = os.path.join(configs_dir, 'aggregate_trips.csv')
-    return bca.read_assignment_spec(f)
+def aggregate_trips_spec():
+    return bca.read_assignment_spec('aggregate_trips.csv')
 
 
 @inject.injectable()
-def aggregate_trips_settings(configs_dir):
-    return config.read_model_settings(configs_dir, 'aggregate_trips.yaml')
+def aggregate_trips_settings():
+    return config.read_model_settings('aggregate_trips.yaml')
 
 
 @inject.injectable()

@@ -32,15 +32,13 @@ mf.cval.csv before input to the bca tool?
 
 
 @inject.injectable()
-def aggregate_zone_spec(configs_dir):
-
-    f = os.path.join(configs_dir, "aggregate_zone.csv")
-    return bca.read_assignment_spec(f)
+def aggregate_zone_spec():
+    return bca.read_assignment_spec('aggregate_zone.csv')
 
 
 @inject.injectable()
-def aggregate_zone_settings(configs_dir):
-    return config.read_model_settings(configs_dir, 'aggregate_zone.yaml')
+def aggregate_zone_settings():
+    return config.read_model_settings('aggregate_zone.yaml')
 
 
 @inject.step()

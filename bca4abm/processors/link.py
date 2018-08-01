@@ -64,25 +64,23 @@ def read_csv_file(data_dir, file_name, column_map=None):
 
 
 @inject.injectable()
-def link_spec(configs_dir):
-    f = os.path.join(configs_dir, 'link.csv')
-    return bca.read_assignment_spec(f)
+def link_spec():
+    return bca.read_assignment_spec('link.csv')
 
 
 @inject.injectable()
-def link_daily_spec(configs_dir):
-    f = os.path.join(configs_dir, 'link_daily.csv')
-    return bca.read_assignment_spec(f)
+def link_daily_spec():
+    return bca.read_assignment_spec('link_daily.csv')
 
 
 @inject.injectable()
-def link_settings(configs_dir):
-    return config.read_model_settings(configs_dir, 'link.yaml')
+def link_settings():
+    return config.read_model_settings('link.yaml')
 
 
 @inject.injectable()
-def link_daily_settings(configs_dir):
-    return config.read_model_settings(configs_dir, 'link_daily.yaml')
+def link_daily_settings():
+    return config.read_model_settings('link_daily.yaml')
 
 
 def add_tables_to_locals(data_dir, model_settings, locals_dict):

@@ -27,7 +27,7 @@ def inject_default_directories(request):
 def test_misc():
 
     # expect all of and only the columns specified by persons_column_map values
-    df = pd.DataFrame.from_items([('A', [1, 2, 3]), ('B', [4, 5, 6])])
+    df = pd.DataFrame.from_dict({'A': [1, 2, 3], 'B': [4, 5, 6]})
     assert expect_columns(df, ['A', 'B'])
 
     with pytest.raises(Exception):

@@ -24,14 +24,13 @@ Person trips processor
 
 
 @inject.injectable()
-def person_trips_spec(configs_dir):
-    f = os.path.join(configs_dir, 'person_trips.csv')
-    return bca.read_assignment_spec(f)
+def person_trips_spec():
+    return bca.read_assignment_spec('person_trips.csv')
 
 
 @inject.injectable()
-def person_trips_settings(configs_dir):
-    return config.read_model_settings(configs_dir, 'person_trips.yaml')
+def person_trips_settings():
+    return config.read_model_settings('person_trips.yaml')
 
 
 @inject.step()

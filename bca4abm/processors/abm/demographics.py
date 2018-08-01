@@ -26,14 +26,13 @@ Demographics processor
 
 
 @inject.injectable()
-def demographics_spec(configs_dir):
-    f = os.path.join(configs_dir, "demographics.csv")
-    return bca.read_assignment_spec(f)
+def demographics_spec():
+    return bca.read_assignment_spec('demographics.csv')
 
 
 @inject.injectable()
-def demographics_settings(configs_dir):
-    return config.read_model_settings(configs_dir, 'demographics.yaml')
+def demographics_settings():
+    return config.read_model_settings('demographics.yaml')
 
 
 @inject.step()

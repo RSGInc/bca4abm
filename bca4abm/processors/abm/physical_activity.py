@@ -24,20 +24,18 @@ physical activity processor
 
 
 @inject.injectable()
-def physical_activity_trip_spec(configs_dir):
-    f = os.path.join(configs_dir, "physical_activity_trip.csv")
-    return bca.read_assignment_spec(f)
+def physical_activity_trip_spec():
+    return bca.read_assignment_spec('physical_activity_trip.csv')
 
 
 @inject.injectable()
-def physical_activity_person_spec(configs_dir):
-    f = os.path.join(configs_dir, "physical_activity_person.csv")
-    return bca.read_assignment_spec(f)
+def physical_activity_person_spec():
+    return bca.read_assignment_spec('physical_activity_person.csv')
 
 
 @inject.injectable()
-def physical_activity_settings(configs_dir):
-    return config.read_model_settings(configs_dir, 'physical_activity.yaml')
+def physical_activity_settings():
+    return config.read_model_settings('physical_activity.yaml')
 
 
 @inject.step()

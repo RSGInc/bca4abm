@@ -7,7 +7,7 @@ import logging
 import numpy as np
 import pandas as pd
 import os
-
+from collections import OrderedDict
 
 from activitysim.core import config
 from activitysim.core import inject
@@ -87,9 +87,10 @@ def read_assignment_spec(fname):
         expression values are set as the table index.
     """
 
-    # print "read_assignment_spec", fname
+    configs_dir = inject.get_injectable('configs_dir')
+    fpath = os.path.join(configs_dir, fname)
 
-    cfg = pd.read_csv(fname, comment='#')
+    cfg = pd.read_csv(fpath, comment='#')
 
     # drop null expressions
     # cfg = cfg.dropna(subset=[expression_name])
@@ -308,13 +309,12 @@ def scalar_assign_variables(assignment_expressions, locals_dict):
             raise err
 
     # since we allow targets to be recycled, we want to only keep the last usage
-    keepers = []
+    keepers = OrderedDict()
     for statement in reversed(target_history):
         # don't keep targets that staert with underscore
-        if statement[0].startswith('_'):
-            continue
         # add statement to keepers list unless target is already in list
-        if not next((True for keeper in keepers if keeper[0] == statement[0]), False):
-            keepers.append(statement)
+        target_name = statement[0]
+        if not target_name.startswith('_') and target_name not in keepers:
+            keepers[target_name] = statement[1]
 
-    return pd.DataFrame.from_items(keepers)
+    return pd.DataFrame.from_dict(keepers)
