@@ -13,6 +13,7 @@ from activitysim.core import config
 from activitysim.core import inject
 from activitysim.core import tracing
 from activitysim.core import assign
+from activitysim.core import chunk
 
 
 logger = logging.getLogger(__name__)
@@ -38,6 +39,41 @@ def physical_activity_settings():
     return config.read_model_settings('physical_activity.yaml')
 
 
+# calc_rows_per_chunk(chunk_size, persons, by_chunk_id=True)
+def physical_activity_rpc(chunk_size, trips_df, persons_df, spec, trace_label=None):
+
+    # NOTE we chunk chunk_id
+    num_chunk_ids = trips_df['chunk_id'].max() + 1
+
+    # if not chunking, then return num_chunk_ids
+    if chunk_size == 0:
+        return num_chunk_ids
+
+    # extra columns from spec
+    extra_columns = spec.shape[1]
+
+    trip_row_size = trips_df.shape[1] + extra_columns
+
+    # scale row_size by average number of chooser rows per chunk_id
+    trip_rows_per_chunk_id = trips_df.shape[0] / float(num_chunk_ids)
+
+    persons_row_size = persons_df.shape[1]
+    persons_rows_per_chunk_id = persons_df.shape[0] / float(num_chunk_ids)
+
+    row_size = (trip_rows_per_chunk_id * trip_row_size) + \
+               (persons_rows_per_chunk_id * persons_row_size)
+
+    print "num_chunk_ids", num_chunk_ids
+    print "choosers.shape", trips_df.shape
+    print "trip_rows_per_chunk_id", trip_rows_per_chunk_id
+    print "persons_rows_per_chunk_id", persons_rows_per_chunk_id
+    print "trip_row_size", trip_row_size
+    print "persons_row_size", persons_row_size
+    print "row_size", row_size
+
+    return chunk.rows_per_chunk(chunk_size, row_size, num_chunk_ids, trace_label)
+
+
 @inject.step()
 def physical_activity_processor(
         trips_with_demographics,
@@ -47,7 +83,7 @@ def physical_activity_processor(
         physical_activity_settings,
         coc_column_names,
         settings,
-        hh_chunk_size,
+        chunk_size,
         trace_hh_id):
 
     """
@@ -61,27 +97,30 @@ def physical_activity_processor(
 
     trips_df = trips_with_demographics.to_frame()
     persons_df = persons_merged.to_frame()
+    trace_label = 'physical_activity'
 
     logger.info("Running physical_activity_processor with %d trips for %d persons "
-                "(hh_chunk_size size = %s)"
-                % (len(trips_df), len(persons_df), hh_chunk_size))
+                % (len(trips_df), len(persons_df)))
 
     locals_dict = config.get_model_constants(physical_activity_settings)
     locals_dict.update(config.setting('globals'))
 
     trip_trace_rows = trace_hh_id and trips_df.household_id == trace_hh_id
 
+    rows_per_chunk = physical_activity_rpc(chunk_size, trips_df, persons_df,
+                                           physical_activity_trip_spec, trace_label)
+
+    logger.info("physical_activity_processor chunk_size %s rows_per_chunk %s" %
+                (chunk_size, rows_per_chunk))
+
     coc_summary = None
-    chunks = 0
+    result_list = []
 
     # iterate over trips df chunked by hh_id
-    for chunk_id, trips_chunk, trace_rows_chunk \
-            in bca.chunked_df(trips_df, trip_trace_rows, chunk_size=None):
+    for chunk, num_chunks, trips_chunk, trace_rows_chunk \
+            in bca.chunked_df_by_chunk_id(trips_df, trip_trace_rows, rows_per_chunk):
 
-        chunks += 1
-
-        # slice persons_df for this chunk (chunk_id column merged in from households table)
-        persons_chunk = persons_df[persons_df['chunk_id'] == chunk_id]
+        logger.info("%s chunk %s of %s" % (trace_label, chunk, num_chunks))
 
         trip_activity, trip_trace_results, trip_trace_assigned_locals = \
             assign.assign_variables(physical_activity_trip_spec,
@@ -105,8 +144,8 @@ def physical_activity_processor(
         # sum trip activity for each unique person
         trip_activity = trip_activity.groupby(trips_chunk.person_id).sum()
 
-        # merge person-level trip activity sums into persons_chunk
-        persons_chunk = pd.merge(persons_chunk, trip_activity,
+        # merge in persons columns for this chunk
+        persons_chunk = pd.merge(trip_activity, persons_df,
                                  left_index=True, right_index=True)
 
         # trace rows array for this chunk
@@ -133,17 +172,15 @@ def physical_activity_processor(
 
         # concat in the coc columns and summarize the chunk by coc
         person_activity = pd.concat([persons_chunk[coc_column_names], person_activity], axis=1)
-        chunk_summary = person_activity.groupby(coc_column_names).sum()
+        coc_summary = person_activity.groupby(coc_column_names).sum()
 
-        # accumulate chunk_summaries in df
-        if coc_summary is None:
-            coc_summary = chunk_summary
-        else:
-            coc_summary = pd.concat([coc_summary, chunk_summary], axis=0)
+        result_list.append(coc_summary)
 
-        # end of chunk loop
+    if len(result_list) > 1:
 
-    if chunks > 1:
+        # (if there was only one chunk, then concat is redundant)
+        coc_summary = pd.concat(result_list)
+
         # squash the accumulated chunk summaries by reapplying group and sum
         coc_summary.reset_index(inplace=True)
         coc_summary = coc_summary.groupby(coc_column_names).sum()

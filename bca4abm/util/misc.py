@@ -20,10 +20,10 @@ logger = logging.getLogger(__name__)
 
 
 def mapped_columns(*column_maps):
-    '''
+    """
     Given any number of column_maps
     return a list of unique column names
-    '''
+    """
     result = set()
     for column_map in column_maps:
         result |= set(column_map.values())

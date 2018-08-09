@@ -60,9 +60,9 @@ def inject_settings(chunk_size=None, trace_hh_id=None, trace_od=None):
 def run_abm(models, resume_after=None, chunk_size=None, trace_hh_id=None, trace_od=None):
 
     settings = inject_settings(
-        chunk_size=None,
-        trace_hh_id=None,
-        trace_od=None)
+        chunk_size=chunk_size,
+        trace_hh_id=trace_hh_id,
+        trace_od=trace_od)
 
     orca.clear_cache()
 
@@ -190,7 +190,7 @@ def test_chunked_full_run():
     # MODELS = setting('models')
 
     run_abm(MODELS, resume_after='physical_activity_processor',
-            chunk_size=5, trace_hh_id=None, trace_od=None)
+            chunk_size=2000, trace_hh_id=None, trace_od=None)
 
     regress_abm()
 

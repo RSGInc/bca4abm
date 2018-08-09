@@ -15,14 +15,6 @@ def chunk_size(settings):
     return int(settings.get('chunk_size', 0))
 
 
-@inject.injectable(cache=True)
-def hh_chunk_size(settings):
-    if 'hh_chunk_size' in settings:
-        return settings.get('hh_chunk_size', 0)
-    else:
-        return settings.get('chunk_size', 0)
-
-
 @inject.injectable(cache=True, override=True)
 def trace_hh_id(settings):
 

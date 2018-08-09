@@ -87,7 +87,6 @@ class ODSkims(object):
             raise RuntimeError("Unexpected skim key type %s" % type(key))
         logger.info("ODSkims loading %s from omx %s as %s" % (key, self.name, omx_key,))
 
-        print "ODSkims loading %s from omx %s as %s" % (key, self.name, omx_key,)
         try:
             self.skims[key] = self.omx[omx_key][:self.length, :self.length]
         except omx.tables.exceptions.NoSuchNodeError:
@@ -178,13 +177,13 @@ def aggregate_od_processor(
         trace_od_rows = None
 
     results, trace_results, trace_assigned_locals = \
-        bca.eval_group_and_sum(assignment_expressions=aggregate_od_spec,
-                               df=od_df,
-                               locals_dict=locals_dict,
-                               df_alias='od',
-                               group_by_column_names=[coc_end],
-                               chunk_size=0,
-                               trace_rows=trace_od_rows)
+        bca.eval_and_sum(assignment_expressions=aggregate_od_spec,
+                         df=od_df,
+                         locals_dict=locals_dict,
+                         df_alias='od',
+                         group_by_column_names=[coc_end],
+                         chunk_size=0,
+                         trace_rows=trace_od_rows)
 
     pipeline.replace_table("aggregate_od_benefits", results)
 

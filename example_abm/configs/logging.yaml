@@ -10,7 +10,7 @@ logging:
   # Configuring the default (root) logger is highly recommended
   root:
     level: !!python/name:logging.NOTSET
-    handlers: [console]
+    handlers: [console, logfile]
 
   loggers:
 
@@ -43,7 +43,6 @@ logging:
       stream: ext://sys.stdout
       formatter: simpleFormatter
       level: !!python/name:logging.NOTSET
-      #level: !!python/name:logging.WARN
 
   formatters:
 

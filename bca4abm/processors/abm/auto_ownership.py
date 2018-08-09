@@ -55,13 +55,13 @@ def auto_ownership_processor(
     trace_rows = trace_hh_id and persons_df['household_id'] == trace_hh_id
 
     coc_summary, trace_results, trace_assigned_locals = \
-        bca.eval_group_and_sum(assignment_expressions=auto_ownership_spec,
-                               df=persons_df,
-                               locals_dict=locals_dict,
-                               df_alias='persons',
-                               group_by_column_names=coc_column_names,
-                               chunk_size=chunk_size,
-                               trace_rows=trace_rows)
+        bca.eval_and_sum(assignment_expressions=auto_ownership_spec,
+                         df=persons_df,
+                         locals_dict=locals_dict,
+                         df_alias='persons',
+                         group_by_column_names=coc_column_names,
+                         chunk_size=chunk_size,
+                         trace_rows=trace_rows)
 
     result_prefix = 'AO_'
     add_result_columns("coc_results", coc_summary, result_prefix)

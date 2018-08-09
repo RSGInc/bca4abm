@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 @inject.table()
-def households(data_dir, settings, hh_chunk_size):
+def households(data_dir, settings):
 
     logger.debug("reading households table")
 
@@ -33,11 +33,8 @@ def households(data_dir, settings, hh_chunk_size):
     households = pd.merge(base_households, build_households, left_index=True, right_index=True)
 
     # - assign chunk_ids
-    chunk_ids = pd.Series(range(len(households)), households.index)
-    if hh_chunk_size > 0:
-        chunk_ids = np.floor(chunk_ids.div(hh_chunk_size)).astype(int)
     assert 'chunk_id' not in households.columns
-    households['chunk_id'] = chunk_ids
+    households['chunk_id'] = pd.Series(range(len(households)), households.index)
 
     return households
 

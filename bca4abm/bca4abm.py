@@ -4,15 +4,13 @@
 
 import logging
 
-import numpy as np
 import pandas as pd
 import os
 from collections import OrderedDict
 
-from activitysim.core import config
 from activitysim.core import inject
-from activitysim.core import tracing
 from activitysim.core import assign
+from activitysim.core import chunk
 
 
 logger = logging.getLogger(__name__)
@@ -113,57 +111,117 @@ def read_assignment_spec(fname):
 
 
 # generator for chunked iteration over dataframe by chunk_size
-def size_chunked_df(df, trace_rows, chunk_size):
-    # generator to iterate over chooses in chunk_size chunks
-    if chunk_size == 0:
-        yield 0, df, trace_rows
-    else:
-        num_choosers = len(df.index)
-        i = 0
-        while i < num_choosers:
-            if trace_rows is None:
-                yield i, df[i: i+chunk_size], None
-            else:
-                yield i, df[i: i+chunk_size], trace_rows[i: i+chunk_size]
-            i += chunk_size
+def chunked_df(df, trace_rows, rows_per_chunk):
 
+    assert df.shape[0] > 0
 
-# generator for chunked iteration over dataframe by chunk_id
-def id_chunked_df(df, trace_rows, chunk_id_col):
-    # generator to iterate over chooses in chunk_size chunks
-    last_chooser = df[chunk_id_col].max()
-    i = 0
-    while i <= last_chooser:
-        chunk_me = (df[chunk_id_col] == i)
+    # generator to iterate over choosers in chunk_size chunks
+    num_df_rows = len(df.index)
+    num_chunks = (num_df_rows // rows_per_chunk) + (num_df_rows % rows_per_chunk > 0)
+
+    i = offset = 0
+    while offset < num_df_rows:
         if trace_rows is None:
-            yield i, df[chunk_me], None
+            yield i + 1, num_chunks, df.iloc[offset: offset+rows_per_chunk], None
         else:
-            yield i, df[chunk_me], trace_rows[chunk_me]
+            yield i + 1, num_chunks, df.iloc[offset: offset + rows_per_chunk], \
+                  trace_rows.iloc[offset: offset + rows_per_chunk]
+        offset += rows_per_chunk
         i += 1
 
 
-# return the appropriate generator for iterating over dataframe by either chunk_size or chunk_id
-def chunked_df(df, trace_rows, chunk_size=None, chunk_id_col='chunk_id'):
-    if chunk_size is None:
-        return id_chunked_df(df, trace_rows, chunk_id_col)
-    else:
-        return size_chunked_df(df, trace_rows, chunk_size)
+def chunked_df_by_chunk_id(df, trace_rows, rows_per_chunk, chunk_id_col='chunk_id'):
+    # generator to iterate over df in chunk_size chunks
+    # like chunked_df but based on chunk_id field rather than dataframe length
+    # (the presumption is that df has multiple rows with the same chunk_id that
+    # all have to be included in the same chunk)
+
+    assert df.shape[0] > 0
+
+    num_rows = df[chunk_id_col].max() + 1
+    num_chunks = (num_rows // rows_per_chunk) + (num_rows % rows_per_chunk > 0)
+
+    i = offset = 0
+    while offset < num_rows:
+        chunk_me = df[chunk_id_col].between(offset, offset + rows_per_chunk - 1)
+        if trace_rows is None:
+            yield i+1, num_chunks, df[chunk_me], None
+        else:
+            yield i+1, num_chunks, df[chunk_me], trace_rows[chunk_me]
+        offset += rows_per_chunk
+        i += 1
 
 
-def eval_group_and_sum(assignment_expressions, df, locals_dict, group_by_column_names,
-                       df_alias=None, chunk_size=0, trace_rows=None):
+def calc_rows_per_chunk(chunk_size, df, spec, extra_columns=0, trace_label=None):
+    """
+    simple rows_per_chunk calculator for chunking calls to assign_variables
+    """
 
-    if group_by_column_names == [None]:
-        raise RuntimeError("eval_group_and_sum: group_by_column_names not initialized")
+    num_rows = len(df.index)
 
-    summary = trace_results = trace_assigned_locals = None
-    chunks = 0
+    # if not chunking, then return num_choosers
+    if chunk_size == 0:
+        return num_rows
 
-    for i, df_chunk, trace_rows_chunk in chunked_df(df, trace_rows, chunk_size):
+    df_row_size = len(df.columns)
 
-        chunks += 1
+    extra_columns = spec.shape[0] + extra_columns
 
-        # print "eval_and_sum chunk %s i: %s" % (chunks, i)
+    row_size = df_row_size + extra_columns
+
+    if trace_label:
+        logger.debug("%s #chunk_calc df %s" % (trace_label, df.shape))
+        logger.debug("%s #chunk_calc spec %s" % (trace_label, spec.shape))
+        logger.debug("%s #chunk_calc extra_columns %s" % (trace_label, extra_columns))
+
+    return chunk.rows_per_chunk(chunk_size, row_size, num_rows, trace_label)
+
+
+def eval_and_sum(assignment_expressions, df, locals_dict,
+                 group_by_column_names=None,
+                 df_alias=None, chunk_size=0, trace_rows=None):
+    """
+    Evaluate assignment_expressions against df, and sum the results
+    (sum by group if list of group_by_column_names is specified.
+    e.g. group by coc column names and return sums grouped by community of concern.)
+
+    Parameters
+    ----------
+    assignment_expressions
+    df
+    locals_dict
+    group_by_column_names : array of str
+        list of names of the columns to group by (e.g. coc_column_names of trip_coc_end)
+    df_alias : str
+        assign_variables df_alias (name of df in assignment_expressions)
+    chunk_size : int
+    trace_rows : array of bool
+        array indicating which rows in df are to be traced
+
+    Returns
+    -------
+
+    """
+
+    if group_by_column_names is None:
+        group_by_column_names = []
+
+    rows_per_chunk = \
+        calc_rows_per_chunk(chunk_size, df, assignment_expressions,
+                            extra_columns=len(group_by_column_names),
+                            trace_label='eval_group_and_sum')
+
+    logger.info("eval_and_sum chunk_size %s rows_per_chunk %s df rows %s" %
+                (chunk_size, rows_per_chunk, df.shape[0]))
+
+    summary = None
+    result_list = []
+    trace_results = []
+    trace_assigned_locals = {}
+
+    for chunk, num_chunks, df_chunk, trace_rows_chunk in chunked_df(df, trace_rows, rows_per_chunk):
+
+        logger.info("eval_and_sum chunk %s of %s" % (chunk, num_chunks))
 
         assigned_chunk, trace_chunk, trace_assigned_locals_chunk = \
             assign.assign_variables(assignment_expressions,
@@ -172,85 +230,42 @@ def eval_group_and_sum(assignment_expressions, df, locals_dict, group_by_column_
                                     df_alias=df_alias,
                                     trace_rows=trace_rows_chunk)
 
-        # concat in the group_by columns
-        for c in group_by_column_names:
-            assigned_chunk[c] = df_chunk[c]
-
         # sum this chunk
-        chunk_summary = assigned_chunk.groupby(group_by_column_names).sum()
-
-        # accumulate chunk_summaries in df
-        if summary is None:
-            summary = chunk_summary
+        if group_by_column_names:
+            # concat in the group_by columns
+            for c in group_by_column_names:
+                assigned_chunk[c] = df_chunk[c]
+            # sum this chunk
+            summary = assigned_chunk.groupby(group_by_column_names).sum()
         else:
-            summary = pd.concat([summary, chunk_summary], axis=0)
+            summary = assigned_chunk.sum()
 
-        if trace_results is None:
-            trace_results = trace_chunk
-        elif trace_chunk is not None:
-            trace_results = pd.concat([trace_results, trace_chunk], axis=0)
+        result_list.append(summary)
 
-        if trace_assigned_locals is None:
-            trace_assigned_locals = trace_assigned_locals_chunk
-        elif trace_assigned_locals_chunk is not None:
+        if trace_chunk is not None:
+            trace_results.append(trace_chunk)
+
+        if trace_assigned_locals_chunk is not None:
             trace_assigned_locals.update(trace_assigned_locals_chunk)
 
-    if chunks > 1:
-        # squash the accumulated chunk summaries by reapplying group and sum
-        summary.reset_index(inplace=True)
-        summary = summary.groupby(group_by_column_names).sum()
+    if len(result_list) > 1:
+        # (if there was only one chunk, then concat is redundant)
 
-        if trace_results is not None:
-            # trace_rows index values should match index of original df
-            trace_results.index = df[trace_rows].index
+        summary = pd.concat(result_list)
 
-    return summary, trace_results, trace_assigned_locals
-
-
-def eval_and_sum(assignment_expressions, df, locals_dict, df_alias=None,
-                 chunk_size=0, trace_rows=None):
-
-    summary = trace_results = trace_assigned_locals = trace_rows_chunk = None
-    chunks = 0
-
-    for i, df_chunk, trace_rows_chunk in chunked_df(df, trace_rows, chunk_size):
-
-        chunks += 1
-
-        # print "eval_and_sum chunk %s i: %s" % (chunks, i)
-
-        assigned_chunk, trace_chunk, trace_assigned_locals_chunk = \
-            assign.assign_variables(assignment_expressions,
-                                    df_chunk,
-                                    locals_dict=locals_dict,
-                                    df_alias=df_alias,
-                                    trace_rows=trace_rows_chunk)
-
-        # sum this chunk
-        chunk_summary = assigned_chunk.sum()
-
-        # accumulate chunk_summaries in df
-        if summary is None:
-            summary = chunk_summary
+        # squash the accumulated chunk summaries by reapplying sum
+        if group_by_column_names:
+            summary.reset_index(inplace=True)
+            summary = summary.groupby(group_by_column_names).sum()
         else:
-            summary = pd.concat([summary, chunk_summary], axis=0)
+            summary = summary.sum()
 
-        if trace_results is None:
-            trace_results = trace_chunk
-        elif trace_chunk is not None:
-            trace_results = pd.concat([trace_results, trace_chunk], axis=0)
-
-        if trace_assigned_locals is None:
-            trace_assigned_locals = trace_assigned_locals_chunk
-        elif trace_assigned_locals_chunk is not None:
-            trace_assigned_locals.update(trace_assigned_locals_chunk)
-
-    if chunks > 1:
-        # squash the accumulated chunk summaries by reapplying group and sum
-        summary = summary.sum()
-
+    if trace_results:
+        trace_results = pd.concat(trace_results)
         # trace_rows index values should match index of original df
         trace_results.index = df[trace_rows].index
+    else:
+        trace_results = None
 
     return summary, trace_results, trace_assigned_locals
 
@@ -267,7 +282,7 @@ def scalar_assign_variables(assignment_expressions, locals_dict):
 
     Parameters
     ----------
-    exprs : sequence of str
+    assignment_expressions : pandas sequence of str
     locals_dict : Dict
         This is a dictionary of local variables that will be the environment
         for an evaluation of an expression that begins with @

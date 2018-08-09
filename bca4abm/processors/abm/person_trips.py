@@ -60,13 +60,13 @@ def person_trips_processor(
     trace_rows = trace_hh_id and trips_df['household_id'] == trace_hh_id
 
     coc_summary, trace_results, trace_assigned_locals = \
-        bca.eval_group_and_sum(assignment_expressions=person_trips_spec,
-                               df=trips_df,
-                               locals_dict=locals_dict,
-                               df_alias='trips',
-                               group_by_column_names=coc_column_names,
-                               chunk_size=chunk_size,
-                               trace_rows=trace_rows)
+        bca.eval_and_sum(assignment_expressions=person_trips_spec,
+                         df=trips_df,
+                         locals_dict=locals_dict,
+                         df_alias='trips',
+                         group_by_column_names=coc_column_names,
+                         chunk_size=chunk_size,
+                         trace_rows=trace_rows)
 
     result_prefix = 'PT_'
     add_result_columns("coc_results", coc_summary, result_prefix)

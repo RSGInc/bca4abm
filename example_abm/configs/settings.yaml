@@ -4,8 +4,7 @@ dump: True
 # trace household id; comment out for no trace
 trace_hh_id: 60
 
-chunk_size: 10
-hh_chunk_size: 5
+chunk_size: 2000
 
 scenario_year: sample
 
