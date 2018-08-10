@@ -103,7 +103,7 @@ def add_tables_to_locals(data_dir, model_settings, locals_dict):
 
 def eval_link_spec(link_spec, link_file_names, data_dir,
                    link_file_column_map, link_index_fields,
-                   settings, model_settings, trace_tag=None, trace_od=None):
+                   settings, model_settings, chunk_size, trace_tag=None, trace_od=None):
 
     # accept a single string as well as a dict of {suffix: filename}
     if isinstance(link_file_names, str):
@@ -155,10 +155,10 @@ def eval_link_spec(link_spec, link_file_names, data_dir,
                              links_df,
                              locals_dict,
                              df_alias='links',
-                             chunk_size=0,
+                             chunk_size=chunk_size,
                              trace_rows=trace_rows)
 
-        results[scenario] = pd.DataFrame(data=summary).T
+        results[scenario] = summary
 
         if trace_results is not None:
             tracing.write_csv(trace_results,
@@ -182,7 +182,7 @@ def link_processor(
         link_manifest,
         link_spec,
         link_settings,
-        settings, data_dir):
+        settings, chunk_size, data_dir):
 
     assert not missing_columns(link_manifest,
                                settings['link_data_manifest_column_map'].values())
@@ -199,7 +199,8 @@ def link_processor(
                                      settings.get('link_table_column_map', None),
                                      link_index_fields,
                                      settings,
-                                     model_settings=link_settings)
+                                     model_settings=link_settings,
+                                     chunk_size=chunk_size)
 
         assigned_column_names = row_results.columns.values
         row_results.insert(loc=0, column='description', value=row.description)
@@ -220,7 +221,7 @@ def link_processor(
 def link_daily_processor(
         link_daily_spec,
         link_daily_settings,
-        settings, data_dir, trace_od):
+        settings, chunk_size, data_dir, trace_od):
 
     if 'link_daily_file_names' in settings:
         link_daily_file_names = settings['link_daily_file_names']
@@ -236,6 +237,7 @@ def link_daily_processor(
                              settings.get('link_daily_index_fields', None),
                              settings,
                              model_settings=link_daily_settings,
+                             chunk_size=chunk_size,
                              trace_tag='link_daily',
                              trace_od=trace_od)
 

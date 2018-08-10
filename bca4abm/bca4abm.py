@@ -165,14 +165,17 @@ def calc_rows_per_chunk(chunk_size, df, spec, extra_columns=0, trace_label=None)
 
     df_row_size = len(df.columns)
 
-    extra_columns = spec.shape[0] + extra_columns
+    # spec temp vars are transient and (we assume) discarded before extra_columns are applied
+    # so the extra_columns headroom will be the max of the two
+    spec_temps = spec.target.str.match('_').sum()
+    spec_vars = spec.shape[0] - spec_temps
+    row_size = df_row_size + spec_vars + max(spec_temps, extra_columns)
 
-    row_size = df_row_size + extra_columns
-
-    if trace_label:
-        logger.debug("%s #chunk_calc df %s" % (trace_label, df.shape))
-        logger.debug("%s #chunk_calc spec %s" % (trace_label, spec.shape))
-        logger.debug("%s #chunk_calc extra_columns %s" % (trace_label, extra_columns))
+    # if trace_label:
+    #     logger.debug("%s #chunk_calc df %s" % (trace_label, df.shape))
+    #     logger.debug("%s #chunk_calc spec %s" % (trace_label, spec.shape))
+    #     logger.debug("%s #chunk_calc extra_columns %s" % (trace_label, extra_columns))
+    #     logger.debug("%s #chunk_calc row_size %s" % (trace_label, row_size))
 
     return chunk.rows_per_chunk(chunk_size, row_size, num_rows, trace_label)
 
@@ -209,7 +212,7 @@ def eval_and_sum(assignment_expressions, df, locals_dict,
     rows_per_chunk = \
         calc_rows_per_chunk(chunk_size, df, assignment_expressions,
                             extra_columns=len(group_by_column_names),
-                            trace_label='eval_group_and_sum')
+                            trace_label='eval_and_sum')
 
     logger.info("eval_and_sum chunk_size %s rows_per_chunk %s df rows %s" %
                 (chunk_size, rows_per_chunk, df.shape[0]))
@@ -219,9 +222,9 @@ def eval_and_sum(assignment_expressions, df, locals_dict,
     trace_results = []
     trace_assigned_locals = {}
 
-    for chunk, num_chunks, df_chunk, trace_rows_chunk in chunked_df(df, trace_rows, rows_per_chunk):
+    for i, num_chunks, df_chunk, trace_rows_chunk in chunked_df(df, trace_rows, rows_per_chunk):
 
-        logger.info("eval_and_sum chunk %s of %s" % (chunk, num_chunks))
+        logger.info("eval_and_sum chunk %s of %s" % (i, num_chunks))
 
         assigned_chunk, trace_chunk, trace_assigned_locals_chunk = \
             assign.assign_variables(assignment_expressions,
@@ -238,7 +241,7 @@ def eval_and_sum(assignment_expressions, df, locals_dict,
             # sum this chunk
             summary = assigned_chunk.groupby(group_by_column_names).sum()
         else:
-            summary = assigned_chunk.sum()
+            summary = assigned_chunk.sum().to_frame().T
 
         result_list.append(summary)
 
@@ -248,17 +251,23 @@ def eval_and_sum(assignment_expressions, df, locals_dict,
         if trace_assigned_locals_chunk is not None:
             trace_assigned_locals.update(trace_assigned_locals_chunk)
 
-    if len(result_list) > 1:
-        # (if there was only one chunk, then concat is redundant)
+        # note: chunk size will log low if there are more spec temp vars than extra_columns
+        trace_label = 'eval_and_sum chunk_%s' % i
+        cum_size = chunk.log_df_size(trace_label, 'df_chunk', df_chunk, cum_size=None)
+        cum_size = chunk.log_df_size(trace_label, 'assigned_chunk', assigned_chunk, cum_size)
+        chunk.log_chunk_size(trace_label, cum_size)
 
+    assert result_list
+
+    # squash multiple chunk summaries
+    if len(result_list) > 1:
         summary = pd.concat(result_list)
 
-        # squash the accumulated chunk summaries by reapplying sum
         if group_by_column_names:
             summary.reset_index(inplace=True)
             summary = summary.groupby(group_by_column_names).sum()
         else:
-            summary = summary.sum()
+            summary = summary.sum().to_frame().T
 
     if trace_results:
         trace_results = pd.concat(trace_results)

@@ -3,7 +3,6 @@
 
 import logging
 
-import os
 import pandas as pd
 
 from bca4abm import bca4abm as bca
@@ -49,10 +48,11 @@ def physical_activity_rpc(chunk_size, trips_df, persons_df, spec, trace_label=No
     if chunk_size == 0:
         return num_chunk_ids
 
-    # extra columns from spec
-    extra_columns = spec.shape[1]
+    # spec temp vars are transient and discarded before persons_df is merged
+    spec_temps = spec.target.str.match('_').sum()
+    spec_vars = spec.shape[0] - spec_temps
 
-    trip_row_size = trips_df.shape[1] + extra_columns
+    trip_row_size = trips_df.shape[1] + spec_vars
 
     # scale row_size by average number of chooser rows per chunk_id
     trip_rows_per_chunk_id = trips_df.shape[0] / float(num_chunk_ids)
@@ -63,13 +63,15 @@ def physical_activity_rpc(chunk_size, trips_df, persons_df, spec, trace_label=No
     row_size = (trip_rows_per_chunk_id * trip_row_size) + \
                (persons_rows_per_chunk_id * persons_row_size)
 
-    print "num_chunk_ids", num_chunk_ids
-    print "choosers.shape", trips_df.shape
-    print "trip_rows_per_chunk_id", trip_rows_per_chunk_id
-    print "persons_rows_per_chunk_id", persons_rows_per_chunk_id
-    print "trip_row_size", trip_row_size
-    print "persons_row_size", persons_row_size
-    print "row_size", row_size
+    # print "num_chunk_ids", num_chunk_ids
+    # print "spec_vars", spec_vars
+    # print "spec_temps", spec_temps
+    # print "trips_df.shape", trips_df.shape
+    # print "trip_rows_per_chunk_id", trip_rows_per_chunk_id
+    # print "persons_rows_per_chunk_id", persons_rows_per_chunk_id
+    # print "trip_row_size", trip_row_size
+    # print "persons_row_size", persons_row_size
+    # print "row_size", row_size
 
     return chunk.rows_per_chunk(chunk_size, row_size, num_chunk_ids, trace_label)
 
@@ -117,10 +119,10 @@ def physical_activity_processor(
     result_list = []
 
     # iterate over trips df chunked by hh_id
-    for chunk, num_chunks, trips_chunk, trace_rows_chunk \
+    for i, num_chunks, trips_chunk, trace_rows_chunk \
             in bca.chunked_df_by_chunk_id(trips_df, trip_trace_rows, rows_per_chunk):
 
-        logger.info("%s chunk %s of %s" % (trace_label, chunk, num_chunks))
+        logger.info("%s chunk %s of %s" % (trace_label, i, num_chunks))
 
         trip_activity, trip_trace_results, trip_trace_assigned_locals = \
             assign.assign_variables(physical_activity_trip_spec,
@@ -175,6 +177,11 @@ def physical_activity_processor(
         coc_summary = person_activity.groupby(coc_column_names).sum()
 
         result_list.append(coc_summary)
+
+        chunk_trace_label = 'trace_label chunk_%s' % i
+        cum_size = chunk.log_df_size(chunk_trace_label, 'trips_chunk', trips_chunk, cum_size=None)
+        cum_size = chunk.log_df_size(chunk_trace_label, 'persons_chunk', persons_chunk, cum_size)
+        chunk.log_chunk_size(chunk_trace_label, cum_size)
 
     if len(result_list) > 1:
 

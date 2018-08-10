@@ -142,7 +142,7 @@ def aggregate_od_processor(
         zone_demographics,
         aggregate_od_spec,
         aggregate_od_settings,
-        settings, data_dir, trace_od):
+        settings, chunk_size, data_dir, trace_od):
 
     logger.info("Running aggregate_od_processor")
 
@@ -182,7 +182,7 @@ def aggregate_od_processor(
                          locals_dict=locals_dict,
                          df_alias='od',
                          group_by_column_names=[coc_end],
-                         chunk_size=0,
+                         chunk_size=chunk_size,
                          trace_rows=trace_od_rows)
 
     pipeline.replace_table("aggregate_od_benefits", results)
