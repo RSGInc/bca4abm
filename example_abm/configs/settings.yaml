@@ -1,6 +1,4 @@
 
-dump: True
-
 # trace household id; comment out for no trace
 trace_hh_id: 60
 

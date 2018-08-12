@@ -85,7 +85,7 @@ class ODSkims(object):
             omx_key = '__'.join(key)
         else:
             raise RuntimeError("Unexpected skim key type %s" % type(key))
-        logger.info("ODSkims loading %s from omx %s as %s" % (key, self.name, omx_key,))
+        logger.debug("ODSkims loading %s from omx %s as %s" % (key, self.name, omx_key,))
 
         try:
             self.skims[key] = self.omx[omx_key][:self.length, :self.length]
@@ -105,7 +105,7 @@ def aggregate_od_settings():
 
 def add_skims_to_locals(full_local_name, omx_file_name, zone_count, local_od_skims):
 
-        print "add_skims_to_locals: %s : %s" % (full_local_name, omx_file_name)
+        logger.debug("add_skims_to_locals: %s : %s" % (full_local_name, omx_file_name))
 
         omx_file = omx.open_file(omx_file_name, 'r')
 
@@ -142,7 +142,7 @@ def aggregate_od_processor(
         zone_demographics,
         aggregate_od_spec,
         aggregate_od_settings,
-        settings, chunk_size, data_dir, trace_od):
+        settings, data_dir, trace_od):
 
     logger.info("Running aggregate_od_processor")
 
@@ -182,7 +182,7 @@ def aggregate_od_processor(
                          locals_dict=locals_dict,
                          df_alias='od',
                          group_by_column_names=[coc_end],
-                         chunk_size=chunk_size,
+                         chunk_size=0,
                          trace_rows=trace_od_rows)
 
     pipeline.replace_table("aggregate_od_benefits", results)
@@ -190,7 +190,7 @@ def aggregate_od_processor(
     add_aggregate_results(results, aggregate_od_spec, source='aggregate_od')
 
     for local_name, od_skims in local_skims.iteritems():
-        print "closing %s" % od_skims.name
+        logger.debug("closing %s" % od_skims.name)
         od_skims.omx.close
 
     if trace_results is not None:

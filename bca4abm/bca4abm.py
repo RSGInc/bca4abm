@@ -111,7 +111,7 @@ def read_assignment_spec(fname):
 
 
 # generator for chunked iteration over dataframe by chunk_size
-def chunked_df(df, trace_rows, rows_per_chunk):
+def chunked_df(df, rows_per_chunk, trace_rows=None):
 
     assert df.shape[0] > 0
 
@@ -122,7 +122,7 @@ def chunked_df(df, trace_rows, rows_per_chunk):
     i = offset = 0
     while offset < num_df_rows:
         if trace_rows is None:
-            yield i + 1, num_chunks, df.iloc[offset: offset+rows_per_chunk], None
+            yield i + 1, num_chunks, df.iloc[offset: offset + rows_per_chunk], None
         else:
             yield i + 1, num_chunks, df.iloc[offset: offset + rows_per_chunk], \
                   trace_rows.iloc[offset: offset + rows_per_chunk]
@@ -145,9 +145,9 @@ def chunked_df_by_chunk_id(df, trace_rows, rows_per_chunk, chunk_id_col='chunk_i
     while offset < num_rows:
         chunk_me = df[chunk_id_col].between(offset, offset + rows_per_chunk - 1)
         if trace_rows is None:
-            yield i+1, num_chunks, df[chunk_me], None
+            yield i + 1, num_chunks, df[chunk_me], None
         else:
-            yield i+1, num_chunks, df[chunk_me], trace_rows[chunk_me]
+            yield i + 1, num_chunks, df[chunk_me], trace_rows[chunk_me]
         offset += rows_per_chunk
         i += 1
 
@@ -222,7 +222,7 @@ def eval_and_sum(assignment_expressions, df, locals_dict,
     trace_results = []
     trace_assigned_locals = {}
 
-    for i, num_chunks, df_chunk, trace_rows_chunk in chunked_df(df, trace_rows, rows_per_chunk):
+    for i, num_chunks, df_chunk, trace_rows_chunk in chunked_df(df, rows_per_chunk, trace_rows):
 
         logger.info("eval_and_sum chunk %s of %s" % (i, num_chunks))
 
