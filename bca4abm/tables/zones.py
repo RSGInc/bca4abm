@@ -67,6 +67,25 @@ def read_and_concat_csv_files(data_dir, file_names, axis=1):
 
 
 @inject.table()
+def zone_districts(data_dir, settings):
+
+    file_name = settings.get('district_file_name')
+    districts_df = read_csv_file(
+        data_dir=data_dir,
+        file_name=file_name,
+        column_map=None)
+
+    # the default index is zero-based, so we can convert to 1-based zone ids simply by adding 1
+    districts_df.index = districts_df.index + 1
+    districts_df.index.name = 'ZONE'
+
+    if 'zone' in districts_df:
+        assert (districts_df.index == districts_df.zone.values).all()
+
+    return districts_df
+
+
+@inject.table()
 def zone_cvals(data_dir, settings):
 
     logger.debug("reading zone_cvals table")

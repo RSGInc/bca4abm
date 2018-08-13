@@ -50,14 +50,16 @@ coc_silos:
   - coc_lowinc_ext
   - everybody
 
-# orig or dest
-trip_coc_end: orig
-
 # file name for cvals table csv data input file (expect versions in build and base data subdirs)
 cval_file_name: mf.cval.csv
 
+# file name for csv file in data dir with list of zone districts (which district each zone is in)
+district_file_name: zone_districts.csv
+
 # file name for external cocs table csv data input file (expect versions in build and base data subdirs)
 ext_cocs_file_name: cocs.csv
+
+
 
 #### Zones Processor
 

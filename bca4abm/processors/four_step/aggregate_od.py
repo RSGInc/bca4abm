@@ -17,6 +17,7 @@ from activitysim.core import config
 from activitysim.core import inject
 from activitysim.core import tracing
 from activitysim.core import pipeline
+from activitysim.core import assign
 
 logger = logging.getLogger(__name__)
 
@@ -139,25 +140,21 @@ def create_skim_locals_dict(settings, data_dir, zone_count):
 
 @inject.step()
 def aggregate_od_processor(
-        zone_demographics,
+        zone_districts,
         aggregate_od_spec,
         aggregate_od_settings,
         settings, data_dir, trace_od):
 
     logger.info("Running aggregate_od_processor")
 
-    zones_index = zone_demographics.index
-    zone_count = len(zones_index)
+    zones = zone_districts.to_frame()
+    zone_count = zones.shape[0]
 
-    coc_end = settings.get('trip_coc_end', 'not found')
-    if coc_end not in ['orig', 'dest']:
-        raise RuntimeError("setting trip_coc_end (%s) should be orig or dest" % coc_end)
-
-    # create OD dataframe
+    # create OD dataframe in order compatible with ODSkims
     od_df = pd.DataFrame(
         data={
-            'orig': np.repeat(np.asanyarray(zones_index), zone_count),
-            'dest': np.tile(np.asanyarray(zones_index), zone_count)
+            'orig': np.repeat(np.asanyarray(zones.index), zone_count),
+            'dest': np.tile(np.asanyarray(zones.index), zone_count),
         }
     )
 
@@ -177,17 +174,23 @@ def aggregate_od_processor(
         trace_od_rows = None
 
     results, trace_results, trace_assigned_locals = \
-        bca.eval_and_sum(assignment_expressions=aggregate_od_spec,
-                         df=od_df,
-                         locals_dict=locals_dict,
-                         df_alias='od',
-                         group_by_column_names=[coc_end],
-                         chunk_size=0,
-                         trace_rows=trace_od_rows)
+        assign.assign_variables(aggregate_od_spec,
+                                od_df,
+                                locals_dict=locals_dict,
+                                df_alias='od',
+                                trace_rows=trace_od_rows)
 
-    pipeline.replace_table("aggregate_od_benefits", results)
+    # summarize aggregate_od_benefits by orig and dest districts
+    results['orig'] = np.repeat(np.asanyarray(zones.district), zone_count)
+    results['dest'] = np.tile(np.asanyarray(zones.district), zone_count)
+    district_summary = results.groupby(['orig', 'dest']).sum()
+    pipeline.replace_table("aggregate_od_benefits", district_summary)
 
-    add_aggregate_results(results, aggregate_od_spec, source='aggregate_od')
+    # attribute aggregate_results benefits to origin zone
+    results['orig'] = od_df['orig']
+    del results['dest']
+    zone_summary = results.groupby(['orig']).sum()
+    add_aggregate_results(zone_summary, aggregate_od_spec, source='aggregate_od')
 
     for local_name, od_skims in local_skims.iteritems():
         logger.debug("closing %s" % od_skims.name)

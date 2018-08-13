@@ -70,8 +70,6 @@ def aggregate_zone_processor(
     locals_dict = config.get_model_constants(aggregate_zone_settings)
     locals_dict.update(config.setting('globals'))
 
-    trace_rows = None
-
     # eval_variables evaluates each of the expressions in spec
     # in the context of each row in of the choosers dataframe
     results, trace_results, trace_assigned_locals = \
