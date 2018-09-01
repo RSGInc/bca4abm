@@ -2,9 +2,9 @@
 
 # Copied from github.com/sympy/sympy
 #
-# This file automatically deploys changes to http://rsginc.github.io/populationsim/.
+# This file automatically deploys changes to http://rsginc.github.io/bca4abm/.
 # This will only happen when building a non-pull request build on the master
-# branch of PopulationSim.
+# branch of bca4abm.
 # It requires an access token which should be present in .travis.yml file.
 #
 # Following is the procedure to get the access token:
@@ -29,7 +29,7 @@ set -e
 ACTUAL_TRAVIS_JOB_NUMBER=`echo $TRAVIS_JOB_NUMBER| cut -d'.' -f 2`
 
 
-if [ "$TRAVIS_REPO_SLUG" == "RSGInc/populationsim" ] && \
+if [ "$TRAVIS_REPO_SLUG" == "RSGInc/bca4abm" ] && \
         [ "$TRAVIS_BRANCH" == "master" ] && \
         [ "$TRAVIS_PULL_REQUEST" == "false" ] && \
         [ "$ACTUAL_TRAVIS_JOB_NUMBER" == "1" ]; then
@@ -49,11 +49,11 @@ if [ "$TRAVIS_REPO_SLUG" == "RSGInc/populationsim" ] && \
         git config --global user.name "Jeff Doyle"
 
         echo "Cloning repository"
-        git clone --quiet --single-branch --branch=gh-pages https://${GH_TOKEN}@github.com/RSGInc/populationsim.git  gh-pages > /dev/null 2>&1
+        git clone --quiet --single-branch --branch=gh-pages https://${GH_TOKEN}@github.com/RSGInc/bca4abm.git  gh-pages > /dev/null 2>&1
 
         cd gh-pages
         rm -rf *
-        cp -R ../populationsim/docs/_build/html/* ./
+        cp -R ../bca4abm/docs/_build/html/* ./
         touch .nojekyll
         git add -A .
 
