@@ -14,6 +14,6 @@ calculating benefits since it works with a variety of input data types:
 
 bca4abm is implemented in the [ActivitySim](https://github.com/activitysim/activitysim) framework. 
 
-## Documentation
+## Documentation 
 
 https://rsginc.github.io/bca4abm/
