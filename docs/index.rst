@@ -11,13 +11,10 @@ calculating benefits since it works with a variety of input data types:
   * persons
   * trips
 
-bca4abm is implemented in the `ActivitySim framework <https://github.com/activitysim/activitysim>`_. 
-
-bca4abm exposes most of its calculations in CSV files that contain numpy and 
-pandas expression that operate on the input data tables and matrices. This avoid 
-having to modify Python code when making changes to the model calculations. An 
-example set of expressions is in the auto_ownership expression file - auto_ownership.csv. 
-Refer to :ref:`Expressions` for more info.
+bca4abm exposes its calculations in CSV files that contain pandas and numpy 
+expressions that operate on the input data tables and matrices. This design avoids 
+having to modify Python code when making changes to the model calculations. 
+bca4abm is implemented in the `ActivitySim framework <https://github.com/activitysim/activitysim>`_.
 
 bca4abm requires model outputs for both a base and a build alternative. The required model 
 outputs which are input to bca4abm need to be the same in each alternative. The values 
