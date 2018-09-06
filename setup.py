@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 setup(
-    name = "bca4abm",
-    version = "0.1",
+    name="bca4abm",
+    version='0.2',
     author='RSG Inc',
-    packages = find_packages(exclude=['*.tests']),
+    packages=find_packages(exclude=['*.tests']),
     install_requires=[
         'numpy >= 1.8.0',
         'openmatrix >= 0.2.2',
