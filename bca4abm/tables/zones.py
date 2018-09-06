@@ -9,6 +9,7 @@ import pandas as pd
 import itertools
 
 from activitysim.core import inject
+from activitysim.core import config
 
 from bca4abm import bca4abm as bca
 
@@ -69,7 +70,9 @@ def read_and_concat_csv_files(data_dir, file_names, axis=1):
 @inject.table()
 def zone_districts(data_dir, settings):
 
-    file_name = settings.get('district_file_name')
+    table_settings = config.read_model_settings('tables.yaml')
+
+    file_name = table_settings.get('district_file_name')
     districts_df = read_csv_file(
         data_dir=data_dir,
         file_name=file_name,
@@ -86,11 +89,13 @@ def zone_districts(data_dir, settings):
 
 
 @inject.table()
-def zone_cvals(data_dir, settings):
+def zone_cvals(data_dir):
 
     logger.debug("reading zone_cvals table")
 
-    file_name = settings.get('cval_file_name')
+    table_settings = config.read_model_settings('tables.yaml')
+
+    file_name = table_settings.get('cval_file_name')
 
     base_cvals_df = read_csv_file(
         data_dir=os.path.join(data_dir, 'base-data'),
@@ -102,7 +107,7 @@ def zone_cvals(data_dir, settings):
         file_name=file_name,
         column_map=None)
 
-    cocs_file_names = settings.get('ext_cocs_file_name')
+    cocs_file_names = table_settings.get('ext_cocs_file_name')
 
     base_cocs_df = read_csv_file(
         data_dir=os.path.join(data_dir, 'base-data'),
@@ -130,7 +135,7 @@ def zone_cvals(data_dir, settings):
 
 
 @inject.table()
-def zones(data_dir, settings):
+def zones(data_dir):
     """
     aggregate_zone_file_names in settings contains a list of file name
     for zones table csv data input files (expect versions in build and base data subdirs)
@@ -140,7 +145,9 @@ def zones(data_dir, settings):
 
     logger.debug("reading zones table")
 
-    file_names = settings.get('aggregate_zone_file_names')
+    table_settings = config.read_model_settings('tables.yaml')
+
+    file_names = table_settings.get('aggregate_zone_file_names')
 
     base_zones_df = read_and_concat_csv_files(
         data_dir=os.path.join(data_dir, 'base-data'),

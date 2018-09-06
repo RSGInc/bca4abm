@@ -1,4 +1,11 @@
 
+aggregate_od_matrices:
+  assign_mfs: assign_mfs.omx
+  skims_mfs: skims_mfs.omx
+  mode_choice_pa: mode_choice_pa.omx
+  park_cost: parking_cost.omx
+
+
 CONSTANTS:
   #time-of-day factors
   HBC_PK: 0.407

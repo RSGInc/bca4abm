@@ -36,23 +36,20 @@ def aggregate_zone_spec():
     return bca.read_assignment_spec('aggregate_zone.csv')
 
 
-@inject.injectable()
-def aggregate_zone_settings():
-    return config.read_model_settings('aggregate_zone.yaml')
-
-
 @inject.step()
 def aggregate_zone_processor(
         zones,
         aggregate_zone_spec,
-        aggregate_zone_settings,
-        settings, trace_od):
+        trace_od):
     """
     zones: orca table
 
     zone data for base and build scenario dat files combined into a single dataframe
     with columns names prefixed with 'base_' or 'build_' indexed by ZONE
     """
+
+    trace_label = 'aggregate_zone'
+    model_settings = config.read_model_settings('aggregate_zone.yaml')
 
     zones_df = zones.to_frame()
 
@@ -67,7 +64,7 @@ def aggregate_zone_processor(
 
     # locals whose values will be accessible to the execution context
     # when the expressions in spec are applied to choosers
-    locals_dict = config.get_model_constants(aggregate_zone_settings)
+    locals_dict = config.get_model_constants(model_settings)
     locals_dict.update(config.setting('globals'))
 
     # eval_variables evaluates each of the expressions in spec
@@ -81,7 +78,7 @@ def aggregate_zone_processor(
 
     pipeline.replace_table('aggregate_zone_benefits', results)
 
-    add_aggregate_results(results, aggregate_zone_spec, source='aggregate_zone')
+    add_aggregate_results(results, aggregate_zone_spec, source=trace_label)
 
     if trace_results is not None:
 

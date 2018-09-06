@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from activitysim.core import inject
+from activitysim.core import config
 
 from bca4abm import bca4abm as bca
 
@@ -16,11 +17,12 @@ logger = logging.getLogger(__name__)
 
 
 @inject.table()
-def persons(data_dir, settings):
+def persons(data_dir):
 
     logger.debug("reading persons table")
 
-    df = bca.read_csv_table(table_name="persons", data_dir=data_dir, settings=settings)
+    table_settings = config.read_model_settings('tables.yaml')
+    df = bca.read_csv_table(table_name="persons", data_dir=data_dir, settings=table_settings)
 
     # just to be explicit
     assert 'person_id' not in df.columns

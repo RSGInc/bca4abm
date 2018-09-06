@@ -6,6 +6,7 @@ import logging
 import pandas as pd
 
 from activitysim.core import inject
+from activitysim.core import config
 
 from bca4abm import bca4abm as bca
 
@@ -13,13 +14,15 @@ from bca4abm import bca4abm as bca
 logger = logging.getLogger(__name__)
 
 
-def read_merged_trips(table_name, alt_table_name, data_dir, settings, persons):
+def read_merged_trips(table_name, alt_table_name, data_dir, table_settings, persons):
 
     # like bca.read_csv_or_stored_table except stores and retrieves merged table and alt together
 
-    trips = bca.read_csv_table(table_name=table_name, data_dir=data_dir, settings=settings)
+    trips = \
+        bca.read_csv_table(table_name=table_name, data_dir=data_dir, settings=table_settings)
 
-    trips_alt = bca.read_csv_table(table_name=alt_table_name, data_dir=data_dir, settings=settings)
+    trips_alt = \
+        bca.read_csv_table(table_name=alt_table_name, data_dir=data_dir, settings=table_settings)
 
     trips_merged = pd.merge(trips, trips_alt, on=['household_id',
                                                   'person_idx',
@@ -36,14 +39,16 @@ def read_merged_trips(table_name, alt_table_name, data_dir, settings, persons):
 
 
 @inject.table()
-def base_trips(data_dir, settings, persons):
+def base_trips(data_dir, persons):
 
     logger.debug("reading base_trips table")
+
+    table_settings = config.read_model_settings('tables.yaml')
 
     trips_merged = read_merged_trips(table_name="basetrips",
                                      alt_table_name="basetrips_buildlos",
                                      data_dir=data_dir,
-                                     settings=settings,
+                                     table_settings=table_settings,
                                      persons=persons)
 
     trips_merged['build'] = 0
@@ -52,14 +57,16 @@ def base_trips(data_dir, settings, persons):
 
 
 @inject.table()
-def build_trips(data_dir, settings, persons):
+def build_trips(data_dir, persons):
 
     logger.debug("reading build_trips table")
+
+    table_settings = config.read_model_settings('tables.yaml')
 
     trips_merged = read_merged_trips(table_name="buildtrips",
                                      alt_table_name="buildtrips_baselos",
                                      data_dir=data_dir,
-                                     settings=settings,
+                                     table_settings=table_settings,
                                      persons=persons)
 
     trips_merged['build'] = 1

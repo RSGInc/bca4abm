@@ -32,16 +32,10 @@ def aggregate_demographics_spec():
     return bca.read_assignment_spec('aggregate_demographics.csv')
 
 
-@inject.injectable()
-def aggregate_demographics_settings():
-    return config.read_model_settings('aggregate_demographics.yaml')
-
-
 @inject.step()
 def aggregate_demographics_processor(
         zone_cvals,
         aggregate_demographics_spec,
-        aggregate_demographics_settings,
         settings, trace_od):
     """
 
@@ -52,10 +46,12 @@ def aggregate_demographics_processor(
 
     """
 
+    trace_label = 'aggregate_demographics'
+    model_settings = config.read_model_settings('aggregate_demographics.yaml')
+
     zone_cvals_df = zone_cvals.to_frame()
 
-    logger.info("Running aggregate_demographics_processor with %d zones"
-                % (len(zone_cvals_df), ))
+    logger.info("Running %s with %d zones" % (trace_label, len(zone_cvals_df), ))
 
     if trace_od:
         trace_orig, trace_dest = trace_od
@@ -63,14 +59,14 @@ def aggregate_demographics_processor(
     else:
         trace_od_rows = None
 
-    coc_silos = settings.get('coc_silos', None)
+    coc_silos = model_settings.get('coc_silos', None)
     if coc_silos is None:
-        raise RuntimeError("coc_silos not defined in settings")
+        raise RuntimeError("coc_silos not defined in model_settings")
     inject.add_injectable("coc_silos", coc_silos)
 
     # locals whose values will be accessible to the execution context
     # when the expressions in spec are applied to choosers
-    locals_dict = config.get_model_constants(aggregate_demographics_settings)
+    locals_dict = config.get_model_constants(model_settings)
     locals_dict.update(config.setting('globals'))
 
     trace_rows = None
@@ -87,7 +83,7 @@ def aggregate_demographics_processor(
     pipeline.replace_table("zone_demographics", results)
 
     # expression file can use silos column to designate result targets (e.g. count of households)
-    add_aggregate_results(results, aggregate_demographics_spec, source='aggregate_demographics')
+    add_aggregate_results(results, aggregate_demographics_spec, source=trace_label)
 
     if trace_results is not None:
 

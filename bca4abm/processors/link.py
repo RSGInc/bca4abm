@@ -27,8 +27,8 @@ Link processor
 """
 
 
-@inject.injectable()
-def link_manifest(data_dir, settings):
+def read_link_manifest(data_dir, model_settings):
+
     fname = os.path.join(data_dir, 'link_data_manifest.csv')
 
     # strings that might be empty and hence misconstrued as nans
@@ -38,11 +38,8 @@ def link_manifest(data_dir, settings):
     }
     manifest = pd.read_csv(fname, header=0, comment='#', converters=converters)
 
-    column_map = "link_data_manifest_column_map"
-
-    if column_map in settings:
-        usecols = settings[column_map].keys()
-        manifest.rename(columns=settings[column_map], inplace=True)
+    assert 'description' in manifest.columns
+    assert 'link_file_name' in manifest.columns
 
     return manifest
 
@@ -73,16 +70,6 @@ def link_daily_spec():
     return bca.read_assignment_spec('link_daily.csv')
 
 
-@inject.injectable()
-def link_settings():
-    return config.read_model_settings('link.yaml')
-
-
-@inject.injectable()
-def link_daily_settings():
-    return config.read_model_settings('link_daily.yaml')
-
-
 def add_tables_to_locals(data_dir, model_settings, locals_dict):
 
     tables_tag = "TABLES"
@@ -103,7 +90,7 @@ def add_tables_to_locals(data_dir, model_settings, locals_dict):
 
 def eval_link_spec(link_spec, link_file_names, data_dir,
                    link_file_column_map, link_index_fields,
-                   settings, model_settings, chunk_size, trace_tag=None, trace_od=None):
+                   model_settings, chunk_size, trace_tag=None, trace_od=None):
 
     # accept a single string as well as a dict of {suffix: filename}
     if isinstance(link_file_names, str):
@@ -179,13 +166,13 @@ def eval_link_spec(link_spec, link_file_names, data_dir,
 
 @inject.step()
 def link_processor(
-        link_manifest,
         link_spec,
-        link_settings,
-        settings, chunk_size, data_dir):
+        chunk_size, data_dir):
 
-    assert not missing_columns(link_manifest,
-                               settings['link_data_manifest_column_map'].values())
+    trace_label = 'link'
+    model_settings = config.read_model_settings('link.yaml')
+
+    link_manifest = read_link_manifest(data_dir, model_settings)
 
     results = None
 
@@ -196,10 +183,9 @@ def link_processor(
         row_results = eval_link_spec(link_spec,
                                      row.link_file_name,
                                      data_dir,
-                                     settings.get('link_table_column_map', None),
+                                     model_settings.get('link_table_column_map', None),
                                      link_index_fields,
-                                     settings,
-                                     model_settings=link_settings,
+                                     model_settings=model_settings,
                                      chunk_size=chunk_size)
 
         assigned_column_names = row_results.columns.values
@@ -220,28 +206,29 @@ def link_processor(
 @inject.step()
 def link_daily_processor(
         link_daily_spec,
-        link_daily_settings,
-        settings, chunk_size, data_dir, trace_od):
+        chunk_size, data_dir, trace_od):
 
-    if 'link_daily_file_names' in settings:
-        link_daily_file_names = settings['link_daily_file_names']
-    elif 'link_daily_file_name' in settings:
-        link_daily_file_names = settings['link_daily_file_name']
+    trace_label = 'link_daily'
+    model_settings = config.read_model_settings('link_daily.yaml')
+
+    if 'link_daily_file_names' in model_settings:
+        link_daily_file_names = model_settings['link_daily_file_names']
+    elif 'link_daily_file_name' in model_settings:
+        link_daily_file_names = model_settings['link_daily_file_name']
     else:
-        raise RuntimeError("no link_daily_file_names specified in settings file")
+        raise RuntimeError("no link_daily_file_names specified in model_settings file")
 
     results = eval_link_spec(link_daily_spec,
                              link_daily_file_names,
                              data_dir,
-                             settings.get('link_daily_table_column_map', None),
-                             settings.get('link_daily_index_fields', None),
-                             settings,
-                             model_settings=link_daily_settings,
+                             model_settings.get('link_daily_table_column_map', None),
+                             model_settings.get('link_daily_index_fields', None),
+                             model_settings=model_settings,
                              chunk_size=chunk_size,
-                             trace_tag='link_daily',
+                             trace_tag=trace_label,
                              trace_od=trace_od)
 
     if 'silos' in link_daily_spec.columns:
-        add_aggregate_results(results, link_daily_spec, source='link_daily', zonal=False)
+        add_aggregate_results(results, link_daily_spec, source=trace_label, zonal=False)
     else:
         add_summary_results(results, prefix='LD_', spec=link_daily_spec)

@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from activitysim.core import inject
+from activitysim.core import config
 
 from bca4abm import bca4abm as bca
 
@@ -20,15 +21,17 @@ def households(data_dir, settings):
 
     logger.debug("reading households table")
 
+    table_settings = config.read_model_settings('tables.yaml')
+
     base_households = bca.read_csv_table(table_name="base_households",
                                          index_col="household_id",
                                          data_dir=data_dir,
-                                         settings=settings)
+                                         settings=table_settings)
 
     build_households = bca.read_csv_table(table_name="build_households",
                                           index_col="household_id",
                                           data_dir=data_dir,
-                                          settings=settings)
+                                          settings=table_settings)
 
     households = pd.merge(base_households, build_households, left_index=True, right_index=True)
 

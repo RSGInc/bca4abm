@@ -28,14 +28,10 @@ def aggregate_trips_spec():
     return bca.read_assignment_spec('aggregate_trips.csv')
 
 
-@inject.injectable()
-def aggregate_trips_settings():
-    return config.read_model_settings('aggregate_trips.yaml')
+def read_aggregate_trips_manifest(data_dir, model_settings):
 
-
-@inject.injectable()
-def aggregate_trips_manifest(data_dir, settings):
-    fname = os.path.join(data_dir, 'aggregate_data_manifest.csv')
+    manifest_fname = model_settings.get('aggregate_trips_manifest', 'aggregate_data_manifest.csv')
+    fname = os.path.join(data_dir, manifest_fname)
 
     # strings that might be empty and hence misconstrued as nans
     converters = {
@@ -44,11 +40,10 @@ def aggregate_trips_manifest(data_dir, settings):
     }
     manifest = pd.read_csv(fname, header=0, comment='#', converters=converters)
 
-    column_map = "aggregate_data_manifest_column_map"
-
-    if column_map in settings:
-        usecols = settings[column_map].keys()
-        manifest.rename(columns=settings[column_map], inplace=True)
+    column_map = "aggregate_trips_manifest_column_map"
+    if column_map in model_settings:
+        manifest.rename(columns=model_settings[column_map], inplace=True)
+        assert not missing_columns(manifest, model_settings[column_map].values())
 
     return manifest
 
@@ -68,8 +63,6 @@ def get_omx_matrix(matrix_dir, omx_file_name, omx_key, close_after_read=True):
 
 @inject.step()
 def aggregate_trips_processor(
-        aggregate_trips_manifest,
-        aggregate_trips_settings,
         aggregate_trips_spec,
         settings, data_dir):
 
@@ -80,16 +73,19 @@ def aggregate_trips_processor(
     along with their their corresponding in-vehicle-time (ivt), operating cost (aoc),
     and toll skims.
 
+
     Since the skims are all aligned numpy arrays , we can express their benefit calculation as
     vector computations in the aggregate_trips_spec
     """
 
-    logger.info("Running aggregate_trips_processor")
+    trace_label = 'aggregate_trips'
+    model_settings = config.read_model_settings('aggregate_trips.yaml')
 
-    assert not missing_columns(aggregate_trips_manifest,
-                               settings['aggregate_data_manifest_column_map'].values())
+    aggregate_trips_manifest = read_aggregate_trips_manifest(data_dir, model_settings)
 
-    locals_dict = config.get_model_constants(aggregate_trips_settings)
+    logger.info("Running %s" % trace_label)
+
+    locals_dict = config.get_model_constants(model_settings)
     locals_dict.update(config.setting('globals'))
 
     results = None

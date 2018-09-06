@@ -1,3 +1,18 @@
+
+link_table_column_map:
+  distance: distance
+  dircode: dircode
+  time: time
+  congtime: congested_time
+  area_type: area_type
+  facl_type: facility_type_code
+  num_lanes: num_lanes
+  capacity: capacity
+  twoway: two_way
+  vol_total: total_volume
+  trk_vol: truck_volume
+
+
 CONSTANTS:
   # unreliability costs - inputs
   RELIABILITY_RATIO: 0.5

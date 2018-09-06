@@ -1,3 +1,30 @@
+
+link_daily_file_names:
+  "": linksMD1.csv
+  PM2: linksPM2.csv
+
+link_daily_index_fields:
+  - i
+  - j
+
+link_daily_table_column_map:
+  i: i
+  j: j
+  "@hvol": hvol
+  "@svol": svol
+  "@zone": zone
+  "@mtvol": mtvol
+  "@htvol": htvol
+  "@speed": speed
+  length: length
+  num_lanes: num_lanes
+  volume_delay_func: volume_delay_func
+  "@urbrur": urbrur
+  "@divhwy": divhwy
+  "@waterf": waterf
+  "@noisef": noisef
+
+
 CONSTANTS:
   LINK_PEAK_TOD_SHARE_AUTO: 3.0
   LINK_OFFPEAK_TOD_SHARE_AUTO: 8.7

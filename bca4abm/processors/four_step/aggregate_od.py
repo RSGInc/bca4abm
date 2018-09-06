@@ -99,11 +99,6 @@ def aggregate_od_spec():
     return bca.read_assignment_spec('aggregate_od.csv')
 
 
-@inject.injectable()
-def aggregate_od_settings():
-    return config.read_model_settings('aggregate_od.yaml')
-
-
 def add_skims_to_locals(full_local_name, omx_file_name, zone_count, local_od_skims):
 
         logger.debug("add_skims_to_locals: %s : %s" % (full_local_name, omx_file_name))
@@ -120,11 +115,11 @@ def add_skims_to_locals(full_local_name, omx_file_name, zone_count, local_od_ski
         local_od_skims[full_local_name] = skims
 
 
-def create_skim_locals_dict(settings, data_dir, zone_count):
+def create_skim_locals_dict(model_settings, data_dir, zone_count):
 
-    aggregate_od_matrices = settings.get('aggregate_od_matrices', None)
+    aggregate_od_matrices = model_settings.get('aggregate_od_matrices', None)
     if not aggregate_od_matrices:
-        raise RuntimeError("No list of aggregate_od_matrices found in settings")
+        raise RuntimeError("No list of aggregate_od_matrices found in model_settings")
 
     local_od_skims = {}
     for local_name, omx_file_name in aggregate_od_matrices.iteritems():
@@ -142,10 +137,12 @@ def create_skim_locals_dict(settings, data_dir, zone_count):
 def aggregate_od_processor(
         zone_districts,
         aggregate_od_spec,
-        aggregate_od_settings,
         settings, data_dir, trace_od):
 
-    logger.info("Running aggregate_od_processor")
+    trace_label = 'aggregate_od'
+    model_settings = config.read_model_settings('aggregate_od.yaml')
+
+    logger.info("Running %s" % (trace_label, ))
 
     zones = zone_districts.to_frame()
     zone_count = zones.shape[0]
@@ -160,11 +157,11 @@ def aggregate_od_processor(
 
     # locals whose values will be accessible to the execution context
     # when the expressions in spec are applied to choosers
-    locals_dict = config.get_model_constants(aggregate_od_settings)
+    locals_dict = config.get_model_constants(model_settings)
     locals_dict.update(config.setting('globals'))
 
     # add ODSkims to locals (note: we use local_skims list later to close omx files)
-    local_skims = create_skim_locals_dict(settings, data_dir, zone_count)
+    local_skims = create_skim_locals_dict(model_settings, data_dir, zone_count)
     locals_dict.update(local_skims)
 
     if trace_od:
