@@ -1,5 +1,0 @@
-provenance: tests.configs
-
-dump: True
-
-test_setting: ping

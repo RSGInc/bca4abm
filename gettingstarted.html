@@ -1,0 +1,294 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Getting Started &mdash; bca4abm 0.2
+ documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="bca4abm" href="index.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> bca4abm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2
+
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-model">Running the Model</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bca4abm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Getting Started</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/gettingstarted.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>There are two example implementations included in this repository: ABM and 4step (trip-based).</p>
+<p>ABM models defined in <a class="reference external" href="https://github.com/RSGInc/bca4abm/blob/master/example_abm/configs/settings.yaml">settings.yaml</a></p>
+<blockquote>
+<div><ul class="simple">
+<li>demographics_processor - disaggregate person calculations</li>
+<li>person_trips_processor - disaggregate trip calculations</li>
+<li>auto_ownership_processor - disaggregate person (and household) auto ownership calculations</li>
+<li>physical_activity_processor - disaggregate person and trip physical activity calculations</li>
+<li>aggregate_trips_processor - aggregate (matrix-based) calculations</li>
+<li>link_daily_processor - daily link-based calculations</li>
+<li>link_processor - time period link-based calculations</li>
+<li>write_tables - writes output files</li>
+</ul>
+</div></blockquote>
+<p>4step models defined in <a class="reference external" href="https://github.com/RSGInc/bca4abm/blob/master/example_4step/configs/settings.yaml">settings.yaml</a></p>
+<blockquote>
+<div><ul class="simple">
+<li>aggregate_demographics_processor - zone-based calculations to identify communities of concern (COC) / market segments</li>
+<li>aggregate_zone_processor - zone-based calculations such as auto ownership and destination choice logsums benefits</li>
+<li>aggregate_od_processor - OD pair-based calaculations such as travel time savings</li>
+<li>link_daily_processor - daily link-based calculations such as safety and emissions</li>
+<li>write_tables - writes output files</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Install <a class="reference external" href="https://www.continuum.io/downloads">Anaconda Python 2.7</a>, which includes a number of required Python packages.</li>
+<li>Create and activate an Anaconda environment (i.e. a Python install just for this project).</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">bca4abmtest</span> <span class="n">python</span><span class="o">=</span><span class="mf">2.7</span>
+<span class="n">activate</span> <span class="n">bca4abmtest</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Get and install other required libraries from the <a class="reference external" href="https://pypi.python.org/pypi">Python Package Index</a></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">orca</span> <span class="n">toolz</span> <span class="n">zbox</span> <span class="n">openmatrix</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Get and install the bca4abm package from <a class="reference external" href="https://github.com/RSGInc/bca4abm">GitHub</a></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">RSGInc</span><span class="o">/</span><span class="n">bca4abm</span><span class="o">/</span><span class="n">zipball</span><span class="o">/</span><span class="n">master</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="running-the-model">
+<h2>Running the Model<a class="headerlink" href="#running-the-model" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Activate the conda Python environment</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">activate</span> <span class="n">bca4abmtest</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Change to the ABM or 4step example folder and then run the run_bca.py program</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_bca</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Check the outputs folder for results</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="bca4abm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright contributing authors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
