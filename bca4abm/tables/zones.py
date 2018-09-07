@@ -25,8 +25,11 @@ def conflate_cval(cval, in_place=True):
         cval_out = pd.DataFrame(index=cval.index)
 
     a = 1+np.arange(4)
+    # for each permutation of the string "a_i_h_w_" for all 256 permutations of [1,2,3,4]
+    # namely: 'a1i1h1w1', 'a1i1h1w2', ... 'a4i4h4w4'
     for i in itertools.product(a, a, a, a):
         c = "a%si%sh%sw%s" % i
+        # sum the 4 columns ending in c1 through c4 (e.g. 'a1i1h1w1c1' through 'a1i1h1w1c4')
         rhs_cols = ["%sc%s" % (c, j) for j in a]
         # print "%s = %s" % (c, rhs_cols)
         # row sum
