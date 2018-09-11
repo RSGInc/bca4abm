@@ -50,7 +50,7 @@ class ODSkims(object):
         whether to transpose the matrix before flattening. (i.e. act as a D-O instead of O-D skim)
     """
 
-    def __init__(self, name, length, omx, transpose=False):
+    def __init__(self, name, length, omx, transpose=False, cache_skims=False):
 
         self.skims = {}
 
@@ -59,8 +59,12 @@ class ODSkims(object):
         self.transpose = transpose
 
         self.omx = omx
+        self.cache_skims = cache_skims
 
         self.usage = {key: 0 for key in omx.listMatrices()}
+
+        logger.debug("omx file %s skim shape: %s number of skims: %s" %
+                     (name, omx.shape(), len(self.usage)))
 
     def __getitem__(self, key):
         """
@@ -77,30 +81,35 @@ class ODSkims(object):
 
         if key in self.skims:
             logger.debug("ODSkims using cached %s from omx %s" % (key, self.name, ))
+            data = self.skims[key]
 
         if key not in self.skims:
-            self.get_from_omx(key)
+            data = self.get_from_omx(key)
+            if self.cache_skims:
+                self.skims[key] = data
 
-        data = self.skims[key]
-
-        if self.transpose:
-            return data.transpose().flatten()
-        else:
-            return data.flatten()
+        return data
 
     def get_from_omx(self, key):
+
         if isinstance(key, str):
             omx_key = key
         elif isinstance(key, tuple):
             omx_key = '__'.join(key)
         else:
             raise RuntimeError("Unexpected skim key type %s" % type(key))
-        logger.debug("ODSkims loading %s from omx %s as %s" % (key, self.name, omx_key,))
+
+        # logger.debug("ODSkims loading %s from omx %s as %s" % (key, self.name, omx_key,))
 
         try:
-            self.skims[key] = self.omx[omx_key][:self.length, :self.length]
+            data = self.omx[omx_key][:self.length, :self.length]
         except omx.tables.exceptions.NoSuchNodeError:
             raise RuntimeError("Could not find skim with key '%s' in %s" % (omx_key, self.name))
+
+        if self.transpose:
+            data = data.transpose()
+
+        return data.flatten()
 
 
 @inject.injectable()
@@ -179,6 +188,7 @@ def aggregate_od_processor(
     else:
         trace_od_rows = None
 
+    logger.debug("%s assigning variables" % (trace_label,))
     results, trace_results, trace_assigned_locals = \
         assign.assign_variables(aggregate_od_spec,
                                 od_df,
@@ -187,12 +197,14 @@ def aggregate_od_processor(
                                 trace_rows=trace_od_rows)
 
     # summarize aggregate_od_benefits by orig and dest districts
+    logger.debug("%s creating district summary" % (trace_label,))
     results['orig'] = np.repeat(np.asanyarray(zones.district), zone_count)
     results['dest'] = np.tile(np.asanyarray(zones.district), zone_count)
     district_summary = results.groupby(['orig', 'dest']).sum()
     pipeline.replace_table("aggregate_od_district_summary", district_summary)
 
     # attribute aggregate_results benefits to origin zone
+    logger.debug("%s creating zone summary" % (trace_label,))
     results['orig'] = od_df['orig']
     del results['dest']
     zone_summary = results.groupby(['orig']).sum()
