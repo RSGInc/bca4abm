@@ -35,7 +35,7 @@ logging:
       class: logging.FileHandler
       filename: !!python/object/apply:activitysim.core.tracing.log_file_path ['bca.log']
       mode: w
-      formatter: simpleFormatter
+      formatter: fileFormatter
       level: !!python/name:logging.NOTSET
       #level: !!python/name:logging.INFO
 

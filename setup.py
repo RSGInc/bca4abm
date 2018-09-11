@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name="bca4abm",
-    version='0.2',
+    version='0.3',
     author='RSG Inc',
     packages=find_packages(exclude=['*.tests']),
     install_requires=[
@@ -12,6 +12,6 @@ setup(
         'tables >= 3.1.0',
         'toolz >= 0.7',
         'zbox >= 1.2',
-        'activitysim == 0.7',
+        'activitysim >= 0.8',
     ]
 )

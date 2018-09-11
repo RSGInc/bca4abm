@@ -30,7 +30,7 @@ logging:
       class: logging.FileHandler
       filename: !!python/object/apply:bca4abm.tracing.log_file_path ['bca.log']
       mode: w
-      formatter: simpleFormatter
+      formatter: fileFormatter
       level: !!python/name:logging.NOTSET
 
     console:

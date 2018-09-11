@@ -16,7 +16,9 @@ globals:
 models:
   - aggregate_demographics_processor
   - aggregate_zone_processor
+  - aggregate_zone_benefits
   - aggregate_od_processor
+  - aggregate_od_benefits
   - link_daily_processor
   - write_data_dictionary
   - write_tables
@@ -29,8 +31,7 @@ output_tables:
   prefix: final_
   tables:
     - zone_demographics
-    - aggregate_od_benefits
-    - aggregate_zone_benefits
+    - aggregate_od_zone_summary
+    - aggregate_od_district_summary
+    - aggregate_zone_summary
     - aggregate_results
-
-

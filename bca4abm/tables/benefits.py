@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 from activitysim.core import inject
-
+from activitysim.core import config
 
 logger = logging.getLogger(__name__)
 
@@ -52,5 +52,8 @@ def aggregate_results():
 @inject.injectable(cache=True)
 def coc_silos():
 
-    raise RuntimeError("coc_silos not initialized"
-                       " - did you forget to run aggregate_demographics_processor?")
+    model_settings = config.read_model_settings('aggregate_demographics.yaml')
+    silos = model_settings.get('coc_silos', None)
+    if silos is None:
+        raise RuntimeError("coc_silos not defined in model_settings")
+    return silos

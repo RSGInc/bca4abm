@@ -76,15 +76,9 @@ def aggregate_zone_processor(
                                 df_alias='zones',
                                 trace_rows=trace_od_rows)
 
-    pipeline.replace_table('aggregate_zone_benefits', results)
-
-    add_aggregate_results(results, aggregate_zone_spec, source=trace_label)
+    pipeline.replace_table('aggregate_zone_summary', results)
 
     if trace_results is not None:
-
-        # tracing.write_csv(results,
-        #                   file_name="aggregate_zone_results",
-        #                   transpose=False)
 
         tracing.write_csv(trace_results,
                           file_name="aggregate_zone",
@@ -93,3 +87,15 @@ def aggregate_zone_processor(
 
         if trace_assigned_locals:
             tracing.write_csv(trace_assigned_locals, file_name="aggregate_zone_locals")
+
+
+@inject.step()
+def aggregate_zone_benefits(
+        aggregate_zone_summary,
+        aggregate_zone_spec):
+
+    trace_label = 'aggregate_zone_benefits'
+
+    zone_summary = aggregate_zone_summary.to_frame()
+
+    add_aggregate_results(zone_summary, aggregate_zone_spec, source=trace_label)

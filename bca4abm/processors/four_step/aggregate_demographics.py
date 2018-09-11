@@ -59,11 +59,6 @@ def aggregate_demographics_processor(
     else:
         trace_od_rows = None
 
-    coc_silos = model_settings.get('coc_silos', None)
-    if coc_silos is None:
-        raise RuntimeError("coc_silos not defined in model_settings")
-    inject.add_injectable("coc_silos", coc_silos)
-
     # locals whose values will be accessible to the execution context
     # when the expressions in spec are applied to choosers
     locals_dict = config.get_model_constants(model_settings)

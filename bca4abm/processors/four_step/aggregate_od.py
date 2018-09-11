@@ -60,6 +60,8 @@ class ODSkims(object):
 
         self.omx = omx
 
+        self.usage = {key: 0 for key in omx.listMatrices()}
+
     def __getitem__(self, key):
         """
         accessor to return flattened skim array with specified key
@@ -68,6 +70,13 @@ class ODSkims(object):
         this allows the skim array to be accessed from expressions as
         skim['DISTANCE'] or skim[('SOVTOLL_TIME', 'MD')]
         """
+
+        assert key in self.usage
+
+        self.usage[key] += 1
+
+        if key in self.skims:
+            logger.debug("ODSkims using cached %s from omx %s" % (key, self.name, ))
 
         if key not in self.skims:
             self.get_from_omx(key)
@@ -181,16 +190,22 @@ def aggregate_od_processor(
     results['orig'] = np.repeat(np.asanyarray(zones.district), zone_count)
     results['dest'] = np.tile(np.asanyarray(zones.district), zone_count)
     district_summary = results.groupby(['orig', 'dest']).sum()
-    pipeline.replace_table("aggregate_od_benefits", district_summary)
+    pipeline.replace_table("aggregate_od_district_summary", district_summary)
 
     # attribute aggregate_results benefits to origin zone
     results['orig'] = od_df['orig']
     del results['dest']
     zone_summary = results.groupby(['orig']).sum()
-    add_aggregate_results(zone_summary, aggregate_od_spec, source='aggregate_od')
+    pipeline.replace_table("aggregate_od_zone_summary", zone_summary)
 
     for local_name, od_skims in local_skims.iteritems():
         logger.debug("closing %s" % od_skims.name)
+        num_skims = len(od_skims.usage)
+        num_used = (np.asanyarray(od_skims.usage.values()) > 0).sum()
+        num_unused = num_skims - num_used
+        avg_used = (np.asanyarray(od_skims.usage.values())).sum() / num_used
+        logger.debug("  %s skims %s used (%s avg) %s unused" %
+                     (num_skims, num_used, avg_used, num_unused))
         od_skims.omx.close
 
     if trace_results is not None:
@@ -201,3 +216,15 @@ def aggregate_od_processor(
 
         if trace_assigned_locals:
             tracing.write_csv(trace_assigned_locals, file_name="aggregate_od_locals")
+
+
+@inject.step()
+def aggregate_od_benefits(
+        aggregate_od_zone_summary,
+        aggregate_od_spec):
+
+    trace_label = 'aggregate_od_benefits'
+
+    zone_summary = aggregate_od_zone_summary.to_frame()
+
+    add_aggregate_results(zone_summary, aggregate_od_spec, source=trace_label)
