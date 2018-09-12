@@ -13,6 +13,7 @@ Silos,Description,Target,Expression
 ,,stpkg_build,"park_cost_build[""stpkg""]"
 ,,ltpkg_build,"park_cost_build[""ltpkg""]"
 # drive alone,,,
+,,_,logger.info("calculating drive alone")
 ,,base_da_pa_trips_hbc,"mode_choice_pa_base[""mf.hwda.lowinc""]"
 ,,build_da_pa_trips_hbc,"mode_choice_pa_build[""mf.hwda.lowinc""]"
 ,,park_cost_diff_pa,(ltpkg_build - ltpkg_base) / 2

@@ -80,10 +80,10 @@ class ODSkims(object):
         self.usage[key] += 1
 
         if key in self.skims:
-            logger.debug("ODSkims using cached %s from omx %s" % (key, self.name, ))
+            # logger.debug("ODSkims using cached %s from omx %s" % (key, self.name, ))
             data = self.skims[key]
-
-        if key not in self.skims:
+        else:
+            # logger.debug("ODSkims loading %s from omx %s" % (key, self.name, ,))
             data = self.get_from_omx(key)
             if self.cache_skims:
                 self.skims[key] = data
@@ -98,8 +98,6 @@ class ODSkims(object):
             omx_key = '__'.join(key)
         else:
             raise RuntimeError("Unexpected skim key type %s" % type(key))
-
-        # logger.debug("ODSkims loading %s from omx %s as %s" % (key, self.name, omx_key,))
 
         try:
             data = self.omx[omx_key][:self.length, :self.length]
@@ -177,6 +175,7 @@ def aggregate_od_processor(
     # when the expressions in spec are applied to choosers
     locals_dict = config.get_model_constants(model_settings)
     locals_dict.update(config.setting('globals'))
+    locals_dict['logger'] = logger
 
     # add ODSkims to locals (note: we use local_skims list later to close omx files)
     local_skims = create_skim_locals_dict(model_settings, data_dir, zone_count)
@@ -227,7 +226,8 @@ def aggregate_od_processor(
                           column_labels=['label', 'od'])
 
         if trace_assigned_locals:
-            tracing.write_csv(trace_assigned_locals, file_name="aggregate_od_locals")
+            tracing.write_csv(trace_assigned_locals, file_name="aggregate_od_locals",
+                              index_label='variable', columns='value')
 
 
 @inject.step()

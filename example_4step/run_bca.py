@@ -31,6 +31,7 @@ parent_dir = os.path.dirname(__file__)
 handle_standard_args()
 
 tracing.config_logger()
+tracing.delete_csv_files()
 
 warnings.simplefilter("always")
 
