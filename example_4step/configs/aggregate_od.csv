@@ -1,73 +1,73 @@
 Silos,Description,Target,Expression
 #travel time benefit; CURRENTLY ONLY HBC UNTIL WE GET ALL THE REQUIRED DATA,,,
-,,base_sov_am_travel_time,skims_mfs_base['mf5']
-,,build_sov_am_travel_time,"skims_mfs_build[""mf5""] "
-,,base_sov_md_travel_time,"skims_mfs_base[""mf7""] "
-,,build_sov_md_travel_time,"skims_mfs_build[""mf7""] "
-,,base_hov_am_travel_time,"skims_mfs_base[""mf6""] "
-,,build_hov_am_travel_time,"skims_mfs_build[""mf6""] "
-,,base_hov_md_travel_time,"skims_mfs_base[""mf8""] "
-,,build_hov_md_travel_time,"skims_mfs_build[""mf8""] "
-,,stpkg_base,"park_cost_base[""stpkg""]"
-,,ltpkg_base,"park_cost_base[""ltpkg""]"
-,,stpkg_build,"park_cost_build[""stpkg""]"
-,,ltpkg_build,"park_cost_build[""ltpkg""]"
+,ALIAS,base_sov_am_travel_time,skims_mfs_base['mf5']
+,ALIAS,build_sov_am_travel_time,"skims_mfs_build['mf5']"
+,ALIAS,base_sov_md_travel_time,"skims_mfs_base['mf7']"
+,ALIAS,build_sov_md_travel_time,"skims_mfs_build['mf7']"
+,ALIAS,base_hov_am_travel_time,"skims_mfs_base['mf6']"
+,ALIAS,build_hov_am_travel_time,"skims_mfs_build['mf6']"
+,ALIAS,base_hov_md_travel_time,"skims_mfs_base['mf8']"
+,ALIAS,build_hov_md_travel_time,"skims_mfs_build['mf8']"
+,ALIAS,stpkg_base,"park_cost_base['stpkg']"
+,ALIAS,ltpkg_base,"park_cost_base['ltpkg']"
+,ALIAS,stpkg_build,"park_cost_build['stpkg']"
+,ALIAS,ltpkg_build,"park_cost_build['ltpkg']"
+,,park_cost_diff_pa,(ltpkg_build - ltpkg_base) / 2
 # drive alone,,,
 ,,_,logger.info("calculating drive alone")
-,,base_da_pa_trips_hbc,"mode_choice_pa_base[""mf.hwda.lowinc""]"
-,,build_da_pa_trips_hbc,"mode_choice_pa_build[""mf.hwda.lowinc""]"
-,,park_cost_diff_pa,(ltpkg_build - ltpkg_base) / 2
+,ALIAS,base_da_pa_trips_hbc,"mode_choice_pa_base['mf.hwda.lowinc']"
+,ALIAS,build_da_pa_trips_hbc,"mode_choice_pa_build['mf.hwda.lowinc']"
 ,,hbc_da_am_travel_time_benefit, -0.5 * HBC_PK * (base_da_pa_trips_hbc + build_da_pa_trips_hbc) * (((build_sov_am_travel_time - base_sov_am_travel_time) * VOT_HBC/60.0) + park_cost_diff_pa)
 ,,hbc_da_md_travel_time_benefit, -0.5 * HBC_OP * (base_da_pa_trips_hbc + build_da_pa_trips_hbc) * (((build_sov_md_travel_time - base_sov_md_travel_time) * VOT_HBC/60.0) + park_cost_diff_pa)
 ,hbc da benefit,hbc_da_travel_time_benefit,(hbc_da_am_travel_time_benefit + hbc_da_md_travel_time_benefit) * DISCOUNT_RATE * ANNUALIZATION_FACTOR
 # drive with passenger,,,
-,,base_dp_pa_trips_hbc,"mode_choice_pa_base[""mf.hwda.lowinc""]"
-,,build_dp_pa_trips_hbc,"mode_choice_pa_build[""mf.hwda.lowinc""]"
+,ALIAS,base_dp_pa_trips_hbc,"mode_choice_pa_base['mf.hwda.lowinc']"
+,ALIAS,build_dp_pa_trips_hbc,"mode_choice_pa_build['mf.hwda.lowinc']"
 ,,hbc_dp_am_travel_time_benefit, -0.5 * HBC_PK * (base_dp_pa_trips_hbc + build_dp_pa_trips_hbc) * (((build_hov_am_travel_time - base_hov_am_travel_time) * VOT_HBC/60.0) + park_cost_diff_pa)
 ,,hbc_dp_md_travel_time_benefit, -0.5 * HBC_OP * (base_dp_pa_trips_hbc + build_dp_pa_trips_hbc) * (((build_hov_md_travel_time - base_hov_md_travel_time) * VOT_HBC/60.0) + park_cost_diff_pa)
 ,hbc dp benefit,hbc_dp_travel_time_benefit,(hbc_dp_am_travel_time_benefit + hbc_dp_md_travel_time_benefit) * DISCOUNT_RATE * ANNUALIZATION_FACTOR
 # passenger,,,
-,,base_p_pa_trips_hbc,"mode_choice_pa_base[""mf.hwda.lowinc""]"
-,,build_p_pa_trips_hbc,"mode_choice_pa_build[""mf.hwda.lowinc""]"
+,ALIAS,base_p_pa_trips_hbc,"mode_choice_pa_base['mf.hwda.lowinc']"
+,ALIAS,build_p_pa_trips_hbc,"mode_choice_pa_build['mf.hwda.lowinc']"
 ,,hbc_p_am_travel_time_benefit, -0.5 * HBC_PK * (base_p_pa_trips_hbc + build_p_pa_trips_hbc) * (((build_hov_am_travel_time - base_hov_am_travel_time) * VOT_HBC/60.0) + park_cost_diff_pa)
 ,,hbc_p_md_travel_time_benefit, -0.5 * HBC_OP * (base_p_pa_trips_hbc + build_p_pa_trips_hbc) * (((build_hov_md_travel_time - base_hov_md_travel_time) * VOT_HBC/60.0) + park_cost_diff_pa)
 ,hbc p benefit,hbc_p_travel_time_benefit,(hbc_p_am_travel_time_benefit + hbc_p_md_travel_time_benefit) * DISCOUNT_RATE * ANNUALIZATION_FACTOR
 # walk transit,,,
-,,base_wtransit_pa_trips_hbc,"mode_choice_pa_base[""mf.hwda.lowinc""]"
-,,build_wtransit_pa_trips_hbc,"mode_choice_pa_build[""mf.hwda.lowinc""]"
-,,base_wtransit_am_travel_time,"1.0 * skims_mfs_base[""mf36""] + 2.0 * skims_mfs_base[""mf20""] + 2.0 * skims_mfs_base[""mf21""] +  2.0 * skims_mfs_base[""mf22""] + 8.0 * skims_mfs_base[""mf24""] + skims_mfs_base[""mf2""] * VOT_HBC"
-,,build_wtransit_am_travel_time,"1.0 * skims_mfs_build[""mf36""] + 2.0 * skims_mfs_build[""mf20""] + 2.0 * skims_mfs_build[""mf21""] +  2.0 * skims_mfs_build[""mf22""] + 8.0 * skims_mfs_build[""mf24""] + skims_mfs_build[""mf2""] * VOT_HBC"
-,,base_wtransit_md_travel_time,"1.0 * skims_mfs_base[""mf37""] + 2.0 * skims_mfs_base[""mf25""] + 2.0 * skims_mfs_base[""mf26""] +  2.0 * skims_mfs_base[""mf27""] + 8.0 * skims_mfs_base[""mf29""] + skims_mfs_base[""mf2""] * VOT_HBC"
-,,build_wtransit_md_travel_time,"1.0 * skims_mfs_build[""mf37""] + 2.0 * skims_mfs_build[""mf25""] + 2.0 * skims_mfs_build[""mf26""] +  2.0 * skims_mfs_build[""mf27""] + 8.0 * skims_mfs_build[""mf29""] + skims_mfs_build[""mf2""] * VOT_HBC"
+,ALIAS,base_wtransit_pa_trips_hbc,"mode_choice_pa_base['mf.hwda.lowinc']"
+,ALIAS,build_wtransit_pa_trips_hbc,"mode_choice_pa_build['mf.hwda.lowinc']"
+,,base_wtransit_am_travel_time,"1.0 * skims_mfs_base['mf36'] + 2.0 * skims_mfs_base['mf20'] + 2.0 * skims_mfs_base['mf21'] +  2.0 * skims_mfs_base['mf22'] + 8.0 * skims_mfs_base['mf24'] + skims_mfs_base['mf2'] * VOT_HBC"
+,,build_wtransit_am_travel_time,"1.0 * skims_mfs_build['mf36'] + 2.0 * skims_mfs_build['mf20'] + 2.0 * skims_mfs_build['mf21'] +  2.0 * skims_mfs_build['mf22'] + 8.0 * skims_mfs_build['mf24'] + skims_mfs_build['mf2'] * VOT_HBC"
+,,base_wtransit_md_travel_time,"1.0 * skims_mfs_base['mf37'] + 2.0 * skims_mfs_base['mf25'] + 2.0 * skims_mfs_base['mf26'] +  2.0 * skims_mfs_base['mf27'] + 8.0 * skims_mfs_base['mf29'] + skims_mfs_base['mf2'] * VOT_HBC"
+,,build_wtransit_md_travel_time,"1.0 * skims_mfs_build['mf37'] + 2.0 * skims_mfs_build['mf25'] + 2.0 * skims_mfs_build['mf26'] +  2.0 * skims_mfs_build['mf27'] + 8.0 * skims_mfs_build['mf29'] + skims_mfs_build['mf2'] * VOT_HBC"
 ,,hbc_wtransit_am_travel_time_benefit, -0.5 * HBC_PK * (base_wtransit_pa_trips_hbc + build_wtransit_pa_trips_hbc) * ((build_wtransit_am_travel_time - base_wtransit_am_travel_time) * VOT_HBC/60.0)
 ,,hbc_wtransit_md_travel_time_benefit, -0.5 * HBC_OP * (base_wtransit_pa_trips_hbc + build_wtransit_pa_trips_hbc) * ((build_wtransit_md_travel_time - base_wtransit_md_travel_time) * VOT_HBC/60.0)
 ,hbc wtransit benefit,hbc_wtransit_travel_time_benefit,(hbc_wtransit_am_travel_time_benefit + hbc_wtransit_md_travel_time_benefit) * DISCOUNT_RATE * ANNUALIZATION_FACTOR
 *,hbc travel time benefit,hbc_travel_time_benefit,hbc_da_travel_time_benefit + hbc_dp_travel_time_benefit + hbc_p_travel_time_benefit + hbc_wtransit_travel_time_benefit
 #travel time reliability; CURRENTLY ONLY HBC UNTIL WE GET ALL THE REQUIRED DATA,,,
-,,base_am_reliability,"np.sqrt( skims_mfs_base[""mf5""] )"
-,,build_am_reliability,"np.sqrt( skims_mfs_build[""mf5""] )"
-,,base_md_reliability,"np.sqrt( skims_mfs_base[""mf5""] )"
-,,build_md_reliability,"np.sqrt( skims_mfs_build[""mf5""] )"
+,,base_am_reliability,"np.sqrt( skims_mfs_base['mf5'] )"
+,,build_am_reliability,"np.sqrt( skims_mfs_build['mf5'] )"
+,,base_md_reliability,"np.sqrt( skims_mfs_base['mf5'] )"
+,,build_md_reliability,"np.sqrt( skims_mfs_build['mf5'] )"
 ,,daily_build_hbc_auto_trips,build_da_pa_trips_hbc + build_dp_pa_trips_hbc + build_p_pa_trips_hbc
 ,,daily_base_hbc_auto_trips,base_da_pa_trips_hbc + base_dp_pa_trips_hbc + base_p_pa_trips_hbc
 ,,hbc_am_reliability_benefit, -0.5 * HBC_PK * (daily_build_hbc_auto_trips + daily_base_hbc_auto_trips) * ((build_am_reliability - base_am_reliability) * VOT_HBC/60.0)
 ,,hbc_md_reliability_benefit, -0.5 * HBC_OP * (daily_build_hbc_auto_trips + daily_base_hbc_auto_trips) * ((build_md_reliability - base_md_reliability) * VOT_HBC/60.0)
 *,hbc auto reliability benefit,hbc_reliability_benefit,(hbc_am_reliability_benefit + hbc_md_reliability_benefit) * DISCOUNT_RATE * ANNUALIZATION_FACTOR
 # drive transit just transit leg and in OD format since P to A zone through best N parking lot zone skims are not saved by the model,,,
-,,base_dtransit_od_trips_pkad,"assign_mfs_base[""mf62""]"
-,,base_dtransit_od_trips_opad,"assign_mfs_base[""mf63""]"
-,,build_dtransit_od_trips_pkad,"assign_mfs_build[""mf62""]"
-,,build_dtransit_od_trips_opad,"assign_mfs_build[""mf63""]"
+,ALIAS,base_dtransit_od_trips_pkad,"assign_mfs_base['mf62']"
+,ALIAS,base_dtransit_od_trips_opad,"assign_mfs_base['mf63']"
+,ALIAS,build_dtransit_od_trips_pkad,"assign_mfs_build['mf62']"
+,ALIAS,build_dtransit_od_trips_opad,"assign_mfs_build['mf63']"
 ,,dtransit_am_travel_time_benefit, -0.5 * (base_dtransit_od_trips_pkad + build_dtransit_od_trips_pkad) * ((build_wtransit_am_travel_time - base_wtransit_am_travel_time) * VOT_HBC/60.0)
 ,,dtransit_md_travel_time_benefit, -0.5 * (base_dtransit_od_trips_opad + build_dtransit_od_trips_opad) * ((build_wtransit_md_travel_time - base_wtransit_md_travel_time) * VOT_HBC/60.0)
 *,dtransit travel time benefit,dtransit_travel_time_benefit,(dtransit_am_travel_time_benefit + dtransit_md_travel_time_benefit) * DISCOUNT_RATE * ANNUALIZATION_FACTOR
 #physical activity / active transportation / ITHIM benefit,,,
-,trip distance,base_trip_distance,"skims_mfs_base[""mf3""] "
-,,build_trip_distance,"skims_mfs_build[""mf3""] "
-,,base_walk_trips,"mode_choice_pa_base[""mf.hwda.lowinc""]"
-,,base_bike_trips,"mode_choice_pa_build[""mf.hwda.lowinc""]"
-,,build_walk_trips,"mode_choice_pa_base[""mf.hwda.lowinc""]"
-,,build_bike_trips,"mode_choice_pa_build[""mf.hwda.lowinc""]"
+,trip distance,base_trip_distance,"skims_mfs_base['mf3']"
+,ALIAS,build_trip_distance,"skims_mfs_build['mf3']"
+,ALIAS,base_walk_trips,"mode_choice_pa_base['mf.hwda.lowinc']"
+,ALIAS,base_bike_trips,"mode_choice_pa_build['mf.hwda.lowinc']"
+,ALIAS,build_walk_trips,"mode_choice_pa_base['mf.hwda.lowinc']"
+,ALIAS,build_bike_trips,"mode_choice_pa_build['mf.hwda.lowinc']"
 ,,base_walk_time,base_trip_distance * (60 / WALK_SPEED)
 ,,build_walk_time,build_trip_distance * (60 / WALK_SPEED)
 ,,base_bike_time,base_trip_distance * (60 / BIKE_SPEED)
@@ -85,14 +85,14 @@ Silos,Description,Target,Expression
 ,,dalys_in_dollars,DOLLARS_PER_DALY * POPULATION * ( AVG_WALK_TIME_GROWTH_RATIO * avg_walk_time_growth_ratio + AVG_BIKE_TIME_GROWTH_RATIO * avg_bike_time_growth_ratio )
 *,physical activity benefit,physical_activity_benefit,dalys_in_dollars / dalys_in_dollars.count()
 #truck travel time,,,
-,truck trips,base_hvytrk_am_trips,"mode_choice_pa_base[""mf.hwda.lowinc""]"
-,,base_medtrk_am_trips,"mode_choice_pa_base[""mf.hwda.lowinc""]"
-,,base_hvytrk_md_trips,"mode_choice_pa_base[""mf.hwda.lowinc""]"
-,,base_medtrk_md_trips,"mode_choice_pa_base[""mf.hwda.lowinc""]"
-,,build_hvytrk_am_trips,"mode_choice_pa_build[""mf.hwda.lowinc""]"
-,,build_medtrk_am_trips,"mode_choice_pa_build[""mf.hwda.lowinc""]"
-,,build_hvytrk_md_trips,"mode_choice_pa_build[""mf.hwda.lowinc""]"
-,,build_medtrk_md_trips,"mode_choice_pa_build[""mf.hwda.lowinc""]"
+,truck trips,base_hvytrk_am_trips,"mode_choice_pa_base['mf.hwda.lowinc']"
+,ALIAS,base_medtrk_am_trips,"mode_choice_pa_base['mf.hwda.lowinc']"
+,ALIAS,base_hvytrk_md_trips,"mode_choice_pa_base['mf.hwda.lowinc']"
+,ALIAS,base_medtrk_md_trips,"mode_choice_pa_base['mf.hwda.lowinc']"
+,ALIAS,build_hvytrk_am_trips,"mode_choice_pa_build['mf.hwda.lowinc']"
+,ALIAS,build_medtrk_am_trips,"mode_choice_pa_build['mf.hwda.lowinc']"
+,ALIAS,build_hvytrk_md_trips,"mode_choice_pa_build['mf.hwda.lowinc']"
+,ALIAS,build_medtrk_md_trips,"mode_choice_pa_build['mf.hwda.lowinc']"
 ,,hvytrk_am_time_benefit, -0.5 * (base_hvytrk_am_trips + build_hvytrk_am_trips) * (build_sov_am_travel_time - base_sov_am_travel_time) * VOT_HVYTRK/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
 ,,medtrk_am_time_benefit, -0.5 * (base_medtrk_am_trips + build_medtrk_am_trips) * (build_sov_am_travel_time - base_sov_am_travel_time) * VOT_MEDTRK/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
 ,,hvytrk_md_time_benefit, -0.5 * (base_hvytrk_md_trips + build_hvytrk_md_trips) * (build_sov_md_travel_time - base_sov_md_travel_time) * VOT_HVYTRK/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR

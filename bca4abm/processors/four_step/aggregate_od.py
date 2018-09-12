@@ -4,13 +4,13 @@
 import logging
 
 import os
+import re
 import pandas as pd
 import numpy as np
 import openmatrix as omx
 
 
 from bca4abm import bca4abm as bca
-from ...util.misc import add_summary_results
 from ...util.misc import add_aggregate_results
 
 from activitysim.core import config
@@ -33,6 +33,27 @@ assign_mfs.omx, inputs and results of the zone aggregate processor, and skims_mf
 """
 
 
+def alias_assignment_spec(spec):
+
+    ALIAS_TAG = 'ALIAS'
+    aliases = {}
+    expressions = []
+
+    for row in spec.itertuples(index=False):
+        if row.description == ALIAS_TAG:
+            aliases[row.target] = row.expression
+            expressions.append(ALIAS_TAG)  # placeholder so expressions align, we drop these rows
+        elif aliases:
+            pattern = re.compile(r'\b(' + '|'.join(aliases.keys()) + r')\b')
+            result = pattern.sub(lambda x: aliases[x.group()], row.expression)
+            expressions.append(result)
+
+    spec.expression = expressions
+    spec = spec[spec.description != ALIAS_TAG]
+
+    return spec
+
+
 class ODSkims(object):
     """
     Wrapper for skim arrays to facilitate use of skims by aggregate_od_processor
@@ -50,7 +71,7 @@ class ODSkims(object):
         whether to transpose the matrix before flattening. (i.e. act as a D-O instead of O-D skim)
     """
 
-    def __init__(self, name, length, omx, transpose=False, cache_skims=False):
+    def __init__(self, name, length, omx, transpose=False, cache_skims=True):
 
         self.skims = {}
 
@@ -110,12 +131,7 @@ class ODSkims(object):
         return data.flatten()
 
 
-@inject.injectable()
-def aggregate_od_spec():
-    return bca.read_assignment_spec('aggregate_od.csv')
-
-
-def add_skims_to_locals(full_local_name, omx_file_name, zone_count, local_od_skims):
+def add_skims_to_locals(full_local_name, omx_file_name, zone_count, local_od_skims, cache_skims):
 
         logger.debug("add_skims_to_locals: %s : %s" % (full_local_name, omx_file_name))
 
@@ -126,12 +142,13 @@ def add_skims_to_locals(full_local_name, omx_file_name, zone_count, local_od_ski
 
         skims = ODSkims(name=full_local_name,
                         length=zone_count,
-                        omx=omx_file)
+                        omx=omx_file,
+                        cache_skims=cache_skims)
 
         local_od_skims[full_local_name] = skims
 
 
-def create_skim_locals_dict(model_settings, data_dir, zone_count):
+def create_skim_locals_dict(model_settings, data_dir, zone_count, cache_skims):
 
     aggregate_od_matrices = model_settings.get('aggregate_od_matrices', None)
     if not aggregate_od_matrices:
@@ -144,19 +161,35 @@ def create_skim_locals_dict(model_settings, data_dir, zone_count):
             full_local_name = '_'.join([local_name, scenario])
             data_sub_dir = '%s-data' % scenario
             omx_file_path = os.path.join(data_dir, data_sub_dir, omx_file_name)
-            add_skims_to_locals(full_local_name, omx_file_path, zone_count, local_od_skims)
+            add_skims_to_locals(full_local_name, omx_file_path, zone_count, local_od_skims,
+                                cache_skims)
 
     return local_od_skims
+
+
+def read_aggregate_od_spec(apply_spec_alias):
+
+    spec = bca.read_assignment_spec('aggregate_od.csv')
+
+    if apply_spec_alias:
+        spec = alias_assignment_spec(spec)
+
+    return spec
 
 
 @inject.step()
 def aggregate_od_processor(
         zone_districts,
-        aggregate_od_spec,
-        settings, data_dir, trace_od):
+        data_dir, trace_od):
 
     trace_label = 'aggregate_od'
     model_settings = config.read_model_settings('aggregate_od.yaml')
+
+    cache_skims = apply_spec_alias = model_settings.get('apply_spec_alias', False)
+    aggregate_od_spec = read_aggregate_od_spec(apply_spec_alias)
+
+    if apply_spec_alias:
+        tracing.write_csv(aggregate_od_spec, file_name="aggregate_od_spec", transpose=False)
 
     logger.info("Running %s" % (trace_label, ))
 
@@ -178,7 +211,8 @@ def aggregate_od_processor(
     locals_dict['logger'] = logger
 
     # add ODSkims to locals (note: we use local_skims list later to close omx files)
-    local_skims = create_skim_locals_dict(model_settings, data_dir, zone_count)
+
+    local_skims = create_skim_locals_dict(model_settings, data_dir, zone_count, cache_skims)
     locals_dict.update(local_skims)
 
     if trace_od:
@@ -215,8 +249,9 @@ def aggregate_od_processor(
         num_used = (np.asanyarray(od_skims.usage.values()) > 0).sum()
         num_unused = num_skims - num_used
         avg_used = (np.asanyarray(od_skims.usage.values())).sum() / num_used
-        logger.debug("  %s skims %s used (%s avg) %s unused" %
-                     (num_skims, num_used, avg_used, num_unused))
+        max_used = np.asanyarray(od_skims.usage.values()).max()
+        logger.info("  %s %s skims %s used (%s avg %s max) %s unused" %
+                    (od_skims.name, num_skims, num_used, avg_used, max_used, num_unused))
         od_skims.omx.close
 
     if trace_results is not None:
@@ -231,11 +266,14 @@ def aggregate_od_processor(
 
 
 @inject.step()
-def aggregate_od_benefits(
-        aggregate_od_zone_summary,
-        aggregate_od_spec):
+def aggregate_od_benefits(aggregate_od_zone_summary):
 
     trace_label = 'aggregate_od_benefits'
+
+    model_settings = config.read_model_settings('aggregate_od.yaml')
+
+    apply_spec_alias = model_settings.get('apply_spec_alias', False)
+    aggregate_od_spec = read_aggregate_od_spec(apply_spec_alias)
 
     zone_summary = aggregate_od_zone_summary.to_frame()
 
