@@ -1,5 +1,6 @@
 
 apply_spec_alias: True
+cache_skims: True
 
 aggregate_od_matrices:
   assign_mfs: assign_mfs.omx

@@ -81,7 +81,7 @@ class ODSkims(object):
 
         self.omx = omx
         self.omx_shape = tuple([int(s) for s in omx.shape()])
-        self.skim_dtype = np.float32
+        self.skim_dtype = np.float64
 
         self.cache_skims = cache_skims
 
@@ -197,7 +197,14 @@ def aggregate_od_processor(
     trace_label = 'aggregate_od'
     model_settings = config.read_model_settings('aggregate_od.yaml')
 
-    cache_skims = apply_spec_alias = model_settings.get('apply_spec_alias', False)
+    apply_spec_alias = model_settings.get('apply_spec_alias', False)
+    cache_skims = model_settings.get('apply_spec_alias', False)
+
+    # if apply_spec_alias and not cache_skims:
+    #     # this will run slower but require less RAM
+    #     logger.warn('model settings apply_spec_alias: %s cache_skims %s' %
+    #                 (apply_spec_alias, cache_skims))
+
     aggregate_od_spec = read_aggregate_od_spec(apply_spec_alias)
 
     if apply_spec_alias:
