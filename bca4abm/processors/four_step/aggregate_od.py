@@ -80,7 +80,7 @@ class ODSkims(object):
         self.length = length
 
         self.omx = omx
-        self.omx_shape = omx.shape()
+        self.omx_shape = tuple([int(s) for s in omx.shape()])
         self.skim_dtype = np.float32
 
         self.cache_skims = cache_skims
@@ -126,9 +126,11 @@ class ODSkims(object):
         try:
             # data = self.omx[omx_key][:self.length, :self.length]
 
+            omx_data = self.omx[omx_key]
+
             # this will trigger omx readslice to read and copy data
             data = np.empty(self.omx_shape, dtype=self.skim_dtype)
-            data[:] = self.omx[omx_key][:]
+            data[:] = omx_data[:]
 
             data = data[:self.length, :self.length]
 
@@ -204,6 +206,7 @@ def aggregate_od_processor(
     logger.info("Running %s" % (trace_label, ))
 
     zones = zone_districts.to_frame()
+
     zone_count = zones.shape[0]
 
     # create OD dataframe in order compatible with ODSkims
