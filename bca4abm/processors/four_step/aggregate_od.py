@@ -75,11 +75,14 @@ class ODSkims(object):
 
         self.skims = {}
 
-        self.length = length
         self.name = name
         self.transpose = transpose
+        self.length = length
 
         self.omx = omx
+        self.omx_shape = omx.shape()
+        self.skim_dtype = np.float32
+
         self.cache_skims = cache_skims
 
         self.usage = {key: 0 for key in omx.listMatrices()}
@@ -121,7 +124,14 @@ class ODSkims(object):
             raise RuntimeError("Unexpected skim key type %s" % type(key))
 
         try:
-            data = self.omx[omx_key][:self.length, :self.length]
+            # data = self.omx[omx_key][:self.length, :self.length]
+
+            # this will trigger omx readslice to read and copy data
+            data = np.empty(self.omx_shape, dtype=self.skim_dtype)
+            data[:] = self.omx[omx_key][:]
+
+            data = data[:self.length, :self.length]
+
         except omx.tables.exceptions.NoSuchNodeError:
             raise RuntimeError("Could not find skim with key '%s' in %s" % (omx_key, self.name))
 

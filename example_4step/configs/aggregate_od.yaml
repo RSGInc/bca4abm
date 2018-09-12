@@ -1,5 +1,5 @@
 
-apply_spec_alias: True
+apply_spec_alias: False
 
 aggregate_od_matrices:
   assign_mfs: assign_mfs.omx
