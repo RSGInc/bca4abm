@@ -47,6 +47,8 @@ def alias_assignment_spec(spec):
             pattern = re.compile(r'\b(' + '|'.join(aliases.keys()) + r')\b')
             result = pattern.sub(lambda x: aliases[x.group()], row.expression)
             expressions.append(result)
+        else:
+            expressions.append(row.expression)
 
     spec.expression = expressions
     spec = spec[spec.description != ALIAS_TAG]
@@ -71,7 +73,7 @@ class ODSkims(object):
         whether to transpose the matrix before flattening. (i.e. act as a D-O instead of O-D skim)
     """
 
-    def __init__(self, name, length, omx, transpose=False, cache_skims=True):
+    def __init__(self, omx_file_path, name, length, transpose=False, cache_skims=True):
 
         self.skims = {}
 
@@ -79,16 +81,16 @@ class ODSkims(object):
         self.transpose = transpose
         self.length = length
 
-        self.omx = omx
-        self.omx_shape = tuple([int(s) for s in omx.shape()])
+        self.omx = omx.open_file(omx_file_path, 'r')
+        self.omx_shape = tuple([int(s) for s in self.omx.shape()])
         self.skim_dtype = np.float64
 
         self.cache_skims = cache_skims
 
-        self.usage = {key: 0 for key in omx.listMatrices()}
+        self.usage = {key: 0 for key in self.omx.listMatrices()}
 
         logger.debug("omx file %s skim shape: %s number of skims: %s" %
-                     (name, omx.shape(), len(self.usage)))
+                     (name, self.omx_shape, len(self.usage)))
 
     def __getitem__(self, key):
         """
@@ -124,15 +126,7 @@ class ODSkims(object):
             raise RuntimeError("Unexpected skim key type %s" % type(key))
 
         try:
-            # data = self.omx[omx_key][:self.length, :self.length]
-
-            omx_data = self.omx[omx_key]
-
-            # this will trigger omx readslice to read and copy data
-            data = np.empty(self.omx_shape, dtype=self.skim_dtype)
-            data[:] = omx_data[:]
-
-            data = data[:self.length, :self.length]
+            data = self.omx[omx_key][:self.length, :self.length]
 
         except omx.tables.exceptions.NoSuchNodeError:
             raise RuntimeError("Could not find skim with key '%s' in %s" % (omx_key, self.name))
@@ -141,6 +135,26 @@ class ODSkims(object):
             data = data.transpose()
 
         return data.flatten()
+
+    def log_skim_usage(self):
+
+        num_skims = len(self.usage)
+        num_used = (np.asanyarray(self.usage.values()) > 0).sum()
+        num_unused = num_skims - num_used
+        avg_used = (np.asanyarray(self.usage.values())).sum() / float(num_used)
+        max_used = np.asanyarray(self.usage.values()).max()
+
+        logger.info("  %s %s skims %s used (%s avg %s max) %s unused" %
+                    (self.name, num_skims, num_used, avg_used, max_used, num_unused))
+
+        for key, n in self.usage.iteritems():
+            if n > 4:
+                logger.info("%s.%s %s" % (self.name, key, n))
+
+    def close(self):
+
+        self.omx.close()
+        self.skims = {}
 
 
 def add_skims_to_locals(full_local_name, omx_file_name, zone_count, local_od_skims, cache_skims):
@@ -173,18 +187,31 @@ def create_skim_locals_dict(model_settings, data_dir, zone_count, cache_skims):
             full_local_name = '_'.join([local_name, scenario])
             data_sub_dir = '%s-data' % scenario
             omx_file_path = os.path.join(data_dir, data_sub_dir, omx_file_name)
-            add_skims_to_locals(full_local_name, omx_file_path, zone_count, local_od_skims,
-                                cache_skims)
+
+            logger.debug("add od_skims to locals: %s : %s" % (full_local_name, omx_file_name))
+
+            skims = ODSkims(omx_file_path=omx_file_path,
+                            name=full_local_name,
+                            length=zone_count,
+                            cache_skims=cache_skims)
+
+            local_od_skims[full_local_name] = skims
 
     return local_od_skims
 
 
-def read_aggregate_od_spec(apply_spec_alias):
+def read_aggregate_od_spec(model_settings, trace=False):
 
-    spec = bca.read_assignment_spec('aggregate_od.csv')
+    apply_spec_alias = model_settings.get('apply_spec_alias', False)
+    spec_file_name = model_settings.get('spec_file_name', 'aggregate_od.csv')
+
+    spec = bca.read_assignment_spec(spec_file_name)
 
     if apply_spec_alias:
         spec = alias_assignment_spec(spec)
+
+        if trace:
+            tracing.write_csv(spec, file_name="alias_%s" % spec_file_name, transpose=False)
 
     return spec
 
@@ -197,18 +224,9 @@ def aggregate_od_processor(
     trace_label = 'aggregate_od'
     model_settings = config.read_model_settings('aggregate_od.yaml')
 
-    apply_spec_alias = model_settings.get('apply_spec_alias', False)
     cache_skims = model_settings.get('apply_spec_alias', False)
 
-    # if apply_spec_alias and not cache_skims:
-    #     # this will run slower but require less RAM
-    #     logger.warn('model settings apply_spec_alias: %s cache_skims %s' %
-    #                 (apply_spec_alias, cache_skims))
-
-    aggregate_od_spec = read_aggregate_od_spec(apply_spec_alias)
-
-    if apply_spec_alias:
-        tracing.write_csv(aggregate_od_spec, file_name="aggregate_od_spec", transpose=False)
+    aggregate_od_spec = read_aggregate_od_spec(model_settings, trace=True)
 
     logger.info("Running %s" % (trace_label, ))
 
@@ -249,6 +267,11 @@ def aggregate_od_processor(
                                 df_alias='od',
                                 trace_rows=trace_od_rows)
 
+    for local_name, od_skims in local_skims.iteritems():
+        logger.debug("closing %s" % local_name)
+        od_skims.log_skim_usage()
+        od_skims.close()
+
     # summarize aggregate_od_benefits by orig and dest districts
     logger.debug("%s creating district summary" % (trace_label,))
     results['orig'] = np.repeat(np.asanyarray(zones.district), zone_count)
@@ -262,17 +285,6 @@ def aggregate_od_processor(
     del results['dest']
     zone_summary = results.groupby(['orig']).sum()
     pipeline.replace_table("aggregate_od_zone_summary", zone_summary)
-
-    for local_name, od_skims in local_skims.iteritems():
-        logger.debug("closing %s" % od_skims.name)
-        num_skims = len(od_skims.usage)
-        num_used = (np.asanyarray(od_skims.usage.values()) > 0).sum()
-        num_unused = num_skims - num_used
-        avg_used = (np.asanyarray(od_skims.usage.values())).sum() / num_used
-        max_used = np.asanyarray(od_skims.usage.values()).max()
-        logger.info("  %s %s skims %s used (%s avg %s max) %s unused" %
-                    (od_skims.name, num_skims, num_used, avg_used, max_used, num_unused))
-        od_skims.omx.close
 
     if trace_results is not None:
         tracing.write_csv(trace_results,
@@ -292,8 +304,7 @@ def aggregate_od_benefits(aggregate_od_zone_summary):
 
     model_settings = config.read_model_settings('aggregate_od.yaml')
 
-    apply_spec_alias = model_settings.get('apply_spec_alias', False)
-    aggregate_od_spec = read_aggregate_od_spec(apply_spec_alias)
+    aggregate_od_spec = read_aggregate_od_spec(model_settings)
 
     zone_summary = aggregate_od_zone_summary.to_frame()
 

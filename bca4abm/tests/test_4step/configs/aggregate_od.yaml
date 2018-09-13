@@ -2,6 +2,8 @@
 apply_spec_alias: True
 cache_skims: True
 
+spec_file_name: aggregate_od.csv
+
 aggregate_od_matrices:
   assign_mfs: assign_mfs.omx
   skims_mfs: skims_mfs.omx

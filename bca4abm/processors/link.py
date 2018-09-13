@@ -104,6 +104,8 @@ def eval_link_spec(link_spec, link_file_names, data_dir,
 
     for scenario in ['base', 'build']:
 
+        logger.debug("eval_link_spec scenario %s" % scenario)
+
         link_data_subdir = 'base-data' if scenario == 'base' else 'build-data'
 
         df_list = []

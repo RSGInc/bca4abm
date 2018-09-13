@@ -226,6 +226,7 @@ def eval_and_sum(assignment_expressions, df, locals_dict,
 
         logger.info("eval_and_sum chunk %s of %s" % (i, num_chunks))
 
+        logger.debug("eval_and_sum chunk %s assign variables" % (i, ))
         assigned_chunk, trace_chunk, trace_assigned_locals_chunk = \
             assign.assign_variables(assignment_expressions,
                                     df_chunk,
@@ -234,6 +235,7 @@ def eval_and_sum(assignment_expressions, df, locals_dict,
                                     trace_rows=trace_rows_chunk)
 
         # sum this chunk
+        logger.debug("eval_and_sum chunk %s sum" % (i, ))
         if group_by_column_names:
             # concat in the group_by columns
             for c in group_by_column_names:
@@ -261,6 +263,8 @@ def eval_and_sum(assignment_expressions, df, locals_dict,
 
     # squash multiple chunk summaries
     if len(result_list) > 1:
+        logger.debug("eval_and_sum squash chunk summaries")
+
         summary = pd.concat(result_list)
 
         if group_by_column_names:
