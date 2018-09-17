@@ -238,14 +238,14 @@ def aggregate_od_processor(
     results['orig'] = np.repeat(np.asanyarray(zones.district), zone_count)
     results['dest'] = np.tile(np.asanyarray(zones.district), zone_count)
     district_summary = results.groupby(['orig', 'dest']).sum()
-    pipeline.extend_table('aggregate_od_district_summary', district_summary, axis=1)
+    pipeline.replace_table('aggregate_od_district_summary', district_summary)
 
     # attribute aggregate_results benefits to origin zone
     logger.debug("%s zone summary" % (trace_label,))
     results['orig'] = od_df['orig']
     del results['dest']
     zone_summary = results.groupby(['orig']).sum()
-    pipeline.extend_table('aggregate_od_zone_summary', zone_summary, axis=1)
+    pipeline.replace_table('aggregate_od_zone_summary', zone_summary)
 
     add_aggregate_results(zone_summary, aggregate_od_spec, source=trace_label)
 

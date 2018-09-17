@@ -12,6 +12,6 @@ setup(
         'tables >= 3.1.0',
         'toolz >= 0.7',
         'zbox >= 1.2',
-        'activitysim >= 0.8',
+        'activitysim >= 0.7',
     ]
 )
