@@ -30,6 +30,7 @@ parent_dir = os.path.dirname(__file__)
 handle_standard_args()
 
 tracing.config_logger()
+tracing.delete_csv_files(output_dir=inject.get_injectable('output_dir'))
 
 warnings.simplefilter("always")
 

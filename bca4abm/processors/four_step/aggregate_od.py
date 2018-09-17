@@ -18,6 +18,7 @@ from activitysim.core import inject
 from activitysim.core import tracing
 from activitysim.core import pipeline
 from activitysim.core import assign
+from activitysim.core.util import memory_info
 
 logger = logging.getLogger(__name__)
 
@@ -209,6 +210,8 @@ def aggregate_od_processor(
     locals_dict.update(config.setting('globals'))
     locals_dict['logger'] = logger
 
+    logger.debug('%s mem before create_skim_locals_dict, %s' % (trace_label, memory_info(),))
+
     # add ODSkims to locals (note: we use local_skims list later to close omx files)
     cache_skims = model_settings.get('cache_skims', False)
     local_skims = create_skim_locals_dict(model_settings, data_dir, zone_count, cache_skims)
@@ -227,6 +230,8 @@ def aggregate_od_processor(
                                 locals_dict=locals_dict,
                                 df_alias='od',
                                 trace_rows=trace_od_rows)
+
+    logger.debug('%s mem after assign_variables, %s' % (trace_label, memory_info(),))
 
     for local_name, od_skims in local_skims.iteritems():
         logger.debug("closing %s" % local_name)

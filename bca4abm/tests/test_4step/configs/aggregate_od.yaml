@@ -1,5 +1,4 @@
 
-apply_spec_alias: True
 cache_skims: True
 
 spec_file_name: aggregate_od.csv
