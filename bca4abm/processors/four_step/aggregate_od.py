@@ -33,29 +33,6 @@ assign_mfs.omx, inputs and results of the zone aggregate processor, and skims_mf
 """
 
 
-def alias_assignment_spec(spec):
-
-    ALIAS_TAG = 'ALIAS'
-    aliases = {}
-    expressions = []
-
-    for row in spec.itertuples(index=False):
-        if row.description == ALIAS_TAG:
-            aliases[row.target] = row.expression
-            expressions.append(ALIAS_TAG)  # placeholder so expressions align, we drop these rows
-        elif aliases:
-            pattern = re.compile(r'\b(' + '|'.join(aliases.keys()) + r')\b')
-            result = pattern.sub(lambda x: aliases[x.group()], row.expression)
-            expressions.append(result)
-        else:
-            expressions.append(row.expression)
-
-    spec.expression = expressions
-    spec = spec[spec.description != ALIAS_TAG]
-
-    return spec
-
-
 class ODSkims(object):
     """
     Wrapper for skim arrays to facilitate use of skims by aggregate_od_processor
@@ -127,7 +104,6 @@ class ODSkims(object):
 
         try:
             data = self.omx[omx_key][:self.length, :self.length]
-
         except omx.tables.exceptions.NoSuchNodeError:
             raise RuntimeError("Could not find skim with key '%s' in %s" % (omx_key, self.name))
 
@@ -141,15 +117,17 @@ class ODSkims(object):
         num_skims = len(self.usage)
         num_used = (np.asanyarray(self.usage.values()) > 0).sum()
         num_unused = num_skims - num_used
-        avg_used = (np.asanyarray(self.usage.values())).sum() / float(num_used)
+
+        avg_used = (np.asanyarray(self.usage.values())).sum() / float(num_used or 1)
         max_used = np.asanyarray(self.usage.values()).max()
 
-        logger.info("  %s %s skims %s used (%s avg %s max) %s unused" %
-                    (self.name, num_skims, num_used, avg_used, max_used, num_unused))
+        logger.debug("  %s (cached=%s) %s skims in omx file %s used (%s avg %s max) %s unused" %
+                     (self.name, self.cache_skims,
+                      num_skims, num_used, avg_used, max_used, num_unused))
 
-        for key, n in self.usage.iteritems():
-            if n > 4:
-                logger.info("%s.%s %s" % (self.name, key, n))
+        # for key, n in self.usage.iteritems():
+        #     if n > 4:
+        #         logger.info("%s.%s %s" % (self.name, key, n))
 
     def close(self):
 
@@ -200,38 +178,21 @@ def create_skim_locals_dict(model_settings, data_dir, zone_count, cache_skims):
     return local_od_skims
 
 
-def read_aggregate_od_spec(model_settings, trace=False):
-
-    apply_spec_alias = model_settings.get('apply_spec_alias', False)
-    spec_file_name = model_settings.get('spec_file_name', 'aggregate_od.csv')
-
-    spec = bca.read_assignment_spec(spec_file_name)
-
-    if apply_spec_alias:
-        spec = alias_assignment_spec(spec)
-
-        if trace:
-            tracing.write_csv(spec, file_name="alias_%s" % spec_file_name, transpose=False)
-
-    return spec
-
-
 @inject.step()
 def aggregate_od_processor(
         zone_districts,
         data_dir, trace_od):
 
     trace_label = 'aggregate_od'
-    model_settings = config.read_model_settings('aggregate_od.yaml')
-
-    cache_skims = model_settings.get('apply_spec_alias', False)
-
-    aggregate_od_spec = read_aggregate_od_spec(model_settings, trace=True)
 
     logger.info("Running %s" % (trace_label, ))
 
-    zones = zone_districts.to_frame()
+    model_settings = config.read_model_settings('aggregate_od.yaml')
 
+    spec_file_name = model_settings.get('spec_file_name', 'aggregate_od.csv')
+    aggregate_od_spec = bca.read_assignment_spec(spec_file_name)
+
+    zones = zone_districts.to_frame()
     zone_count = zones.shape[0]
 
     # create OD dataframe in order compatible with ODSkims
@@ -249,7 +210,7 @@ def aggregate_od_processor(
     locals_dict['logger'] = logger
 
     # add ODSkims to locals (note: we use local_skims list later to close omx files)
-
+    cache_skims = model_settings.get('cache_skims', False)
     local_skims = create_skim_locals_dict(model_settings, data_dir, zone_count, cache_skims)
     locals_dict.update(local_skims)
 
@@ -273,39 +234,28 @@ def aggregate_od_processor(
         od_skims.close()
 
     # summarize aggregate_od_benefits by orig and dest districts
-    logger.debug("%s creating district summary" % (trace_label,))
+    logger.debug("%s district summary" % (trace_label,))
     results['orig'] = np.repeat(np.asanyarray(zones.district), zone_count)
     results['dest'] = np.tile(np.asanyarray(zones.district), zone_count)
     district_summary = results.groupby(['orig', 'dest']).sum()
-    pipeline.replace_table("aggregate_od_district_summary", district_summary)
+    pipeline.extend_table('aggregate_od_district_summary', district_summary, axis=1)
 
     # attribute aggregate_results benefits to origin zone
-    logger.debug("%s creating zone summary" % (trace_label,))
+    logger.debug("%s zone summary" % (trace_label,))
     results['orig'] = od_df['orig']
     del results['dest']
     zone_summary = results.groupby(['orig']).sum()
-    pipeline.replace_table("aggregate_od_zone_summary", zone_summary)
+    pipeline.extend_table('aggregate_od_zone_summary', zone_summary, axis=1)
+
+    add_aggregate_results(zone_summary, aggregate_od_spec, source=trace_label)
 
     if trace_results is not None:
         tracing.write_csv(trace_results,
-                          file_name="aggregate_od",
+                          file_name=trace_label,
                           index_label='index',
                           column_labels=['label', 'od'])
 
         if trace_assigned_locals:
-            tracing.write_csv(trace_assigned_locals, file_name="aggregate_od_locals",
+            tracing.write_csv(trace_assigned_locals,
+                              file_name="%s_locals" % trace_label,
                               index_label='variable', columns='value')
-
-
-@inject.step()
-def aggregate_od_benefits(aggregate_od_zone_summary):
-
-    trace_label = 'aggregate_od_benefits'
-
-    model_settings = config.read_model_settings('aggregate_od.yaml')
-
-    aggregate_od_spec = read_aggregate_od_spec(model_settings)
-
-    zone_summary = aggregate_od_zone_summary.to_frame()
-
-    add_aggregate_results(zone_summary, aggregate_od_spec, source=trace_label)

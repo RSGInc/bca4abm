@@ -18,7 +18,6 @@ models:
   - aggregate_zone_processor
   - aggregate_zone_benefits
   - aggregate_od_processor
-  - aggregate_od_benefits
   - link_daily_processor
   - write_data_dictionary
   - write_tables
