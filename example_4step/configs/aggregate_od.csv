@@ -1,7 +1,7 @@
 silos,description,target,expression
 #,drive alone,,
 ,,_,logger.info('drive alone')
-,,park_cost_diff_pa,(park_cost_build['ltpkg'] - park_cost_base['ltpkg']) / 2
+,,park_cost_diff_pa,(dest_zone['ltpkg_build'] - dest_zone['ltpkg_base']) / 2
 ,,hbc_da_am_travel_time_benefit, -0.5 * HBC_PK * (mode_choice_pa_base['mf.hwda.lowinc'] + mode_choice_pa_build['mf.hwda.lowinc']) * (((skims_mfs_build['mf5'] - skims_mfs_base['mf5']) * VOT_HBC/60.0) + park_cost_diff_pa)
 ,,hbc_da_md_travel_time_benefit, -0.5 * HBC_OP * (mode_choice_pa_base['mf.hwda.lowinc'] + mode_choice_pa_build['mf.hwda.lowinc']) * (((skims_mfs_build['mf7'] - skims_mfs_base['mf7']) * VOT_HBC/60.0) + park_cost_diff_pa)
 ,hbc da benefit,hbc_da_travel_time_benefit,(hbc_da_am_travel_time_benefit + hbc_da_md_travel_time_benefit) * DISCOUNT_RATE * ANNUALIZATION_FACTOR

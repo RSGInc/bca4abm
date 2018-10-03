@@ -45,3 +45,4 @@ aggregate_zone_file_names:
   - ma.nhnwpr.csv
   - ma.nhwpr.csv
   - ma.schpr.csv
+  - parking_cost.csv

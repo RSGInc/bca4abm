@@ -126,9 +126,10 @@ class ODSkims(object):
                      (self.name, self.cache_skims,
                       num_skims, num_used, avg_used, max_used, num_unused))
 
-        # for key, n in self.usage.iteritems():
-        #     if n > 4:
-        #         logger.info("%s.%s %s" % (self.name, key, n))
+        for key, n in self.usage.iteritems():
+            logger.info("%s.%s %s" % (self.name, key, n))
+            # if n > 4:
+            #     logger.info("%s.%s %s" % (self.name, key, n))
 
     def close(self):
 
@@ -179,9 +180,32 @@ def create_skim_locals_dict(model_settings, data_dir, zone_count, cache_skims):
     return local_od_skims
 
 
+def create_zone_matrices(model_settings, zones):
+
+    def zone_matrices(column_list_key, rep_func):
+        dict = {}
+        columns = model_settings.get(column_list_key, [])
+        for scenario in ['base', 'build']:
+            for c in columns:
+                zones_col = '%s_%s' % (scenario, c)
+                dict_col = '%s_%s' % (c, scenario)
+                if zones_col not in zones:
+                    raise RuntimeError("%s column '%s' not found in zones table" %
+                                       (column_list_key, zones_col))
+                dict[dict_col] = rep_func(zones['%s_%s' % (scenario, c)].values, zones.shape[0])
+        return dict
+
+    zone_matrix_dict = {}
+    zone_matrix_dict['origin_zone'] = zone_matrices('origin_zone_matrices', np.repeat)
+    zone_matrix_dict['dest_zone'] = zone_matrices('dest_zone_matrices', np.tile)
+
+    return zone_matrix_dict
+
+
 @inject.step()
 def aggregate_od_processor(
         zone_districts,
+        zones,
         data_dir, trace_od):
 
     trace_label = 'aggregate_od'
@@ -193,8 +217,11 @@ def aggregate_od_processor(
     spec_file_name = model_settings.get('spec_file_name', 'aggregate_od.csv')
     aggregate_od_spec = bca.read_assignment_spec(spec_file_name)
 
-    zones = zone_districts.to_frame()
-    zone_count = zones.shape[0]
+    zones = zones.to_frame()
+    zone_districts = zone_districts.to_frame()
+    zone_count = zone_districts.shape[0]
+
+    assert zones.index.equals(zone_districts.index)
 
     # create OD dataframe in order compatible with ODSkims
     od_df = pd.DataFrame(
@@ -212,10 +239,13 @@ def aggregate_od_processor(
 
     logger.debug('%s mem before create_skim_locals_dict, %s' % (trace_label, memory_info(),))
 
-    # add ODSkims to locals (note: we use local_skims list later to close omx files)
+    # - add ODSkims to locals (note: we use local_skims list later to close omx files)
     cache_skims = model_settings.get('cache_skims', False)
     local_skims = create_skim_locals_dict(model_settings, data_dir, zone_count, cache_skims)
     locals_dict.update(local_skims)
+
+    # - create_zone_matrices dicts
+    locals_dict.update(create_zone_matrices(model_settings, zones))
 
     if trace_od:
         trace_orig, trace_dest = trace_od
@@ -240,8 +270,8 @@ def aggregate_od_processor(
 
     # summarize aggregate_od_benefits by orig and dest districts
     logger.debug("%s district summary" % (trace_label,))
-    results['orig'] = np.repeat(np.asanyarray(zones.district), zone_count)
-    results['dest'] = np.tile(np.asanyarray(zones.district), zone_count)
+    results['orig'] = np.repeat(np.asanyarray(zone_districts.district), zone_count)
+    results['dest'] = np.tile(np.asanyarray(zone_districts.district), zone_count)
     district_summary = results.groupby(['orig', 'dest']).sum()
     pipeline.replace_table('aggregate_od_district_summary', district_summary)
 

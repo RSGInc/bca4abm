@@ -7,7 +7,15 @@ aggregate_od_matrices:
   assign_mfs: assign_mfs.omx
   skims_mfs: skims_mfs.omx
   mode_choice_pa: mode_choice_pa.omx
-  park_cost: parking_cost.omx
+  #park_cost: parking_cost.omx
+
+origin_zone_matrices:
+  - ltpkg
+  - stpkg
+
+dest_zone_matrices:
+  - ltpkg
+  - stpkg
 
 
 CONSTANTS:
