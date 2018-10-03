@@ -1,11 +1,11 @@
 Silos,Description,Target,Expression
 # identify cval columns for each number of autos group,,,
-,,_BASE_AUTO_1_COLNAMES,zones.columns.map(lambda x: x.startswith('base_') and 'c2' in x)
-,,_BASE_AUTO_2_COLNAMES,zones.columns.map(lambda x: x.startswith('base_') and 'c3' in x)
-,,_BASE_AUTO_3P_COLNAMES,zones.columns.map(lambda x: x.startswith('base_') and 'c4' in x)
-,,_BUILD_AUTO_1_COLNAMES,zones.columns.map(lambda x: x.startswith('build_') and 'c2' in x)
-,,_BUILD_AUTO_2_COLNAMES,zones.columns.map(lambda x: x.startswith('build_') and 'c3' in x)
-,,_BUILD_AUTO_3P_COLNAMES,zones.columns.map(lambda x: x.startswith('build_') and 'c4' in x)
+,,_BASE_AUTO_1_COLNAMES,zones.columns.map(lambda x: x.startswith('base_') and 'c2' in x).tolist()
+,,_BASE_AUTO_2_COLNAMES,zones.columns.map(lambda x: x.startswith('base_') and 'c3' in x).tolist()
+,,_BASE_AUTO_3P_COLNAMES,zones.columns.map(lambda x: x.startswith('base_') and 'c4' in x).tolist()
+,,_BUILD_AUTO_1_COLNAMES,zones.columns.map(lambda x: x.startswith('build_') and 'c2' in x).tolist()
+,,_BUILD_AUTO_2_COLNAMES,zones.columns.map(lambda x: x.startswith('build_') and 'c3' in x).tolist()
+,,_BUILD_AUTO_3P_COLNAMES,zones.columns.map(lambda x: x.startswith('build_') and 'c4' in x).tolist()
 # calculate auto ownership,,,
 ,Autos in HHs with 1 auto in base year,base_1_auto,"zones.loc[:, _BASE_AUTO_1_COLNAMES].sum(axis=1)"
 ,Autos in HHs with 2 auto in base year,base_2_auto,"zones.loc[:, _BASE_AUTO_2_COLNAMES].sum(axis=1) * 2"
