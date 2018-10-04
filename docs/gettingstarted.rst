@@ -41,7 +41,7 @@ Installation
 
 :: 
 
-  pip install orca toolz zbox openmatrix
+  pip install orca toolz zbox openmatrix activitysim
 
 * Get and install the bca4abm package from `GitHub <https://github.com/RSGInc/bca4abm>`_
 
