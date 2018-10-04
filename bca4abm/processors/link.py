@@ -1,23 +1,34 @@
+# bca4abm
+# See full license in LICENSE.txt.
+
+import logging
+
 import os
-import orca
 import pandas as pd
 import numpy as np
 import openmatrix as omx
+
+from activitysim.core import config
+from activitysim.core import inject
+from activitysim.core import tracing
+from activitysim.core import assign
 
 from bca4abm import bca4abm as bca
 from ..util.misc import missing_columns
 from ..util.misc import add_summary_results
 from ..util.misc import add_aggregate_results
 
-from bca4abm import tracing
+
+logger = logging.getLogger(__name__)
+
 
 """
 Link processor
 """
 
 
-@orca.injectable()
-def link_manifest(data_dir, settings):
+def read_link_manifest(data_dir, model_settings):
+
     fname = os.path.join(data_dir, 'link_data_manifest.csv')
 
     # strings that might be empty and hence misconstrued as nans
@@ -27,11 +38,8 @@ def link_manifest(data_dir, settings):
     }
     manifest = pd.read_csv(fname, header=0, comment='#', converters=converters)
 
-    column_map = "link_data_manifest_column_map"
-
-    if column_map in settings:
-        usecols = settings[column_map].keys()
-        manifest.rename(columns=settings[column_map], inplace=True)
+    assert 'description' in manifest.columns
+    assert 'link_file_name' in manifest.columns
 
     return manifest
 
@@ -52,24 +60,22 @@ def read_csv_file(data_dir, file_name, column_map=None):
     return df
 
 
-@orca.injectable()
-def link_spec(configs_dir):
-    f = os.path.join(configs_dir, 'link.csv')
-    return bca.read_assignment_spec(f)
+@inject.injectable()
+def link_spec():
+    return bca.read_assignment_spec('link.csv')
 
 
-@orca.injectable()
-def link_daily_spec(configs_dir):
-    f = os.path.join(configs_dir, 'link_daily.csv')
-    return bca.read_assignment_spec(f)
+@inject.injectable()
+def link_daily_spec():
+    return bca.read_assignment_spec('link_daily.csv')
 
 
-def add_tables_to_locals(data_dir, settings, settings_tag, locals_dict):
+def add_tables_to_locals(data_dir, model_settings, locals_dict):
 
-    tables_tag = "tables_%s" % settings_tag
-    if tables_tag in settings:
+    tables_tag = "TABLES"
+    if tables_tag in model_settings:
 
-        file_list = settings.get(tables_tag)
+        file_list = model_settings.get(tables_tag)
         for var_name, filename in file_list.iteritems():
 
             # print "add_tables_to_locals %s = %s" % (var_name, filename)
@@ -84,19 +90,21 @@ def add_tables_to_locals(data_dir, settings, settings_tag, locals_dict):
 
 def eval_link_spec(link_spec, link_file_names, data_dir,
                    link_file_column_map, link_index_fields,
-                   settings, settings_tag, trace_tag=None, trace_od=None):
+                   model_settings, chunk_size, trace_tag=None, trace_od=None):
 
     # accept a single string as well as a dict of {suffix: filename}
     if isinstance(link_file_names, str):
         link_file_names = {"": link_file_names}
 
-    locals_dict = bca.assign_variables_locals(settings, settings_tag)
-
-    locals_dict = add_tables_to_locals(data_dir, settings, settings_tag, locals_dict)
+    locals_dict = config.get_model_constants(model_settings)
+    locals_dict.update(config.setting('globals'))
+    locals_dict = add_tables_to_locals(data_dir, model_settings, locals_dict)
 
     results = {}
 
     for scenario in ['base', 'build']:
+
+        logger.debug("eval_link_spec scenario %s" % scenario)
 
         link_data_subdir = 'base-data' if scenario == 'base' else 'build-data'
 
@@ -121,7 +129,7 @@ def eval_link_spec(link_spec, link_file_names, data_dir,
             links_df = links_df.reset_index().set_index(link_index_fields, drop=False)
 
         if trace_od:
-            od_column = settings.get('%s_od_column' % settings_tag, None)
+            od_column = model_settings.get('od_column', None)
             if od_column:
                 o, d = trace_od
                 trace_rows = (links_df[od_column] == o) | (links_df[od_column] == d)
@@ -136,20 +144,20 @@ def eval_link_spec(link_spec, link_file_names, data_dir,
                              links_df,
                              locals_dict,
                              df_alias='links',
-                             chunk_size=0,
+                             chunk_size=chunk_size,
                              trace_rows=trace_rows)
 
-        results[scenario] = pd.DataFrame(data=summary).T
-
-        if trace_tag and trace_assigned_locals is not None:
-            tracing.write_locals(trace_assigned_locals,
-                                 file_name="%s_locals_%s" % (settings_tag, scenario))
+        results[scenario] = summary
 
         if trace_results is not None:
             tracing.write_csv(trace_results,
-                              file_name="%s_results_%s" % (settings_tag, scenario),
+                              file_name="%s_results_%s" % (trace_tag, scenario),
                               index_label='index',
                               column_labels=['label', 'link'])
+
+            if trace_assigned_locals:
+                tracing.write_csv(trace_assigned_locals,
+                                  file_name="%s_locals_%s" % (trace_tag, scenario))
 
     results = results['build'] - results['base']
 
@@ -158,13 +166,15 @@ def eval_link_spec(link_spec, link_file_names, data_dir,
     return results
 
 
-@orca.step()
-def link_processor(link_manifest, link_spec, settings, data_dir):
+@inject.step()
+def link_processor(
+        link_spec,
+        chunk_size, data_dir):
 
-    print "---------- link_processor"
+    trace_label = 'link'
+    model_settings = config.read_model_settings('link.yaml')
 
-    assert not missing_columns(link_manifest,
-                               settings['link_data_manifest_column_map'].values())
+    link_manifest = read_link_manifest(data_dir, model_settings)
 
     results = None
 
@@ -175,10 +185,10 @@ def link_processor(link_manifest, link_spec, settings, data_dir):
         row_results = eval_link_spec(link_spec,
                                      row.link_file_name,
                                      data_dir,
-                                     settings.get('link_table_column_map', None),
+                                     model_settings.get('link_table_column_map', None),
                                      link_index_fields,
-                                     settings,
-                                     settings_tag='link')
+                                     model_settings=model_settings,
+                                     chunk_size=chunk_size)
 
         assigned_column_names = row_results.columns.values
         row_results.insert(loc=0, column='description', value=row.description)
@@ -194,42 +204,33 @@ def link_processor(link_manifest, link_spec, settings, data_dir):
     add_summary_results(results, summary_column_names=assigned_column_names,
                         prefix='L_', spec=link_spec)
 
-    if settings.get("dump", False):
-        output_dir = orca.eval_variable('output_dir')
-        csv_file_name = os.path.join(output_dir, 'link_benefits.csv')
-        print "writing", csv_file_name
-        results.to_csv(csv_file_name, index=False)
 
+@inject.step()
+def link_daily_processor(
+        link_daily_spec,
+        chunk_size, data_dir, trace_od):
 
-@orca.step()
-def link_daily_processor(link_daily_spec, settings, data_dir, trace_od):
+    trace_label = 'link_daily'
+    model_settings = config.read_model_settings('link_daily.yaml')
 
-    print "---------- link_daily_processor"
-
-    if 'link_daily_file_names' in settings:
-        link_daily_file_names = settings['link_daily_file_names']
-    elif 'link_daily_file_name' in settings:
-        link_daily_file_names = settings['link_daily_file_name']
+    if 'link_daily_file_names' in model_settings:
+        link_daily_file_names = model_settings['link_daily_file_names']
+    elif 'link_daily_file_name' in model_settings:
+        link_daily_file_names = model_settings['link_daily_file_name']
     else:
-        raise RuntimeError("no link_daily_file_names specified in settings file")
+        raise RuntimeError("no link_daily_file_names specified in model_settings file")
 
     results = eval_link_spec(link_daily_spec,
                              link_daily_file_names,
                              data_dir,
-                             settings.get('link_daily_table_column_map', None),
-                             settings.get('link_daily_index_fields', None),
-                             settings,
-                             settings_tag='link_daily',
-                             trace_tag='link_daily',
+                             model_settings.get('link_daily_table_column_map', None),
+                             model_settings.get('link_daily_index_fields', None),
+                             model_settings=model_settings,
+                             chunk_size=chunk_size,
+                             trace_tag=trace_label,
                              trace_od=trace_od)
 
     if 'silos' in link_daily_spec.columns:
-        add_aggregate_results(results, link_daily_spec, source='link_daily', zonal=False)
+        add_aggregate_results(results, link_daily_spec, source=trace_label, zonal=False)
     else:
         add_summary_results(results, prefix='LD_', spec=link_daily_spec)
-
-    if settings.get("dump", False):
-        output_dir = orca.eval_variable('output_dir')
-        csv_file_name = os.path.join(output_dir, 'link_daily_benefits.csv')
-        print "writing", csv_file_name
-        results.to_csv(csv_file_name, index=False)

@@ -10,7 +10,7 @@ total auto and truck operating cost,cost_op_total, cost_op_auto + cost_op_truck
 ,_time_ratio, links.congested_time / links.time
 ,_ttim2, (TIME_RATIO_FACTOR * (_time_ratio ** TIME_RATIO_POWER)).clip(upper=TIME_RATIO_UPPER_LIMIT)
 ,_tti50, _ttim2 ** TTI50_POWER
-,_tti80, 1 + log(_ttim2) * TTI80_LOG_MULTIPLIER
+,_tti80, 1 + np.log(_ttim2) * TTI80_LOG_MULTIPLIER
 ,_dly_per_mile, _tti50 + (_tti80 - _tti50) * RELIABILITY_RATIO
 ,_equiv_delay_auto, _dly_per_mile * links.distance * _auto_volume/60
 ,_equiv_delay_truck, _dly_per_mile * links.distance * links.truck_volume/60

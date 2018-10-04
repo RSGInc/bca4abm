@@ -1,18 +1,29 @@
-import orca
+# bca4abm
+# See full license in LICENSE.txt.
+
+import logging
+
 import pandas as pd
 
+from activitysim.core import inject
+from activitysim.core import pipeline
+from activitysim.core.util import assign_in_place
 
-def drop_duplicates(seq):
-    seen = set()
-    seen_add = seen.add
-    return [x for x in seq if not (x in seen or seen_add(x))]
+
+logger = logging.getLogger(__name__)
+
+
+# def drop_duplicates(seq):
+#     seen = set()
+#     seen_add = seen.add
+#     return [x for x in seq if not (x in seen or seen_add(x))]
 
 
 def mapped_columns(*column_maps):
-    '''
+    """
     Given any number of column_maps
     return a list of unique column names
-    '''
+    """
     result = set()
     for column_map in column_maps:
         result |= set(column_map.values())
@@ -20,19 +31,17 @@ def mapped_columns(*column_maps):
     return list(result)
 
 
-def add_assigned_columns(base_dfname, from_df):
-
-    for col in from_df.columns:
-        # print "Adding %s to %s" % (col, base_dfname)
-        orca.add_column(base_dfname, col, from_df[col])
-
-
 def add_result_columns(base_dfname, from_df, prefix=''):
 
-    for col_name in from_df.columns:
-        dest_col_name = prefix + col_name
-        # print "Adding result column %s to %s.%s" % (col_name, base_dfname, dest_col_name)
-        orca.add_column(base_dfname, dest_col_name, from_df[col_name])
+    dest_df = inject.get_table(base_dfname).to_frame()
+
+    if prefix:
+        from_df = from_df.copy()
+        from_df.columns = [prefix + c for c in from_df.columns.values]
+
+    assign_in_place(dest_df, from_df)
+
+    pipeline.replace_table(base_dfname, dest_df)
 
 
 def add_targets_to_data_dictionary(targets, prefix, spec):
@@ -43,7 +52,7 @@ def add_targets_to_data_dictionary(targets, prefix, spec):
     # map prefixed column name to description
     spec_dict = {prefix+e[0]: e[1] for e in zip(spec.target, spec.description)}
 
-    data_dict = orca.get_injectable('data_dictionary')
+    data_dict = inject.get_injectable('data_dictionary')
 
     for col in targets:
         dest_col_name = prefix + col
@@ -59,7 +68,6 @@ def add_summary_results(df, summary_column_names=None, prefix='', spec=None):
 
     # if it has more than one row, sum the columns
     if df.shape[0] > 1:
-        # print "#\n#\n# transposing\n#\n#\n"
         df = pd.DataFrame(df.sum()).T
 
     add_targets_to_data_dictionary(df.columns, prefix, spec)
@@ -107,15 +115,13 @@ def add_aggregate_results(results, spec, source='', zonal=True):
         raise RuntimeError('No Silo column in spec')
 
     if zonal:
-        all_silos = orca.get_injectable('coc_silos')
-        zone_demographics = orca.get_table('zone_demographics').to_frame()
+        all_silos = inject.get_injectable('coc_silos')
+        zone_demographics = inject.get_table('zone_demographics').to_frame()
     else:
         all_silos = ['everybody']
         zone_demographics = None
 
-    # use orca cached table instead of getting a copy
-    # aggregate_results = orca.get_table('aggregate_results').to_frame()
-    aggregate_results = orca.get_table('aggregate_results').local
+    aggregate_results = inject.get_table('aggregate_results').to_frame()
 
     # target can appear more than once, so this ensures we only use the final one
     seen = set()
@@ -163,4 +169,4 @@ def add_aggregate_results(results, spec, source='', zonal=True):
                 aggregate_results.loc[new_row_index, silo] \
                     = (results[target] * zone_demographics[pct_col]).sum()
 
-    # no need to call orca.add_table to save results if we use local
+    pipeline.replace_table('aggregate_results', aggregate_results)

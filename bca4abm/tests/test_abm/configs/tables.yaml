@@ -1,0 +1,100 @@
+### table definitions
+
+base_households: base_households.csv
+base_households_column_map:
+  hhno: household_id
+  hhincome: hh_income
+  hhsize: hh_size
+  hhexpfac: hh_expansion_factor
+  hhvehs: base_vehicles
+
+build_households: build_households.csv
+build_households_column_map:
+  hhno: household_id
+  hhvehs: build_vehicles
+
+persons: persons.csv
+persons_column_map:
+  pno: person_idx
+  hhno: household_id
+  pptyp: person_type
+  pgend: person_gender
+  pagey: person_age
+
+basetrips: basetrips_normal.csv
+basetrips_column_map:
+  pno: person_idx
+  hhno: household_id
+  tour: tour_idx
+  half: half_tour_idx
+  tseg: half_tour_seg_idx
+  pdpurp: tour_purpose
+  mode: trip_mode
+  autotime: base_auto_time
+  transittime: base_transit_time
+  transitwait: base_transit_wait
+  transitwalk: base_transit_walk
+  biketime: base_bike_time
+  walktime: base_walk_time
+  tollcost: base_toll_cost
+  fuelcost: base_fuel_cost
+  parkcost: base_park_cost
+  farecost: base_fare_cost
+
+
+basetrips_buildlos: basetrips_buildlos.csv
+basetrips_buildlos_column_map:
+  pno: person_idx
+  hhno: household_id
+  tour: tour_idx
+  half: half_tour_idx
+  tseg: half_tour_seg_idx
+  autotime: build_auto_time
+  transittime: build_transit_time
+  transitwait: build_transit_wait
+  transitwalk: build_transit_walk
+  biketime: build_bike_time
+  walktime: build_walk_time
+  tollcost: build_toll_cost
+  fuelcost: build_fuel_cost
+  parkcost: build_park_cost
+  farecost: build_fare_cost
+
+buildtrips: buildtrips_normal.csv
+buildtrips_column_map:
+  pno: person_idx
+  hhno: household_id
+  tour: tour_idx
+  half: half_tour_idx
+  tseg: half_tour_seg_idx
+  pdpurp: tour_purpose
+  mode: trip_mode
+  autotime: build_auto_time
+  transittime: build_transit_time
+  transitwait: build_transit_wait
+  transitwalk: build_transit_walk
+  biketime: build_bike_time
+  walktime: build_walk_time
+  tollcost: build_toll_cost
+  fuelcost: build_fuel_cost
+  parkcost: build_park_cost
+  farecost: build_fare_cost
+
+buildtrips_baselos: buildtrips_baselos.csv
+buildtrips_baselos_column_map:
+  pno: person_idx
+  hhno: household_id
+  tour: tour_idx
+  half: half_tour_idx
+  tseg: half_tour_seg_idx
+  autotime: base_auto_time
+  transittime: base_transit_time
+  transitwait: base_transit_wait
+  transitwalk: base_transit_walk
+  biketime: base_bike_time
+  walktime: base_walk_time
+  tollcost: base_toll_cost
+  fuelcost: base_fuel_cost
+  parkcost: base_park_cost
+  farecost: base_fare_cost
+

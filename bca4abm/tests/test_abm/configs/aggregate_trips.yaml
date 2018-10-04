@@ -1,0 +1,24 @@
+
+aggregate_trips_manifest: aggregate_data_manifest.csv
+
+# expected column headers in aggregate_data_manifest.csv
+# this is as much to document the expected columns as anything
+# but it does allow you to use different column headers
+aggregate_trips_manifest_column_map:
+  description: description
+  trip_file_name: trip_file_name
+  trip_table_name: trip_table_name
+  ivt_file_name: ivt_file_name
+  ivt_table_name: ivt_table_name
+  dollars_per_hour: vot
+  aoc_file_name: aoc_file_name
+  aoc_table_name: aoc_table_name
+  aoc_dollars_per_unit: aoc_units
+  toll_file_name: toll_file_name
+  toll_table_name: toll_table_name
+  toll_dollars_per_unit: toll_units
+
+
+CONSTANTS:
+  AOC_COST_COUNTING_FACTOR: 1.0
+  TOLL_COST_COUNTING_FACTOR: 1.0

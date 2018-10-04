@@ -1,0 +1,29 @@
+
+link_table_column_map:
+  distance: distance
+  dircode: dircode
+  time: time
+  congtime: congested_time
+  area_type: area_type
+  facl_type: facility_type_code
+  num_lanes: num_lanes
+  capacity: capacity
+  twoway: two_way
+  vol_total: total_volume
+  trk_vol: truck_volume
+
+
+CONSTANTS:
+  # unreliability costs - inputs
+  RELIABILITY_RATIO: 0.5
+  VALUE_OF_RELIABILITY_AUTO: 10.00
+  VALUE_OF_RELIABILITY_TRUCK: 40.00
+  # unreliability costs - constants
+  TIME_RATIO_FACTOR: 1.0274
+  TIME_RATIO_POWER: 1.2204
+  TIME_RATIO_UPPER_LIMIT: 3
+  TTI50_POWER: 0.8601
+  TTI80_LOG_MULTIPLIER: 2.1406
+  # operating costs
+  OPERATING_COST_PER_MILE_AUTO: 0.20
+  OPERATING_COST_PER_MILE_TRUCK: 0.80

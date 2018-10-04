@@ -4,10 +4,13 @@
 
 import logging
 
-import numpy as np
 import pandas as pd
-import orca
 import os
+from collections import OrderedDict
+
+from activitysim.core import inject
+from activitysim.core import assign
+from activitysim.core import chunk
 
 
 logger = logging.getLogger(__name__)
@@ -18,7 +21,7 @@ def read_csv_or_tsv(fpath, header='infer', usecols=None, comment=None):
     if fpath.endswith('.tsv'):
         sep = '\t'
     elif fpath.endswith('.txt'):
-        sep = '\s+'
+        sep = '\\s+'
     else:
         sep = ','
 
@@ -59,22 +62,6 @@ def read_csv_table(data_dir, settings, table_name, index_col=None):
     return df
 
 
-def read_csv_or_stored_table(data_dir, input_source, settings, table_name, index_col=None):
-
-    if input_source in ['read_from_csv', 'update_store_from_csv']:
-        df = read_csv_table(data_dir, settings, table_name=table_name, index_col=index_col)
-        if input_source == 'update_store_from_csv':
-            print "updating store with table %s" % table_name
-            with orca.eval_variable('input_store_for_update') as input_store:
-                input_store[table_name] = df
-    else:
-        with orca.eval_variable('input_store_for_read') as input_store:
-            print "reading table %s from store" % table_name
-            df = input_store[table_name]
-
-    return df
-
-
 def read_assignment_spec(fname):
     """
     Read a CSV model specification into a Pandas DataFrame or Series.
@@ -98,9 +85,10 @@ def read_assignment_spec(fname):
         expression values are set as the table index.
     """
 
-    # print "read_assignment_spec", fname
+    configs_dir = inject.get_injectable('configs_dir')
+    fpath = os.path.join(configs_dir, fname)
 
-    cfg = pd.read_csv(fname, comment='#')
+    cfg = pd.read_csv(fpath, comment='#')
 
     # drop null expressions
     # cfg = cfg.dropna(subset=[expression_name])
@@ -122,355 +110,175 @@ def read_assignment_spec(fname):
     return cfg
 
 
-def undupe_column_names(df, template="{} ({})"):
-    """
-    rename df column names so there are no duplicates (in place)
-
-    e.g. if there are two columns named "dog", the second column will be reformatted to "dog (2)"
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        dataframe whose column names should be de-duplicated
-    template : template taking two arguments (old_name, int) to use to rename columns
-
-    Returns
-    -------
-    df : pandas.DataFrame
-        dataframe that was renamed in place, for convenience in chaining
-    """
-    new_names = []
-    seen = set()
-    for name in df.columns:
-        n = 1
-        new_name = name
-        while new_name in seen:
-            n += 1
-            new_name = template.format(name, n)
-        new_names.append(new_name)
-        seen.add(new_name)
-    df.columns = new_names
-    return df
-
-
-class NumpyLogger(object):
-    def __init__(self, logger):
-        self.logger = logger
-        self.target = ''
-        self.expression = ''
-
-    def write(self, msg):
-        self.logger.error("numpy warning: %s" % (msg.rstrip()))
-        self.logger.error("expression: %s = %s" % (str(self.target), str(self.expression)))
-
-
-def assign_variables(assignment_expressions, df, locals_dict, df_alias=None, trace_rows=None):
-    """
-    Evaluate a set of variable expressions from a spec in the context
-    of a given data table.
-
-    Expressions are evaluated using Python's eval function.
-    Python expressions have access to variables in locals_d (and df being
-    accessible as variable df.) They also have access to previously assigned
-    targets as the assigned target name.
-
-    variables starting with underscore are considered temps variables and returned seperately
-    (and only if return_temp_variables is true)
-
-    Users should take care that expressions should result in
-    a Pandas Series (scalars will be automatically promoted to series.)
-
-    Parameters
-    ----------
-    assignment_expressions : pandas.DataFrame of target assignment expressions
-        target: target column names
-        expression: pandas or python expression to evaluate
-    df : pandas.DataFrame
-    locals_d : Dict
-        This is a dictionary of local variables that will be the environment
-        for an evaluation of "python" expression.
-    trace_rows: series or array of bools to use as mask to select target rows to trace
-
-    Returns
-    -------
-    variables : pandas.DataFrame
-        Will have the index of `df` and columns named by target and containing
-        the result of evaluating expression
-    trace_df : pandas.DataFrame or None
-        a dataframe containing the eval result values for each assignment expression
-    """
-
-    np_logger = NumpyLogger(logger)
-
-    def is_local(target):
-        return target.startswith('_') and target.isupper()
-
-    def is_temp(target):
-        return target.startswith('_')
-
-    def to_series(x, target=None):
-        if x is None or np.isscalar(x):
-            if target:
-                logger.warn("WARNING: assign_variables promoting scalar %s to series" % target)
-            return pd.Series([x] * len(df.index), index=df.index)
-        return x
-
-    trace_assigned_locals = trace_results = None
-    if trace_rows is not None:
-        # convert to numpy array so we can slice ndarrays as well as series
-        trace_rows = np.asanyarray(trace_rows)
-        if trace_rows.any():
-            trace_results = []
-            trace_assigned_locals = {}
-
-    # avoid touching caller's passed-in locals_d parameter (they may be looping)
-    locals_dict = locals_dict.copy() if locals_dict is not None else {}
-    if df_alias:
-        locals_dict[df_alias] = df
-    else:
-        locals_dict['df'] = df
-    local_keys = locals_dict.keys()
-
-    l = []
-    # need to be able to identify which variables causes an error, which keeps
-    # this from being expressed more parsimoniously
-    for e in zip(assignment_expressions.target, assignment_expressions.expression):
-        target, expression = e
-
-        if target in local_keys:
-            logger.warn("assign_variables target obscures local_d name '%s'" % str(target))
-
-        if is_local(target):
-            x = eval(expression, globals(), locals_dict)
-            locals_dict[target] = x
-            if trace_assigned_locals is not None:
-                trace_assigned_locals[target] = x
-            continue
-
-        try:
-
-            def log_numpy_err(type, flag):
-                logger.error("assign_variables warning: %s: %s" % (type(err).__name__, str(err)))
-
-                logger.error("assign_variables expression: %s = %s"
-                             % (str(target), str(expression)))
-
-                print("numpy error (%s), with flag %s" % (type, flag))
-
-            # saved_handler = np.seterrcall(log_numpy_err)
-            # save_err = np.seterr(all='call')
-
-            # FIXME - log numpy warnings
-            np_logger.target = str(target)
-            np_logger.expression = str(expression)
-            saved_handler = np.seterrcall(np_logger)
-            save_err = np.seterr(all='log')
-
-            values = to_series(eval(expression, globals(), locals_dict), target=target)
-
-            np.seterr(**save_err)
-            np.seterrcall(saved_handler)
-
-        except Exception as err:
-            logger.error("assign_variables error: %s: %s" % (type(err).__name__, str(err)))
-
-            logger.error("assign_variables expression: %s = %s"
-                         % (str(target), str(expression)))
-
-            # values = to_series(None, target=target)
-            raise err
-
-        l.append((target, values))
-
-        if trace_results is not None:
-            trace_results.append((target, values[trace_rows]))
-
-        # update locals to allows us to ref previously assigned targets
-        locals_dict[target] = values
-
-    # build a dataframe of eval results for non-temp targets
-    # since we allow targets to be recycled, we want to only keep the last usage
-    # we scan through targets in reverse order and add them to the front of the list
-    # the first time we see them so they end up in execution order
-    variables = []
-    seen = set()
-    for statement in reversed(l):
-        # statement is a tuple (<target_name>, <eval results in pandas.Series>)
-        target_name = statement[0]
-        if not is_temp(target_name) and target_name not in seen:
-            variables.insert(0, statement)
-            seen.add(target_name)
-
-    # DataFrame from list of tuples [<target_name>, <eval results>), ...]
-    variables = pd.DataFrame.from_items(variables)
-
-    if trace_results is not None:
-
-        trace_results = pd.DataFrame.from_items(trace_results)
-        trace_results.index = df[trace_rows].index
-
-        trace_results = undupe_column_names(trace_results)
-
-        # add df columns to trace_results
-        trace_results = pd.concat([df[trace_rows], trace_results], axis=1)
-
-    return variables, trace_results, trace_assigned_locals
-
-
-def assign_variables_locals(settings, settings_tag=None):
-    # locals whose values will be accessible to the execution context
-    # when the expressions in spec are applied to choosers
-    locals_dict = {
-        'log': np.log,
-        'exp': np.exp
-    }
-    if 'globals' in settings:
-        locals_dict.update(settings.get('globals'))
-    if settings_tag:
-        locals_tag = "locals_%s" % settings_tag
-        if locals_tag in settings:
-            locals_dict.update(settings.get(locals_tag))
-    return locals_dict
-
-
 # generator for chunked iteration over dataframe by chunk_size
-def size_chunked_df(df, trace_rows, chunk_size):
-    # generator to iterate over chooses in chunk_size chunks
-    if chunk_size == 0:
-        yield 0, df, trace_rows
-    else:
-        num_choosers = len(df.index)
-        i = 0
-        while i < num_choosers:
-            if trace_rows is None:
-                yield i, df[i: i+chunk_size], None
-            else:
-                yield i, df[i: i+chunk_size], trace_rows[i: i+chunk_size]
-            i += chunk_size
+def chunked_df(df, rows_per_chunk, trace_rows=None):
 
+    assert df.shape[0] > 0
 
-# generator for chunked iteration over dataframe by chunk_id
-def id_chunked_df(df, trace_rows, chunk_id_col):
-    # generator to iterate over chooses in chunk_size chunks
-    last_chooser = df[chunk_id_col].max()
-    i = 0
-    while i <= last_chooser:
-        chunk_me = (df[chunk_id_col] == i)
+    # generator to iterate over choosers in chunk_size chunks
+    num_df_rows = len(df.index)
+    num_chunks = (num_df_rows // rows_per_chunk) + (num_df_rows % rows_per_chunk > 0)
+
+    i = offset = 0
+    while offset < num_df_rows:
         if trace_rows is None:
-            yield i, df[chunk_me], None
+            yield i + 1, num_chunks, df.iloc[offset: offset + rows_per_chunk], None
         else:
-            yield i, df[chunk_me], trace_rows[chunk_me]
+            yield i + 1, num_chunks, df.iloc[offset: offset + rows_per_chunk], \
+                  trace_rows.iloc[offset: offset + rows_per_chunk]
+        offset += rows_per_chunk
         i += 1
 
 
-# return the appropriate generator for iterating over dataframe by either chunk_size or chunk_id
-def chunked_df(df, trace_rows, chunk_size=None, chunk_id_col='chunk_id'):
-    if chunk_size is None:
-        return id_chunked_df(df, trace_rows, chunk_id_col)
-    else:
-        return size_chunked_df(df, trace_rows, chunk_size)
+def chunked_df_by_chunk_id(df, trace_rows, rows_per_chunk, chunk_id_col='chunk_id'):
+    # generator to iterate over df in chunk_size chunks
+    # like chunked_df but based on chunk_id field rather than dataframe length
+    # (the presumption is that df has multiple rows with the same chunk_id that
+    # all have to be included in the same chunk)
+
+    assert df.shape[0] > 0
+
+    num_rows = df[chunk_id_col].max() + 1
+    num_chunks = (num_rows // rows_per_chunk) + (num_rows % rows_per_chunk > 0)
+
+    i = offset = 0
+    while offset < num_rows:
+        chunk_me = df[chunk_id_col].between(offset, offset + rows_per_chunk - 1)
+        if trace_rows is None:
+            yield i + 1, num_chunks, df[chunk_me], None
+        else:
+            yield i + 1, num_chunks, df[chunk_me], trace_rows[chunk_me]
+        offset += rows_per_chunk
+        i += 1
 
 
-def eval_group_and_sum(assignment_expressions, df, locals_dict, group_by_column_names,
-                       df_alias=None, chunk_size=0, trace_rows=None):
+def calc_rows_per_chunk(chunk_size, df, spec, extra_columns=0, trace_label=None):
+    """
+    simple rows_per_chunk calculator for chunking calls to assign_variables
+    """
 
-    if group_by_column_names == [None]:
-        raise RuntimeError("eval_group_and_sum: group_by_column_names not initialized")
+    num_rows = len(df.index)
 
-    summary = trace_results = trace_assigned_locals = None
-    chunks = 0
+    # if not chunking, then return num_choosers
+    if chunk_size == 0:
+        return num_rows
 
-    for i, df_chunk, trace_rows_chunk in chunked_df(df, trace_rows, chunk_size):
+    df_row_size = len(df.columns)
 
-        chunks += 1
+    # spec temp vars are transient and (we assume) discarded before extra_columns are applied
+    # so the extra_columns headroom will be the max of the two
+    spec_temps = spec.target.str.match('_').sum()
+    spec_vars = spec.shape[0] - spec_temps
+    row_size = df_row_size + spec_vars + max(spec_temps, extra_columns)
 
-        # print "eval_and_sum chunk %s i: %s" % (chunks, i)
+    # if trace_label:
+    #     logger.debug("%s #chunk_calc df %s" % (trace_label, df.shape))
+    #     logger.debug("%s #chunk_calc spec %s" % (trace_label, spec.shape))
+    #     logger.debug("%s #chunk_calc extra_columns %s" % (trace_label, extra_columns))
+    #     logger.debug("%s #chunk_calc row_size %s" % (trace_label, row_size))
 
+    return chunk.rows_per_chunk(chunk_size, row_size, num_rows, trace_label)
+
+
+def eval_and_sum(assignment_expressions, df, locals_dict,
+                 group_by_column_names=None,
+                 df_alias=None, chunk_size=0, trace_rows=None):
+    """
+    Evaluate assignment_expressions against df, and sum the results
+    (sum by group if list of group_by_column_names is specified.
+    e.g. group by coc column names and return sums grouped by community of concern.)
+
+    Parameters
+    ----------
+    assignment_expressions
+    df
+    locals_dict
+    group_by_column_names : array of str
+        list of names of the columns to group by (e.g. coc_column_names of trip_coc_end)
+    df_alias : str
+        assign_variables df_alias (name of df in assignment_expressions)
+    chunk_size : int
+    trace_rows : array of bool
+        array indicating which rows in df are to be traced
+
+    Returns
+    -------
+
+    """
+
+    if group_by_column_names is None:
+        group_by_column_names = []
+
+    rows_per_chunk = \
+        calc_rows_per_chunk(chunk_size, df, assignment_expressions,
+                            extra_columns=len(group_by_column_names),
+                            trace_label='eval_and_sum')
+
+    logger.info("eval_and_sum chunk_size %s rows_per_chunk %s df rows %s" %
+                (chunk_size, rows_per_chunk, df.shape[0]))
+
+    summary = None
+    result_list = []
+    trace_results = []
+    trace_assigned_locals = {}
+
+    for i, num_chunks, df_chunk, trace_rows_chunk in chunked_df(df, rows_per_chunk, trace_rows):
+
+        logger.info("eval_and_sum chunk %s of %s" % (i, num_chunks))
+
+        logger.debug("eval_and_sum chunk %s assign variables" % (i, ))
         assigned_chunk, trace_chunk, trace_assigned_locals_chunk = \
-            assign_variables(assignment_expressions,
-                             df_chunk,
-                             locals_dict=locals_dict,
-                             df_alias=df_alias,
-                             trace_rows=trace_rows_chunk)
-
-        # concat in the group_by columns
-        for c in group_by_column_names:
-            assigned_chunk[c] = df_chunk[c]
+            assign.assign_variables(assignment_expressions,
+                                    df_chunk,
+                                    locals_dict=locals_dict,
+                                    df_alias=df_alias,
+                                    trace_rows=trace_rows_chunk)
 
         # sum this chunk
-        chunk_summary = assigned_chunk.groupby(group_by_column_names).sum()
-
-        # accumulate chunk_summaries in df
-        if summary is None:
-            summary = chunk_summary
+        logger.debug("eval_and_sum chunk %s sum" % (i, ))
+        if group_by_column_names:
+            # concat in the group_by columns
+            for c in group_by_column_names:
+                assigned_chunk[c] = df_chunk[c]
+            # sum this chunk
+            summary = assigned_chunk.groupby(group_by_column_names).sum()
         else:
-            summary = pd.concat([summary, chunk_summary], axis=0)
+            summary = assigned_chunk.sum().to_frame().T
 
-        if trace_results is None:
-            trace_results = trace_chunk
-        elif trace_chunk is not None:
-            trace_results = pd.concat([trace_results, trace_chunk], axis=0)
+        result_list.append(summary)
 
-        if trace_assigned_locals is None:
-            trace_assigned_locals = trace_assigned_locals_chunk
-        elif trace_assigned_locals_chunk is not None:
+        if trace_chunk is not None:
+            trace_results.append(trace_chunk)
+
+        if trace_assigned_locals_chunk is not None:
             trace_assigned_locals.update(trace_assigned_locals_chunk)
 
-    if chunks > 1:
-        # squash the accumulated chunk summaries by reapplying group and sum
-        summary.reset_index(inplace=True)
-        summary = summary.groupby(group_by_column_names).sum()
+        # note: chunk size will log low if there are more spec temp vars than extra_columns
+        trace_label = 'eval_and_sum chunk_%s' % i
+        cum_size = chunk.log_df_size(trace_label, 'df_chunk', df_chunk, cum_size=None)
+        cum_size = chunk.log_df_size(trace_label, 'assigned_chunk', assigned_chunk, cum_size)
+        chunk.log_chunk_size(trace_label, cum_size)
 
-        if trace_results is not None:
-            # trace_rows index values should match index of original df
-            trace_results.index = df[trace_rows].index
+    assert result_list
 
-    return summary, trace_results, trace_assigned_locals
+    # squash multiple chunk summaries
+    if len(result_list) > 1:
+        logger.debug("eval_and_sum squash chunk summaries")
 
+        summary = pd.concat(result_list)
 
-def eval_and_sum(assignment_expressions, df, locals_dict, df_alias=None,
-                 chunk_size=0, trace_rows=None):
-
-    summary = trace_results = trace_assigned_locals = trace_rows_chunk = None
-    chunks = 0
-
-    for i, df_chunk, trace_rows_chunk in chunked_df(df, trace_rows, chunk_size):
-
-        chunks += 1
-
-        # print "eval_and_sum chunk %s i: %s" % (chunks, i)
-
-        assigned_chunk, trace_chunk, trace_assigned_locals_chunk = \
-            assign_variables(assignment_expressions,
-                             df_chunk,
-                             locals_dict=locals_dict,
-                             df_alias=df_alias,
-                             trace_rows=trace_rows_chunk)
-
-        # sum this chunk
-        chunk_summary = assigned_chunk.sum()
-
-        # accumulate chunk_summaries in df
-        if summary is None:
-            summary = chunk_summary
+        if group_by_column_names:
+            summary.reset_index(inplace=True)
+            summary = summary.groupby(group_by_column_names).sum()
         else:
-            summary = pd.concat([summary, chunk_summary], axis=0)
+            summary = summary.sum().to_frame().T
 
-        if trace_results is None:
-            trace_results = trace_chunk
-        elif trace_chunk is not None:
-            trace_results = pd.concat([trace_results, trace_chunk], axis=0)
-
-        if trace_assigned_locals is None:
-            trace_assigned_locals = trace_assigned_locals_chunk
-        elif trace_assigned_locals_chunk is not None:
-            trace_assigned_locals.update(trace_assigned_locals_chunk)
-
-    if chunks > 1:
-        # squash the accumulated chunk summaries by reapplying group and sum
-        summary = summary.sum()
-
+    if trace_results:
+        trace_results = pd.concat(trace_results)
         # trace_rows index values should match index of original df
         trace_results.index = df[trace_rows].index
+    else:
+        trace_results = None
 
     return summary, trace_results, trace_assigned_locals
 
@@ -487,7 +295,7 @@ def scalar_assign_variables(assignment_expressions, locals_dict):
 
     Parameters
     ----------
-    exprs : sequence of str
+    assignment_expressions : pandas sequence of str
     locals_dict : Dict
         This is a dictionary of local variables that will be the environment
         for an evaluation of an expression that begins with @
@@ -502,7 +310,7 @@ def scalar_assign_variables(assignment_expressions, locals_dict):
     # avoid trashing parameter when we add target
     locals_dict = locals_dict.copy() if locals_dict is not None else {}
 
-    l = []
+    target_history = []
     # need to be able to identify which variables causes an error, which keeps
     # this from being expressed more parsimoniously
     for e in zip(assignment_expressions.target, assignment_expressions.expression):
@@ -519,7 +327,7 @@ def scalar_assign_variables(assignment_expressions, locals_dict):
 
             # print "\n%s = %s" % (target, value)
 
-            l.append((target, [value]))
+            target_history.append((target, [value]))
 
             # FIXME - do we want to update locals to allows us to ref previously assigned targets?
             locals_dict[target] = value
@@ -529,13 +337,12 @@ def scalar_assign_variables(assignment_expressions, locals_dict):
             raise err
 
     # since we allow targets to be recycled, we want to only keep the last usage
-    keepers = []
-    for statement in reversed(l):
+    keepers = OrderedDict()
+    for statement in reversed(target_history):
         # don't keep targets that staert with underscore
-        if statement[0].startswith('_'):
-            continue
         # add statement to keepers list unless target is already in list
-        if not next((True for keeper in keepers if keeper[0] == statement[0]), False):
-            keepers.append(statement)
+        target_name = statement[0]
+        if not target_name.startswith('_') and target_name not in keepers:
+            keepers[target_name] = statement[1]
 
-    return pd.DataFrame.from_items(keepers)
+    return pd.DataFrame.from_dict(keepers)

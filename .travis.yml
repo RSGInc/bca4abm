@@ -13,19 +13,25 @@ install:
 - conda update -q conda
 - conda info -a
 - |
-  conda create -q -c synthicity -n test-environment python=$TRAVIS_PYTHON_VERSION cytoolz ipython-notebook jinja2 matplotlib numpy pandas pandana patsy pip pytables pytest pyyaml scipy statsmodels toolz=0.8.0
+  conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION cytoolz numpy pandas pip pytables pyyaml toolz psutil
 - source activate test-environment
-- pip install bottle orca prettytable simplejson zbox
-- pip install openmatrix
-- pip install pytest-cov coveralls pep8 pytest-xdist
+- pip install orca openmatrix zbox
+- pip install activitysim
+# - pip install https://github.com/ActivitySim/activitysim/zipball/dev/
+- pip install pytest pytest-cov coveralls pycodestyle
+- pip install sphinx numpydoc sphinx_rtd_theme
+- pip install .
+- pip freeze
 script:
-- pep8 bca4abm
-- py.test --boxed --cov bca4abm --cov-report term-missing
+- pycodestyle bca4abm
+- py.test --cov bca4abm --cov-report term-missing
 after_success:
 - coveralls
+- bin/build_docs.sh
 notifications:
   slack:
     secure: ssVfG9qhvZ3BkLCypS2zgCu0qE5z0shSp4WTBXft+Ra/t6p1UPfQP3x1cZt41K7Qd1biqlfhWgTOgC82DZpTjg98QkSZTNH0UEbo/5wnBUFrRxxa5U59GP4lQ48wFFYe+BlPPKY4dnw9UOCbpRM82ZXMQcBa0/WPS/ZFMP0clHluioPBXpQMsUmsv6W9LLRVuk+gshdmu1ASzIUw4UZK/fZP4pgtatonFzIVsHXeqWZueJBkUTAW3jc9BB9z9KYaP0EHwg6DxIt8kjmB3E4cQVhEolDIMf1DuC8O5tx+xC/GZRBFg4gBtYaqBulNuCUkkA1krFjN2H8LBZCmxCVx1o36DsEWfgQJxqNQyscxT7s+SGdmb5xNHhZZ56VaS7mxdE9cJmfAUpiBZbxL+WrLkzMuJUHZuZSJ8gyyp4UXYcPLqVOKDraAcH2xXJq5NU7J9ZcRTbhEsEoiyxG0WOlwjgO7s0lNYqJyJo39B6jP2x1ld05ydXU+xOcIVVatIfS/arozXodgrhV7kZP2xMVXGJlWy4I+11EBbGjrhvoFl82gHdUjALXoj8sMbz+JjT9t83ZWZojgQQV7LdPQbjN0Nq3MBTzL80SGiGZUYoaDU0BO5M0vj+Tw6jtYRngue4za2QLn/udainmkuJ09T7tDifJ7FXYgpdpuniHJPKKatvw=
-  email:
-    recipients:
-      - toliwaga@gmail.com
+env:
+  global:
+     # GH_TOKEN RSGInc/bca4abm public_repo token
+    secure: QUkor/IUAyt5ZqZ0NGlr+7XXRUjUIHztiT8q+ebpfh+ejNSdLj1BjxrPVdN6POKw+FV0bAPjGtphtdbptm0dBBrtVzlnhjL4e9MH3Vv00TN6/BnD7MGIs5eTQyQwXsWbyc7fO+b//ISkrph067fP0vOv5r/OAk+imxcan+wkeaQjIkVmnmVar+nI/955NCTMSb85TBFhqBquyF9RD84zUiCXiIiSNfWU7rDSRHGX2nxppkQWD86RMhqIT0KPO/SQOD0dOefSDlaee5TrL2s+w29CqtkfcRULEf0rEm/zl3PJx0mh0fwOx/CY128G7p4+1Z1i7F0bCK1PSn2ouoOguP8ITusHqKQhSHq+B8vnujZR7uKBM7KU4YF8qZshyfZP4mW7ImwDiD83s4DWMymxUoLxyRSpLQup9fx9qulGTYauoe1IOSgHOfH6cP64bTTnj44nqLqGyecpvFkxP0G1HI40GI0uor9BFyVWOzTWmh3Ye1RLhMImjjFWAb/9D2HuWaGXfy1E9cNFkawM7D0BxgKisu8iQrzJ5jO+gRBOxM/XIxHyANWbK/jLT8YOmRuB7zndjHaf6yIApp7/JDIL/OkLh+jj8FqjxPCx5pq75EN5gVtJ4G/6b7M2w6xGm2YfXqQhiPKJuByflnyW4cPpoD6ZIQ372HJHR0vRvgDAApM=

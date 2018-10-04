@@ -33,12 +33,6 @@ def inject_default_directories(request):
     request.addfinalizer(orca.clear_cache)
 
 
-def test_settings():
-
-    settings = orca.eval_variable('settings')
-    assert settings.get('provenance') == 'tests.test_4step.configs'
-
-
 def test_read_zone_cval_table():
 
     zones = orca.get_table('zone_cvals').to_frame()

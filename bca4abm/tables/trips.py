@@ -1,76 +1,81 @@
-import os.path
-import numpy as np
-import orca
+# bca4abm
+# See full license in LICENSE.txt.
+
+import logging
+
 import pandas as pd
+
+from activitysim.core import inject
+from activitysim.core import config
 
 from bca4abm import bca4abm as bca
 
 
-def read_merged_trips(table_name, alt_table_name, data_dir, input_source, settings):
+logger = logging.getLogger(__name__)
+
+
+def read_merged_trips(table_name, alt_table_name, data_dir, table_settings, persons):
 
     # like bca.read_csv_or_stored_table except stores and retrieves merged table and alt together
 
-    if input_source in ['read_from_csv', 'update_store_from_csv']:
+    trips = \
+        bca.read_csv_table(table_name=table_name, data_dir=data_dir, settings=table_settings)
 
-        trips = bca.read_csv_or_stored_table(table_name=table_name,
-                                             data_dir=data_dir,
-                                             input_source=input_source,
-                                             settings=settings)
+    trips_alt = \
+        bca.read_csv_table(table_name=alt_table_name, data_dir=data_dir, settings=table_settings)
 
-        trips_alt = bca.read_csv_or_stored_table(table_name=alt_table_name,
-                                                 data_dir=data_dir,
-                                                 input_source=input_source,
-                                                 settings=settings)
+    trips_merged = pd.merge(trips, trips_alt, on=['household_id',
+                                                  'person_idx',
+                                                  'tour_idx',
+                                                  'half_tour_idx',
+                                                  'half_tour_seg_idx'])
 
-        trips_merged = pd.merge(trips, trips_alt, on=['hh_id',
-                                                      'person_idx',
-                                                      'tour_idx',
-                                                      'half_tour_idx',
-                                                      'half_tour_seg_idx'])
-
-        if input_source == 'update_store_from_csv':
-            print "updating store with table %s" % table_name
-            with orca.eval_variable('input_store_for_update') as input_store:
-                input_store[table_name] = trips_merged
-    else:
-        with orca.eval_variable('input_store_for_read') as input_store:
-            print "reading table %s from store" % table_name
-            trips_merged = input_store[table_name]
+    # merge in person_id as it is far more useful than ['household_id', 'person_idx']
+    persons = persons.to_frame()[['household_id', 'person_idx']]
+    persons['person_id'] = persons.index
+    trips_merged = pd.merge(trips_merged, persons, on=['household_id', 'person_idx'])
 
     return trips_merged
 
 
-# this caches all the columns that are computed on the trips table
-@orca.table(cache=True)
-def base_trips(data_dir, input_source, settings):
+@inject.table()
+def base_trips(data_dir, persons):
+
+    logger.debug("reading base_trips table")
+
+    table_settings = config.read_model_settings('tables.yaml')
 
     trips_merged = read_merged_trips(table_name="basetrips",
                                      alt_table_name="basetrips_buildlos",
                                      data_dir=data_dir,
-                                     input_source=input_source,
-                                     settings=settings)
+                                     table_settings=table_settings,
+                                     persons=persons)
 
     trips_merged['build'] = 0
     trips_merged['base'] = 1
     return trips_merged
 
 
-# this caches all the columns that are computed on the trips table
-@orca.table(cache=True)
-def build_trips(data_dir, input_source, settings):
+@inject.table()
+def build_trips(data_dir, persons):
+
+    logger.debug("reading build_trips table")
+
+    table_settings = config.read_model_settings('tables.yaml')
 
     trips_merged = read_merged_trips(table_name="buildtrips",
                                      alt_table_name="buildtrips_baselos",
                                      data_dir=data_dir,
-                                     input_source=input_source,
-                                     settings=settings)
+                                     table_settings=table_settings,
+                                     persons=persons)
 
     trips_merged['build'] = 1
     trips_merged['base'] = 0
+
     return trips_merged
 
 
-@orca.table(cache=True)
+@inject.table()
 def disaggregate_trips(base_trips, build_trips):
 
     build = build_trips.to_frame()
@@ -78,7 +83,7 @@ def disaggregate_trips(base_trips, build_trips):
 
     # print "disaggregate_trips - appending %s base and %s build" % (base.shape[0], build.shape[0])
 
-    df = base.append(build, ignore_index=True)
+    df = base.append(build, ignore_index=True, sort=False)
 
     # TODO - aids debugging if we can sort merged versions of this table in base+build csv order
     df['index1'] = df.index
@@ -86,13 +91,13 @@ def disaggregate_trips(base_trips, build_trips):
     return df
 
 
-orca.broadcast(cast='persons_merged',
-               onto='disaggregate_trips',
-               cast_on=['hh_id', 'person_idx'],
-               onto_on=['hh_id', 'person_idx'])
+inject.broadcast(cast='persons_merged',
+                 onto='disaggregate_trips',
+                 cast_index=True, onto_on='person_id')
 
 
-@orca.table()
+@inject.table()
 def trips_with_demographics(disaggregate_trips, persons_merged):
-    return orca.merge_tables(target=disaggregate_trips.name,
-                             tables=[disaggregate_trips, persons_merged])
+
+    return inject.merge_tables(target=disaggregate_trips.name,
+                               tables=[disaggregate_trips, persons_merged])

@@ -1,19 +1,36 @@
+# bca4abm
+# See full license in LICENSE.txt.
+
+import logging
+
 import os
-import orca
+import re
 import pandas as pd
 import numpy as np
 import openmatrix as omx
 
 
 from bca4abm import bca4abm as bca
-from ...util.misc import add_summary_results
 from ...util.misc import add_aggregate_results
 
-from bca4abm import tracing
+from activitysim.core import config
+from activitysim.core import inject
+from activitysim.core import tracing
+from activitysim.core import pipeline
+from activitysim.core import assign
+from activitysim.core.util import memory_info
 
+logger = logging.getLogger(__name__)
 
 """
 Aggregate OD processor
+
+each row in the data table to solve is an OD pair and this processor
+calculates trip differences.  It requires the access to input zone tables,
+the COC coding, trip matrices and skim matrices.  The new
+OD_aggregate_manifest.csv file tells this processor what data it can
+use and how to reference it.  The following input data tables are required:
+assign_mfs.omx, inputs and results of the zone aggregate processor, and skims_mfs.omx.
 """
 
 
@@ -34,15 +51,24 @@ class ODSkims(object):
         whether to transpose the matrix before flattening. (i.e. act as a D-O instead of O-D skim)
     """
 
-    def __init__(self, name, length, omx, transpose=False):
+    def __init__(self, omx_file_path, name, length, transpose=False, cache_skims=True):
 
         self.skims = {}
 
-        self.length = length
         self.name = name
         self.transpose = transpose
+        self.length = length
 
-        self.omx = omx
+        self.omx = omx.open_file(omx_file_path, 'r')
+        self.omx_shape = tuple([int(s) for s in self.omx.shape()])
+        self.skim_dtype = np.float64
+
+        self.cache_skims = cache_skims
+
+        self.usage = {key: 0 for key in self.omx.listMatrices()}
+
+        logger.debug("omx file %s skim shape: %s number of skims: %s" %
+                     (name, self.omx_shape, len(self.usage)))
 
     def __getitem__(self, key):
         """
@@ -53,43 +79,67 @@ class ODSkims(object):
         skim['DISTANCE'] or skim[('SOVTOLL_TIME', 'MD')]
         """
 
-        if key not in self.skims:
-            self.get_from_omx(key)
+        assert key in self.usage
 
-        data = self.skims[key]
+        self.usage[key] += 1
 
-        if self.transpose:
-            return data.transpose().flatten()
+        if key in self.skims:
+            # logger.debug("ODSkims using cached %s from omx %s" % (key, self.name, ))
+            data = self.skims[key]
         else:
-            return data.flatten()
+            # logger.debug("ODSkims loading %s from omx %s" % (key, self.name, ,))
+            data = self.get_from_omx(key)
+            if self.cache_skims:
+                self.skims[key] = data
+
+        return data
 
     def get_from_omx(self, key):
+
         if isinstance(key, str):
             omx_key = key
         elif isinstance(key, tuple):
             omx_key = '__'.join(key)
         else:
             raise RuntimeError("Unexpected skim key type %s" % type(key))
-        tracing.info(__name__,
-                     message="ODSkims loading %s from omx %s as %s" % (key, self.name, omx_key,))
 
-        print "ODSkims loading %s from omx %s as %s" % (key, self.name, omx_key,)
         try:
-            self.skims[key] = self.omx[omx_key][:self.length, :self.length]
+            data = self.omx[omx_key][:self.length, :self.length]
         except omx.tables.exceptions.NoSuchNodeError:
             raise RuntimeError("Could not find skim with key '%s' in %s" % (omx_key, self.name))
 
+        if self.transpose:
+            data = data.transpose()
 
-@orca.injectable()
-def aggregate_od_spec(configs_dir):
+        return data.flatten()
 
-    f = os.path.join(configs_dir, "aggregate_od.csv")
-    return bca.read_assignment_spec(f)
+    def log_skim_usage(self):
+
+        num_skims = len(self.usage)
+        num_used = (np.asanyarray(self.usage.values()) > 0).sum()
+        num_unused = num_skims - num_used
+
+        avg_used = (np.asanyarray(self.usage.values())).sum() / float(num_used or 1)
+        max_used = np.asanyarray(self.usage.values()).max()
+
+        logger.debug("  %s (cached=%s) %s skims in omx file %s used (%s avg %s max) %s unused" %
+                     (self.name, self.cache_skims,
+                      num_skims, num_used, avg_used, max_used, num_unused))
+
+        for key, n in self.usage.iteritems():
+            logger.info("%s.%s %s" % (self.name, key, n))
+            # if n > 4:
+            #     logger.info("%s.%s %s" % (self.name, key, n))
+
+    def close(self):
+
+        self.omx.close()
+        self.skims = {}
 
 
-def add_skims_to_locals(full_local_name, omx_file_name, zone_count, local_od_skims):
+def add_skims_to_locals(full_local_name, omx_file_name, zone_count, local_od_skims, cache_skims):
 
-        print "add_skims_to_locals: %s : %s" % (full_local_name, omx_file_name)
+        logger.debug("add_skims_to_locals: %s : %s" % (full_local_name, omx_file_name))
 
         omx_file = omx.open_file(omx_file_name, 'r')
 
@@ -98,16 +148,17 @@ def add_skims_to_locals(full_local_name, omx_file_name, zone_count, local_od_ski
 
         skims = ODSkims(name=full_local_name,
                         length=zone_count,
-                        omx=omx_file)
+                        omx=omx_file,
+                        cache_skims=cache_skims)
 
         local_od_skims[full_local_name] = skims
 
 
-def create_skim_locals_dict(settings, data_dir, zone_count):
+def create_skim_locals_dict(model_settings, data_dir, zone_count, cache_skims):
 
-    aggregate_od_matrices = settings.get('aggregate_od_matrices', None)
+    aggregate_od_matrices = model_settings.get('aggregate_od_matrices', None)
     if not aggregate_od_matrices:
-        raise RuntimeError("No list of aggregate_od_matrices found in settings")
+        raise RuntimeError("No list of aggregate_od_matrices found in model_settings")
 
     local_od_skims = {}
     for local_name, omx_file_name in aggregate_od_matrices.iteritems():
@@ -116,40 +167,85 @@ def create_skim_locals_dict(settings, data_dir, zone_count):
             full_local_name = '_'.join([local_name, scenario])
             data_sub_dir = '%s-data' % scenario
             omx_file_path = os.path.join(data_dir, data_sub_dir, omx_file_name)
-            add_skims_to_locals(full_local_name, omx_file_path, zone_count, local_od_skims)
+
+            logger.debug("add od_skims to locals: %s : %s" % (full_local_name, omx_file_name))
+
+            skims = ODSkims(omx_file_path=omx_file_path,
+                            name=full_local_name,
+                            length=zone_count,
+                            cache_skims=cache_skims)
+
+            local_od_skims[full_local_name] = skims
 
     return local_od_skims
 
 
-@orca.step()
-def aggregate_od_processor(zone_demographics, aggregate_od_spec, settings, data_dir, trace_od):
+def create_zone_matrices(model_settings, zones):
 
-    print "---------- aggregate_od_processor"
+    def zone_matrices(column_list_key, rep_func):
+        dict = {}
+        columns = model_settings.get(column_list_key, [])
+        for scenario in ['base', 'build']:
+            for c in columns:
+                zones_col = '%s_%s' % (scenario, c)
+                dict_col = '%s_%s' % (c, scenario)
+                if zones_col not in zones:
+                    raise RuntimeError("%s column '%s' not found in zones table" %
+                                       (column_list_key, zones_col))
+                dict[dict_col] = rep_func(zones['%s_%s' % (scenario, c)].values, zones.shape[0])
+        return dict
 
-    tracing.info(__name__, "Running aggregate_od_processor")
+    zone_matrix_dict = {}
+    zone_matrix_dict['origin_zone'] = zone_matrices('origin_zone_matrices', np.repeat)
+    zone_matrix_dict['dest_zone'] = zone_matrices('dest_zone_matrices', np.tile)
 
-    zones_index = zone_demographics.index
-    zone_count = len(zones_index)
+    return zone_matrix_dict
 
-    coc_end = settings.get('trip_coc_end', 'not found')
-    if coc_end not in ['orig', 'dest']:
-        raise RuntimeError("setting trip_coc_end (%s) should be orig or dest" % coc_end)
 
-    # create OD dataframe
+@inject.step()
+def aggregate_od_processor(
+        zone_districts,
+        zones,
+        data_dir, trace_od):
+
+    trace_label = 'aggregate_od'
+
+    logger.info("Running %s" % (trace_label, ))
+
+    model_settings = config.read_model_settings('aggregate_od.yaml')
+
+    spec_file_name = model_settings.get('spec_file_name', 'aggregate_od.csv')
+    aggregate_od_spec = bca.read_assignment_spec(spec_file_name)
+
+    zones = zones.to_frame()
+    zone_districts = zone_districts.to_frame()
+    zone_count = zone_districts.shape[0]
+
+    assert zones.index.equals(zone_districts.index)
+
+    # create OD dataframe in order compatible with ODSkims
     od_df = pd.DataFrame(
         data={
-            'orig': np.repeat(np.asanyarray(zones_index), zone_count),
-            'dest': np.tile(np.asanyarray(zones_index), zone_count)
+            'orig': np.repeat(np.asanyarray(zones.index), zone_count),
+            'dest': np.tile(np.asanyarray(zones.index), zone_count),
         }
     )
 
     # locals whose values will be accessible to the execution context
     # when the expressions in spec are applied to choosers
-    locals_dict = bca.assign_variables_locals(settings, 'aggregate_od')
+    locals_dict = config.get_model_constants(model_settings)
+    locals_dict.update(config.setting('globals'))
+    locals_dict['logger'] = logger
 
-    # add ODSkims to locals (note: we use local_skims list later to close omx files)
-    local_skims = create_skim_locals_dict(settings, data_dir, zone_count)
+    logger.debug('%s mem before create_skim_locals_dict, %s' % (trace_label, memory_info(),))
+
+    # - add ODSkims to locals (note: we use local_skims list later to close omx files)
+    cache_skims = model_settings.get('cache_skims', False)
+    local_skims = create_skim_locals_dict(model_settings, data_dir, zone_count, cache_skims)
     locals_dict.update(local_skims)
+
+    # - create_zone_matrices dicts
+    locals_dict.update(create_zone_matrices(model_settings, zones))
 
     if trace_od:
         trace_orig, trace_dest = trace_od
@@ -157,33 +253,44 @@ def aggregate_od_processor(zone_demographics, aggregate_od_spec, settings, data_
     else:
         trace_od_rows = None
 
+    logger.debug("%s assigning variables" % (trace_label,))
     results, trace_results, trace_assigned_locals = \
-        bca.eval_group_and_sum(assignment_expressions=aggregate_od_spec,
-                               df=od_df,
-                               locals_dict=locals_dict,
-                               df_alias='od',
-                               group_by_column_names=[coc_end],
-                               chunk_size=0,
-                               trace_rows=trace_od_rows)
+        assign.assign_variables(aggregate_od_spec,
+                                od_df,
+                                locals_dict=locals_dict,
+                                df_alias='od',
+                                trace_rows=trace_od_rows)
 
-    add_aggregate_results(results, aggregate_od_spec, source='aggregate_od')
-
-    if settings.get("dump", False):
-        output_dir = orca.eval_variable('output_dir')
-        csv_file_name = os.path.join(output_dir, 'aggregate_od_benefits.csv')
-        print "writing", csv_file_name
-        results.to_csv(csv_file_name, index=False)
+    logger.debug('%s mem after assign_variables, %s' % (trace_label, memory_info(),))
 
     for local_name, od_skims in local_skims.iteritems():
-        print "closing %s" % od_skims.name
-        od_skims.omx.close
+        logger.debug("closing %s" % local_name)
+        od_skims.log_skim_usage()
+        od_skims.close()
 
-    if trace_assigned_locals is not None:
-        tracing.write_locals(trace_assigned_locals,
-                             file_name="aggregate_od_locals")
+    # summarize aggregate_od_benefits by orig and dest districts
+    logger.debug("%s district summary" % (trace_label,))
+    results['orig'] = np.repeat(np.asanyarray(zone_districts.district), zone_count)
+    results['dest'] = np.tile(np.asanyarray(zone_districts.district), zone_count)
+    district_summary = results.groupby(['orig', 'dest']).sum()
+    pipeline.replace_table('aggregate_od_district_summary', district_summary)
+
+    # attribute aggregate_results benefits to origin zone
+    logger.debug("%s zone summary" % (trace_label,))
+    results['orig'] = od_df['orig']
+    del results['dest']
+    zone_summary = results.groupby(['orig']).sum()
+    pipeline.replace_table('aggregate_od_zone_summary', zone_summary)
+
+    add_aggregate_results(zone_summary, aggregate_od_spec, source=trace_label)
 
     if trace_results is not None:
         tracing.write_csv(trace_results,
-                          file_name="aggregate_od",
+                          file_name=trace_label,
                           index_label='index',
                           column_labels=['label', 'od'])
+
+        if trace_assigned_locals:
+            tracing.write_csv(trace_assigned_locals,
+                              file_name="%s_locals" % trace_label,
+                              index_label='variable', columns='value')

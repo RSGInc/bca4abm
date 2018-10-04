@@ -1,10 +1,10 @@
 Silos,Description,Target,Expression
 # identify cval columns for each income group,,,
-,,_LOW_INCOME_COLNAMES,cvals.columns.map(lambda x: x.startswith('base_') and 'i1' in x)
-,,_MED_INCOME_COLNAMES,cvals.columns.map(lambda x: x.startswith('base_') and 'i2' in x )
-,,_HIGH_INCOME_COLNAMES,cvals.columns.map(lambda x: x.startswith('base_') and 'i3' in x )
-,,_VERYHIGH_INCOME_COLNAMES,cvals.columns.map(lambda x: x.startswith('base_') and 'i4' in x )
-,,_BASE_COLNAMES,cvals.columns.map(lambda x: x.startswith('base_'))
+,,_LOW_INCOME_COLNAMES,cvals.columns.map(lambda x: x.startswith('base_') and 'i1' in x).values
+,,_MED_INCOME_COLNAMES,cvals.columns.map(lambda x: x.startswith('base_') and 'i2' in x ).values
+,,_HIGH_INCOME_COLNAMES,cvals.columns.map(lambda x: x.startswith('base_') and 'i3' in x ).values
+,,_VERYHIGH_INCOME_COLNAMES,cvals.columns.map(lambda x: x.startswith('base_') and 'i4' in x ).values
+,,_BASE_COLNAMES,cvals.columns.map(lambda x: x.startswith('base_') and ('i1' in x or 'i2' in x or 'i3' in x or 'i4' in x)).values
 # count hhs in each group,,,
 ,,households,"cvals.loc[:, _BASE_COLNAMES].sum(axis=1)"
 ,,coc_lowinc_count,"cvals.loc[:, _LOW_INCOME_COLNAMES].sum(axis=1)"

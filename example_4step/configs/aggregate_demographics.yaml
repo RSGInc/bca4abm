@@ -1,0 +1,17 @@
+# values available to expressions in aggregate_demographics_processor
+# CONSTANTS:
+#   SAMPLE_CONSTANT: 42
+
+#specify cocs
+#note everybody is hard wired as 1.0 (100%)
+#note * in the expressions means the expression applies to all cocs
+coc_silos:
+  - coc_lowinc
+  - coc_medinc
+  - coc_highinc
+  - coc_veryhighinc
+  - coc_ext_minority
+  - coc_ext_lowengpro
+  - coc_ext_age18or65
+  - coc_lowinc_ext
+  - everybody

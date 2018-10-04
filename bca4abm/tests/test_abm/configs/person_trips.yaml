@@ -1,0 +1,29 @@
+
+
+CONSTANTS:
+  # map trips table tour_purpose to work/notwork boolean
+  TOUR_PURPOSE_WORK_MAP:
+    0: 0   # home
+    1: 1   # work
+    2: 0   # school
+    3: 0   # escort
+    4: 0   # chore
+    5: 0   # shop
+    6: 0   # meal
+    7: 0   # social
+  # work/nonwork in-vehicle-time value of time
+  WORK_IVT_VOT_MAP:
+      0: 6.0     # nonwork
+      1: 10.0    # work
+  # work/nonwork walk value of time
+  WORK_WALK_VOT_MAP:
+      0: 9.0     # nonwork
+      1: 15.0    # work
+  # work/nonwork wait value of time
+  WORK_WAIT_VOT_MAP:
+      0: 9.0     # nonwork
+      1: 15.0    # work
+  TOLL_INCLUSION_FACTOR: 1
+  FUEL_INCLUSION_FACTOR: 1
+  PARK_INCLUSION_FACTOR: 1
+  FARE_INCLUSION_FACTOR: 1

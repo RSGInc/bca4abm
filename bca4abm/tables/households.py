@@ -1,59 +1,48 @@
+# bca4abm
+# See full license in LICENSE.txt.
+
+import logging
+
 import os.path
 import numpy as np
-import orca
 import pandas as pd
+
+from activitysim.core import inject
+from activitysim.core import config
 
 from bca4abm import bca4abm as bca
 
 
-# this caches all the columns that are computed on the trips table
-@orca.table(cache=True)
-def households(data_dir, input_source, settings):
+logger = logging.getLogger(__name__)
 
-    base_households = bca.read_csv_or_stored_table(table_name="base_households",
-                                                   index_col="hh_id",
-                                                   data_dir=data_dir,
-                                                   input_source=input_source,
-                                                   settings=settings)
 
-    # base_households = bca.read_csv_table(
-    #     data_dir, settings,
-    #     table_name="base_households",
-    #     index_col="hh_id")
+@inject.table()
+def households(data_dir, settings):
 
-    # print "\nbase_households\n", base_households
+    logger.debug("reading households table")
 
-    build_households = bca.read_csv_or_stored_table(table_name="build_households",
-                                                    index_col="hh_id",
-                                                    data_dir=data_dir,
-                                                    input_source=input_source,
-                                                    settings=settings)
+    table_settings = config.read_model_settings('tables.yaml')
 
-    # build_households = bca.read_csv_table(
-    #     data_dir, settings,
-    #     table_name="build_households",
-    #     index_col="hh_id")
+    base_households = bca.read_csv_table(table_name="base_households",
+                                         index_col="household_id",
+                                         data_dir=data_dir,
+                                         settings=table_settings)
 
-    # print "\nbuild_households\n", build_households
+    build_households = bca.read_csv_table(table_name="build_households",
+                                          index_col="household_id",
+                                          data_dir=data_dir,
+                                          settings=table_settings)
 
     households = pd.merge(base_households, build_households, left_index=True, right_index=True)
+
+    # - assign chunk_ids
+    assert 'chunk_id' not in households.columns
+    households['chunk_id'] = pd.Series(range(len(households)), households.index)
 
     return households
 
 
-# this assigns a chunk_id to each household based on the chunk_size setting
-@orca.column("households", cache=True)
-def chunk_id(households, hh_chunk_size):
-
-    chunk_ids = pd.Series(range(len(households)), households.index)
-
-    if hh_chunk_size > 0:
-        chunk_ids = np.floor(chunk_ids.div(hh_chunk_size)).astype(int)
-
-    return chunk_ids
-
-
-orca.broadcast(cast='households',
-               onto='persons',
-               cast_index=True,
-               onto_on='hh_id')
+inject.broadcast(cast='households',
+                 onto='persons',
+                 cast_index=True,
+                 onto_on='household_id')

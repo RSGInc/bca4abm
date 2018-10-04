@@ -1,28 +1,20 @@
+# bca4abm
+# See full license in LICENSE.txt.
+
+import logging
+
 import os.path
 import numpy as np
-import orca
 import pandas as pd
 import itertools
+
+from activitysim.core import inject
+from activitysim.core import config
 
 from bca4abm import bca4abm as bca
 
 
-def conflate_cval(cval, in_place=True):
-
-    if in_place:
-        cval_out = cval
-    else:
-        cval_out = pd.DataFrame(index=cval.index)
-
-    a = 1+np.arange(4)
-    for i in itertools.product(a, a, a, a):
-        c = "a%si%sh%sw%s" % i
-        rhs_cols = ["%sc%s" % (c, j) for j in a]
-        # print "%s = %s" % (c, rhs_cols)
-        # row sum
-        cval_out[c] = cval[rhs_cols].sum(axis=1)
-
-    return cval_out
+logger = logging.getLogger(__name__)
 
 
 def read_csv_file(data_dir, file_name, column_map=None):
@@ -57,10 +49,35 @@ def read_and_concat_csv_files(data_dir, file_names, axis=1):
     return omnibus_df
 
 
-@orca.table(cache=True)
-def zone_cvals(data_dir, settings):
+@inject.table()
+def zone_districts(data_dir, settings):
 
-    file_name = settings.get('cval_file_name')
+    table_settings = config.read_model_settings('tables.yaml')
+
+    file_name = table_settings.get('district_file_name')
+    districts_df = read_csv_file(
+        data_dir=data_dir,
+        file_name=file_name,
+        column_map=None)
+
+    # the default index is zero-based, so we can convert to 1-based zone ids simply by adding 1
+    districts_df.index = districts_df.index + 1
+    districts_df.index.name = 'ZONE'
+
+    if 'zone' in districts_df:
+        assert (districts_df.index == districts_df.zone.values).all()
+
+    return districts_df
+
+
+@inject.table()
+def zone_cvals(data_dir):
+
+    logger.debug("reading zone_cvals table")
+
+    table_settings = config.read_model_settings('tables.yaml')
+
+    file_name = table_settings.get('cval_file_name')
 
     base_cvals_df = read_csv_file(
         data_dir=os.path.join(data_dir, 'base-data'),
@@ -72,7 +89,7 @@ def zone_cvals(data_dir, settings):
         file_name=file_name,
         column_map=None)
 
-    cocs_file_names = settings.get('ext_cocs_file_name')
+    cocs_file_names = table_settings.get('ext_cocs_file_name')
 
     base_cocs_df = read_csv_file(
         data_dir=os.path.join(data_dir, 'base-data'),
@@ -99,8 +116,8 @@ def zone_cvals(data_dir, settings):
     return cvals_df
 
 
-@orca.table(cache=True)
-def zones(data_dir, settings):
+@inject.table()
+def zones(data_dir):
     """
     aggregate_zone_file_names in settings contains a list of file name
     for zones table csv data input files (expect versions in build and base data subdirs)
@@ -108,7 +125,11 @@ def zones(data_dir, settings):
     (e.g.) if ma.hbcdcls.csv has a column 'hbcdcls' you will have 'base_hbcdcls' and 'build_hbcdcls'
     """
 
-    file_names = settings.get('aggregate_zone_file_names')
+    logger.debug("reading zones table")
+
+    table_settings = config.read_model_settings('tables.yaml')
+
+    file_names = table_settings.get('aggregate_zone_file_names')
 
     base_zones_df = read_and_concat_csv_files(
         data_dir=os.path.join(data_dir, 'base-data'),
