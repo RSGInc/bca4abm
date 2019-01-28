@@ -22,9 +22,9 @@ CONSTANTS:
   CRASH_RATE_INJURY: 0.00001
   CRASH_RATE_FATAL: 0.000001
   # Crash costs in Dollars
-  CRASH_COST_PDO: 2500
-  CRASH_COST_INJURY: 25000
-  CRASH_COST_FATAL: 100000
+  CRASH_COST_PDO: 1522
+  CRASH_COST_INJURY: 441800
+  CRASH_COST_FATAL: 9400000
 
 # specify column name to enable zone tracing for both the o and the d zone
 # (if not specified, just trace first link)
