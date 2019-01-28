@@ -37,23 +37,6 @@ silos,description,target,expression
 ,,dtransit_am_travel_time_benefit, -0.5 * (assign_mfs_base['mf62'] + assign_mfs_build['mf62']) * ((build_wtransit_am_travel_time - base_wtransit_am_travel_time) * VOT_HBC/60.0)
 ,,dtransit_md_travel_time_benefit, -0.5 * (assign_mfs_base['mf63'] + assign_mfs_build['mf63']) * ((build_wtransit_md_travel_time - base_wtransit_md_travel_time) * VOT_HBC/60.0)
 *,dtransit travel time benefit,dtransit_travel_time_benefit,(dtransit_am_travel_time_benefit + dtransit_md_travel_time_benefit) * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-,,_,logger.info('physical_activity_benefit')
-,,base_walk_time,skims_mfs_base['mf3'] * (60 / WALK_SPEED)
-,,build_walk_time,skims_mfs_build['mf3'] * (60 / WALK_SPEED)
-,,base_bike_time,skims_mfs_base['mf3'] * (60 / BIKE_SPEED)
-,,build_bike_time,skims_mfs_build['mf3'] * (60 / BIKE_SPEED)
-,,base_amount_of_time_walking,mode_choice_pa_base['mf.hwda.lowinc'] * base_walk_time
-,,build_amount_of_time_walking,mode_choice_pa_base['mf.hwda.lowinc'] * build_walk_time
-,,base_amount_of_time_biking,mode_choice_pa_build['mf.hwda.lowinc'] * base_bike_time
-,,build_amount_of_time_biking,mode_choice_pa_build['mf.hwda.lowinc'] * build_bike_time
-,,base_avg_walk_time,base_amount_of_time_walking.sum()
-,,build_avg_walk_time,build_amount_of_time_walking.sum()
-,,base_avg_bike_time,base_amount_of_time_biking.sum()
-,,build_avg_bike_time,build_amount_of_time_biking.sum()
-,,avg_walk_time_growth_ratio,base_avg_walk_time / build_avg_walk_time
-,,avg_bike_time_growth_ratio,base_avg_bike_time / build_avg_bike_time
-,,dalys_in_dollars,DOLLARS_PER_DALY * POPULATION * ( AVG_WALK_TIME_GROWTH_RATIO * avg_walk_time_growth_ratio + AVG_BIKE_TIME_GROWTH_RATIO * avg_bike_time_growth_ratio )
-*,physical activity benefit,physical_activity_benefit,dalys_in_dollars / dalys_in_dollars.count()
 ,,_,logger.info('trk_time_benefit')
 ,truck trips,base_hvytrk_am_trips,mode_choice_pa_base['mf.hwda.lowinc']
 ,,hvytrk_am_time_benefit, -0.5 * (base_hvytrk_am_trips + mode_choice_pa_build['mf.hwda.lowinc']) * (skims_mfs_build['mf5'] - skims_mfs_base['mf5']) * VOT_HVYTRK/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
