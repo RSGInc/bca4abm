@@ -46,3 +46,10 @@ aggregate_zone_file_names:
   - ma.nhwpr.csv
   - ma.schpr.csv
   - parking_cost.csv
+
+zone_ids: zone_districts.csv
+
+#zone_aliases:
+#  - zone
+#  - TAZID
+#  - TAZ
