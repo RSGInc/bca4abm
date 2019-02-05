@@ -171,12 +171,12 @@ def create_skim_locals_dict(model_settings, data_dir, zones_df, cache_skims):
     return local_od_skims
 
 
-def create_zone_matrices(model_settings, zones_df):
+def create_zone_matrices(model_settings, zones):
     """
     ODSkims look-alikes that have identical values for all zone origins/dests
 
     i.e. we either repeat (origin_zone_matrices) or tile (dest_zone_matrices) zone values
-    to expand zones_df columns into ODSkims-style flattened arrays
+    to expand zones columns into ODSkims-style flattened arrays
     """
 
     def zone_matrices(column_list_key, rep_func):
@@ -186,10 +186,11 @@ def create_zone_matrices(model_settings, zones_df):
             for c in columns:
                 zones_col = '%s_%s' % (scenario, c)
                 dict_col = '%s_%s' % (c, scenario)
-                if zones_col not in zones_df:
+                if zones_col not in zones:
                     raise RuntimeError("%s column '%s' not found in zones table" %
                                        (column_list_key, zones_col))
-                dict[dict_col] = rep_func(zones_df['%s_%s' % (scenario, c)].values, zones.shape[0])
+                dict[dict_col] = \
+                    rep_func(zones['%s_%s' % (scenario, c)].values, zones.shape[0])
         return dict
 
     zone_matrix_dict = {}
