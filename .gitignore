@@ -1,7 +1,6 @@
 .idea
 .ipynb_checkpoints
 sandbox/
-metro_mce/
 .pytest_cache
 
 ~$*.xlsx

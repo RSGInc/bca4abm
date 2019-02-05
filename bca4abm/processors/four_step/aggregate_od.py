@@ -61,6 +61,12 @@ class ODSkims(object):
 
         self.omx = omx.open_file(omx_file_path, 'r')
         self.omx_shape = tuple([int(s) for s in self.omx.shape()])
+
+        # skims must be same shape as zone file
+        # (or we will need to be smarter about discontinuous zone ids)
+        assert self.omx_shape[0] == self.length
+        assert self.omx_shape[1] == self.length
+
         self.skim_dtype = np.float64
 
         self.cache_skims = cache_skims
@@ -139,19 +145,19 @@ class ODSkims(object):
 
 def add_skims_to_locals(full_local_name, omx_file_name, zone_count, local_od_skims, cache_skims):
 
-        logger.debug("add_skims_to_locals: %s : %s" % (full_local_name, omx_file_name))
+    logger.debug("add_skims_to_locals: %s : %s" % (full_local_name, omx_file_name))
 
-        omx_file = omx.open_file(omx_file_name, 'r')
+    omx_file = omx.open_file(omx_file_name, 'r')
 
-        # for skimName in omx_file.listMatrices():
-        #     print "aggregate_od_matrices %s: '%s'" % (full_local_name, skimName)
+    # for skimName in omx_file.listMatrices():
+    #     print "aggregate_od_matrices %s: '%s'" % (full_local_name, skimName)
 
-        skims = ODSkims(name=full_local_name,
-                        length=zone_count,
-                        omx=omx_file,
-                        cache_skims=cache_skims)
+    skims = ODSkims(name=full_local_name,
+                    length=zone_count,
+                    omx=omx_file,
+                    cache_skims=cache_skims)
 
-        local_od_skims[full_local_name] = skims
+    local_od_skims[full_local_name] = skims
 
 
 def create_skim_locals_dict(model_settings, data_dir, zone_count, cache_skims):
