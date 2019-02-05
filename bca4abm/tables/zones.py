@@ -224,6 +224,13 @@ def zone_aliases():
 
 @inject.injectable(cache=True)
 def zone_ids(data_dir, zone_aliases):
+    """
+    we require a master zone_ids file for anything but default 1-based contiguous zone ids
+    it could be specified in the zone_districts file, but we we want to catch errors where
+    different zone files have zone_id index mismatches, so we err on the side of explicitness
+
+    with default 1-based contiguous zone ids, this fiel is optional and zone_ids can return None
+    """
 
     table_settings = config.read_model_settings('tables.yaml')
 
@@ -239,6 +246,9 @@ def zone_ids(data_dir, zone_aliases):
     assert 'zone' in zone_ids_df
 
     zone_ids_df.set_index('zone', drop=True, inplace=True, verify_integrity=True)
+
+    # warning sign that omx skims may not work right unless we check omx mapping attribute
+    assert zone_ids_df.index.is_monotonic_increasing
 
     tracing.write_csv(zone_ids_df,
                       file_name='zone_ids',
