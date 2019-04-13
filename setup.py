@@ -8,7 +8,7 @@ setup(
         'numpy >= 1.8.0',
         'openmatrix >= 0.2.2',
         'pandas >= 0.23.0',
-        'pyyaml >= 3.13',
+        'pyyaml >= 3.0, <5.1',
         'tables >= 3.1.0',
         'toolz >= 0.7',
         'zbox >= 1.2',
