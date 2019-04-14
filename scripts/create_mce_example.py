@@ -12,22 +12,22 @@ import itertools
 def slice_taz_file(source_data_dir, dest_data_dir, file_name, max_zone):
     in_file_path = os.path.join(source_data_dir, file_name)
     out_file_path = os.path.join(dest_data_dir, file_name)
-    cval = pd.read_csv(in_file_path)
-    cval = cval.head(MAX_ZONE)
-    cval.to_csv(out_file_path, index=False, header=True)
-    print "copy_taz %s: %s rows, %s columns" % (file_name, cval.shape[0], cval.shape[1])
+    hh = pd.read_csv(in_file_path)
+    hh = hh.head(MAX_ZONE)
+    hh.to_csv(out_file_path, index=False, header=True)
+    print "copy_taz %s: %s rows, %s columns" % (file_name, hh.shape[0], hh.shape[1])
 
 
 def slice_links_file(source_data_dir, dest_data_dir, file_name, max_zone):
     in_file_path = os.path.join(source_data_dir, file_name)
     out_file_path = os.path.join(dest_data_dir, file_name)
-    cval = pd.read_csv(in_file_path)
+    hh = pd.read_csv(in_file_path)
 
-    cval = cval[(cval['@zone']<=max_zone)]
+    hh = hh[(hh['@zone']<=max_zone)]
 
-    cval.to_csv(out_file_path, index=False, header=True)
+    hh.to_csv(out_file_path, index=False, header=True)
 
-    print "copy_links %s: %s rows, %s columns" % (file_name, cval.shape[0], cval.shape[1])
+    print "copy_links %s: %s rows, %s columns" % (file_name, hh.shape[0], hh.shape[1])
 
 
 def slice_skims(source_data_dir, dest_data_dir, file_name, max_zone):

@@ -5,14 +5,8 @@ bca4abm
 
 bca4abm is an open platform for benefit-cost analysis for comparing scenarios generated
 by travel demand models - activity-based or trip-based.  It is a general framework for 
-calculating benefits since it works with a variety of input data types:
-  - zones
-  - O-D pairs
-  - links
-  - persons
-  - trips
-
-bca4abm is implemented in the [ActivitySim](https://github.com/activitysim/activitysim) framework. 
+calculating benefits since it works with a variety of input data types.  bca4abm is implemented 
+in the [ActivitySim](https://github.com/activitysim/activitysim) framework. 
 
 ## Documentation 
 

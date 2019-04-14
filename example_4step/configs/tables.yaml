@@ -1,5 +1,5 @@
-# file name for cvals table csv data input file (expect versions in build and base data subdirs)
-cval_file_name: mf.cval.csv
+# file name for hhs table csv data input file (expect versions in build and base data subdirs)
+hh_file_name: mf.cval.csv
 
 # file name for external cocs table csv data input file (expect versions in build and base data subdirs)
 ext_cocs_file_name: cocs.csv
@@ -46,3 +46,16 @@ aggregate_zone_file_names:
   - ma.nhwpr.csv
   - ma.schpr.csv
   - parking_cost.csv
+
+# file name for csv file in data dir with a column mapping zone_id to offset
+# zone_ids file must have a column with a name in zone_aliases containing zone_ids
+# this positional mapping applies to all zone files and skims
+# assumes default (1-based) zone_ids if this setting is omitted
+zone_ids: zone_districts.csv
+
+# list of column names that may be synonyms for zone column names in the above files
+# (in case different files from different sources have different zone id columns names)
+#zone_aliases:
+#  - zone
+#  - TAZID
+#  - TAZ

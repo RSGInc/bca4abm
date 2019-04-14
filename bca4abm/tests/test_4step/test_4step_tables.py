@@ -33,9 +33,9 @@ def inject_default_directories(request):
     request.addfinalizer(orca.clear_cache)
 
 
-def test_read_zone_cval_table():
+def test_read_zone_hh_table():
 
-    zones = orca.get_table('zone_cvals').to_frame()
+    zones = orca.get_table('zone_hhs').to_frame()
 
     assert zones.shape[0] == 25
 

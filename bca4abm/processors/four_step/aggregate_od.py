@@ -51,16 +51,22 @@ class ODSkims(object):
         whether to transpose the matrix before flattening. (i.e. act as a D-O instead of O-D skim)
     """
 
-    def __init__(self, omx_file_path, name, length, transpose=False, cache_skims=True):
+    def __init__(self, omx_file_path, name, zone_index, transpose=False, cache_skims=True):
 
         self.skims = {}
 
         self.name = name
-        self.transpose = transpose
-        self.length = length
+        self.transpose = transpose  # never used by any caller?
 
         self.omx = omx.open_file(omx_file_path, 'r')
         self.omx_shape = tuple([int(s) for s in self.omx.shape()])
+
+        # skims must be same shape as zone file
+        # (or we will need to be smarter about discontinuous zone ids)
+        self.length = zone_index.shape[0]
+        assert self.omx_shape[0] == self.length
+        assert self.omx_shape[1] == self.length
+
         self.skim_dtype = np.float64
 
         self.cache_skims = cache_skims
@@ -137,24 +143,9 @@ class ODSkims(object):
         self.skims = {}
 
 
-def add_skims_to_locals(full_local_name, omx_file_name, zone_count, local_od_skims, cache_skims):
+def create_skim_locals_dict(model_settings, data_dir, zones_df, cache_skims):
 
-        logger.debug("add_skims_to_locals: %s : %s" % (full_local_name, omx_file_name))
-
-        omx_file = omx.open_file(omx_file_name, 'r')
-
-        # for skimName in omx_file.listMatrices():
-        #     print "aggregate_od_matrices %s: '%s'" % (full_local_name, skimName)
-
-        skims = ODSkims(name=full_local_name,
-                        length=zone_count,
-                        omx=omx_file,
-                        cache_skims=cache_skims)
-
-        local_od_skims[full_local_name] = skims
-
-
-def create_skim_locals_dict(model_settings, data_dir, zone_count, cache_skims):
+    zone_index = zones_df.index
 
     aggregate_od_matrices = model_settings.get('aggregate_od_matrices', None)
     if not aggregate_od_matrices:
@@ -172,7 +163,7 @@ def create_skim_locals_dict(model_settings, data_dir, zone_count, cache_skims):
 
             skims = ODSkims(omx_file_path=omx_file_path,
                             name=full_local_name,
-                            length=zone_count,
+                            zone_index=zone_index,
                             cache_skims=cache_skims)
 
             local_od_skims[full_local_name] = skims
@@ -181,6 +172,12 @@ def create_skim_locals_dict(model_settings, data_dir, zone_count, cache_skims):
 
 
 def create_zone_matrices(model_settings, zones):
+    """
+    ODSkims look-alikes that have identical values for all zone origins/dests
+
+    i.e. we either repeat (origin_zone_matrices) or tile (dest_zone_matrices) zone values
+    to expand zones columns into ODSkims-style flattened arrays
+    """
 
     def zone_matrices(column_list_key, rep_func):
         dict = {}
@@ -192,7 +189,8 @@ def create_zone_matrices(model_settings, zones):
                 if zones_col not in zones:
                     raise RuntimeError("%s column '%s' not found in zones table" %
                                        (column_list_key, zones_col))
-                dict[dict_col] = rep_func(zones['%s_%s' % (scenario, c)].values, zones.shape[0])
+                dict[dict_col] = \
+                    rep_func(zones['%s_%s' % (scenario, c)].values, zones.shape[0])
         return dict
 
     zone_matrix_dict = {}
@@ -241,7 +239,7 @@ def aggregate_od_processor(
 
     # - add ODSkims to locals (note: we use local_skims list later to close omx files)
     cache_skims = model_settings.get('cache_skims', False)
-    local_skims = create_skim_locals_dict(model_settings, data_dir, zone_count, cache_skims)
+    local_skims = create_skim_locals_dict(model_settings, data_dir, zones, cache_skims)
     locals_dict.update(local_skims)
 
     # - create_zone_matrices dicts

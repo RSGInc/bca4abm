@@ -1,4 +1,5 @@
 
+spec_file_name: aggregate_zone.csv
 
 # values available to expressions in aggregate_zone_processor
 CONSTANTS:

@@ -31,25 +31,21 @@ mf.cval.csv before input to the bca tool?
 """
 
 
-@inject.injectable()
-def aggregate_zone_spec():
-    return bca.read_assignment_spec('aggregate_zone.csv')
-
-
 @inject.step()
 def aggregate_zone_processor(
         zones,
-        aggregate_zone_spec,
         trace_od):
     """
     zones: orca table
 
     zone data for base and build scenario dat files combined into a single dataframe
-    with columns names prefixed with 'base_' or 'build_' indexed by ZONE
+    with columns names prefixed with base_ or build_ indexed by ZONE
     """
 
     trace_label = 'aggregate_zone'
     model_settings = config.read_model_settings('aggregate_zone.yaml')
+    spec_file_name = model_settings.get('spec_file_name', 'aggregate_zone.csv')
+    aggregate_zone_spec = bca.read_assignment_spec(spec_file_name)
 
     zones_df = zones.to_frame()
 
@@ -91,11 +87,14 @@ def aggregate_zone_processor(
 
 @inject.step()
 def aggregate_zone_benefits(
-        aggregate_zone_summary,
-        aggregate_zone_spec):
+        aggregate_zone_summary):
 
     trace_label = 'aggregate_zone_benefits'
 
     zone_summary = aggregate_zone_summary.to_frame()
+
+    model_settings = config.read_model_settings('aggregate_zone.yaml')
+    spec_file_name = model_settings.get('spec_file_name', 'aggregate_zone.csv')
+    aggregate_zone_spec = bca.read_assignment_spec(spec_file_name)
 
     add_aggregate_results(zone_summary, aggregate_zone_spec, source=trace_label)
