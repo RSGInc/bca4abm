@@ -34,14 +34,14 @@ def aggregate_demographics_spec():
 
 @inject.step()
 def aggregate_demographics_processor(
-        zone_cvals,
+        zone_hhs,
         aggregate_demographics_spec,
         settings, trace_od):
     """
 
     Parameters
     ----------
-    zone_cvals : orca table
+    zone_hhs : orca table
         input zone demographics
 
     """
@@ -49,13 +49,13 @@ def aggregate_demographics_processor(
     trace_label = 'aggregate_demographics'
     model_settings = config.read_model_settings('aggregate_demographics.yaml')
 
-    zone_cvals_df = zone_cvals.to_frame()
+    zone_hhs_df = zone_hhs.to_frame()
 
-    logger.info("Running %s with %d zones" % (trace_label, len(zone_cvals_df), ))
+    logger.info("Running %s with %d zones" % (trace_label, len(zone_hhs_df), ))
 
     if trace_od:
         trace_orig, trace_dest = trace_od
-        trace_od_rows = (zone_cvals_df.index == trace_orig) | (zone_cvals_df.index == trace_dest)
+        trace_od_rows = (zone_hhs_df.index == trace_orig) | (zone_hhs_df.index == trace_dest)
     else:
         trace_od_rows = None
 
@@ -70,9 +70,9 @@ def aggregate_demographics_processor(
     # in the context of each row in of the choosers dataframe
     results, trace_results, trace_assigned_locals = \
         assign.assign_variables(aggregate_demographics_spec,
-                                zone_cvals_df,
+                                zone_hhs_df,
                                 locals_dict,
-                                df_alias='cvals',
+                                df_alias='hhs',
                                 trace_rows=trace_od_rows)
 
     pipeline.replace_table("zone_demographics", results)

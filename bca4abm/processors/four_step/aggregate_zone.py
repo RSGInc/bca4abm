@@ -87,11 +87,14 @@ def aggregate_zone_processor(
 
 @inject.step()
 def aggregate_zone_benefits(
-        aggregate_zone_summary,
-        aggregate_zone_spec):
+        aggregate_zone_summary):
 
     trace_label = 'aggregate_zone_benefits'
 
     zone_summary = aggregate_zone_summary.to_frame()
 
+    model_settings = config.read_model_settings('aggregate_zone.yaml')
+    spec_file_name = model_settings.get('spec_file_name', 'aggregate_zone.csv')
+    aggregate_zone_spec = bca.read_assignment_spec(spec_file_name)
+    
     add_aggregate_results(zone_summary, aggregate_zone_spec, source=trace_label)

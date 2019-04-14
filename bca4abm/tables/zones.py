@@ -116,21 +116,21 @@ def zone_districts(data_dir, zone_aliases, zone_ids):
 
 
 @inject.table()
-def zone_cvals(data_dir, zone_aliases, zone_ids):
+def zone_hhs(data_dir, zone_aliases, zone_ids):
 
-    logger.debug("reading zone_cvals table")
+    logger.debug("reading zone_hhs table")
 
     table_settings = config.read_model_settings('tables.yaml')
 
-    file_name = table_settings.get('cval_file_name')
+    file_name = table_settings.get('hh_file_name')
     base_data_dir = os.path.join(data_dir, 'base-data')
     build_data_dir = os.path.join(data_dir, 'build-data')
 
-    base_cvals_df = read_zone_indexed_csv_file(
+    base_hhs_df = read_zone_indexed_csv_file(
         base_data_dir, file_name,
         zone_aliases, zone_ids)
 
-    build_cvals_df = read_zone_indexed_csv_file(
+    build_hhs_df = read_zone_indexed_csv_file(
         build_data_dir, file_name,
         zone_aliases, zone_ids)
 
@@ -140,28 +140,28 @@ def zone_cvals(data_dir, zone_aliases, zone_ids):
         base_data_dir, cocs_file_name,
         zone_aliases, zone_ids)
 
-    base_cvals_df = pd.concat([base_cvals_df, base_cocs_df], axis=1)
+    base_hhs_df = pd.concat([base_hhs_df, base_cocs_df], axis=1)
 
     build_cocs_df = read_zone_indexed_csv_file(
         build_data_dir, cocs_file_name,
         zone_aliases, zone_ids)
 
-    build_cvals_df = pd.concat([build_cvals_df, build_cocs_df], axis=1)
+    build_hhs_df = pd.concat([build_hhs_df, build_cocs_df], axis=1)
 
-    base_cvals_df.columns = ['base_%s' % c for c in base_cvals_df.columns.values]
-    build_cvals_df.columns = ['build_%s' % c for c in build_cvals_df.columns.values]
+    base_hhs_df.columns = ['base_%s' % c for c in base_hhs_df.columns.values]
+    build_hhs_df.columns = ['build_%s' % c for c in build_hhs_df.columns.values]
 
-    cvals_df = pd.concat([base_cvals_df, build_cvals_df], axis=1)
+    hhs_df = pd.concat([base_hhs_df, build_hhs_df], axis=1)
 
-    check_zone_index(cvals_df, zone_ids)
+    check_zone_index(hhs_df, zone_ids)
 
-    # print "cvals_df: ", cvals_df.columns.values
+    # print "hhs_df: ", hhs_df.columns.values
 
-    tracing.write_csv(cvals_df,
-                      file_name='zone_cvals',
+    tracing.write_csv(hhs_df,
+                      file_name='zone_hhs',
                       transpose=False)
 
-    return cvals_df
+    return hhs_df
 
 
 @inject.table()
