@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting Started &mdash; bca4abm 0.3
+  <title>Getting Started &mdash; bca4abm 0.4
  documentation</title>
   
 
@@ -18,34 +18,37 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="examples.html" />
     <link rel="prev" title="bca4abm" href="index.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -59,7 +62,7 @@
             
             
               <div class="version">
-                0.3
+                0.4
 
               </div>
             
@@ -86,11 +89,15 @@
             
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#running-the-model">Running the Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#process-overview">Process Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#expressions">Expressions</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="software.html">Software Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
 </ul>
 
             
@@ -157,33 +164,7 @@
             
   <div class="section" id="getting-started">
 <h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="examples">
-<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
-<p>There are two example implementations included in this repository: ABM and 4step (trip-based).</p>
-<p>ABM models defined in <a class="reference external" href="https://github.com/RSGInc/bca4abm/blob/master/example_abm/configs/settings.yaml">settings.yaml</a></p>
-<blockquote>
-<div><ul class="simple">
-<li>demographics_processor - disaggregate person calculations</li>
-<li>person_trips_processor - disaggregate trip calculations</li>
-<li>auto_ownership_processor - disaggregate person (and household) auto ownership calculations</li>
-<li>physical_activity_processor - disaggregate person and trip physical activity calculations</li>
-<li>aggregate_trips_processor - aggregate (matrix-based) calculations</li>
-<li>link_daily_processor - daily link-based calculations</li>
-<li>link_processor - time period link-based calculations</li>
-<li>write_tables - writes output files</li>
-</ul>
-</div></blockquote>
-<p>4step models defined in <a class="reference external" href="https://github.com/RSGInc/bca4abm/blob/master/example_4step/configs/settings.yaml">settings.yaml</a></p>
-<blockquote>
-<div><ul class="simple">
-<li>aggregate_demographics_processor - zone-based calculations to identify communities of concern (COC) / market segments</li>
-<li>aggregate_zone_processor - zone-based calculations such as auto ownership and destination choice logsums benefits</li>
-<li>aggregate_od_processor - OD pair-based calaculations such as travel time savings</li>
-<li>link_daily_processor - daily link-based calculations such as safety and emissions</li>
-<li>write_tables - writes output files</li>
-</ul>
-</div></blockquote>
-</div>
+<p>bca4abm includes activity-based model and four-step trip-based model <a class="reference internal" href="examples.html#examples"><span class="std std-ref">Examples</span></a> to help get you started.</p>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -222,8 +203,83 @@
 </pre></div>
 </div>
 <ul class="simple">
-<li>Check the outputs folder for results</li>
+<li>Check the outputs folder for results, for example the <code class="docutils literal notranslate"><span class="pre">final_aggregate_results.csv</span></code> file for the 4step example</li>
 </ul>
+</div>
+<div class="section" id="process-overview">
+<h2>Process Overview<a class="headerlink" href="#process-overview" title="Permalink to this headline">¶</a></h2>
+<p>The basic steps to run the benefits calculator with your travel model are below:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Run procedures to export results from the travel model to produce the base and build scenario inputs required for the calculator</li>
+<li>The calculator reads the travel model output files for a base and build scenario</li>
+<li>The calculator evaluates user-defined Python expressions (see below) for each data processor to calculate benefits.  Expressions are segmented by equity group when applicable, and include subtracting the base from the build quantity, monetization, annualization, etc.</li>
+<li>The summation of the calculations by benefit and equity group are written out</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="expressions">
+<h2>Expressions<a class="headerlink" href="#expressions" title="Permalink to this headline">¶</a></h2>
+<p>To help illustrate how the benefits calculator works, an example set of expressions for calculating zone benefits is below.  Each input is a zone data table with
+each row a zone and each column a zone attribute.  The example processes the
+base and build home-based-other productions by zone, as well as the base and build mode choice logsum, and calculates
+an accessibility benefit measure.  The idea here is that improvements in multi-modal accessibility (i.e. the logsum) between the
+based and build scenario results in increased accessibility or additional travel options.  The accessibility benefit is calculated
+using the rule-of-half.  As a result, the calculation is half the difference in the productions
+times the difference in the logsums divided by utilities per minute for home-based-other trips times the value-of-time for
+home-based-other trips times the annual discount rate times a daily to annual factor.  The result is monetized benefits for increases
+in accessibility by zone.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="21%" />
+<col width="12%" />
+<col width="68%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Description</th>
+<th class="head">Target</th>
+<th class="head">Expression</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>#zone input data tables</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>hbo productions in base scenario</td>
+<td>base_prod_hbo</td>
+<td>zones.base_hboprl + zones.base_hboprm + zones.base_hboprh</td>
+</tr>
+<tr class="row-even"><td>hbo productions in build scenario</td>
+<td>build_prod_hbo</td>
+<td>zones.build_hboprl + zones.build_hboprm + zones.build_hboprh</td>
+</tr>
+<tr class="row-odd"><td>hbo logsum in base scenario</td>
+<td>base_ls_hbo</td>
+<td>zones.base_hbodcls</td>
+</tr>
+<tr class="row-even"><td>hbo logsum in build scenario</td>
+<td>build_ls_hbo</td>
+<td>zones.build_hbodcls</td>
+</tr>
+<tr class="row-odd"><td>#calculate travel options benefit by zone</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>access benefit hbo</td>
+<td>access_benefit_hbo</td>
+<td>(0.5 * (base_prod_hbo + build_prod_hbo) * (build_ls_hbo - base_ls_hbo) / UPM_HBO) * (VOT_HBO / 60) * DISCOUNT_RATE * ANNUALIZATION_FACTOR</td>
+</tr>
+<tr class="row-odd"><td>#add up all travel purposes if calculated</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>travel options benefit</td>
+<td>travel_options_benefit</td>
+<td>access_benefit_hbo + access_benefit_hbr + access_benefit_hbs + access_benefit_hbw + access_benefit_nhbnw + access_benefit_nhbw</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 
@@ -235,8 +291,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-        <a href="index.html" class="btn btn-neutral" title="bca4abm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="bca4abm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -262,25 +320,16 @@
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

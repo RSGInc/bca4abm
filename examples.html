@@ -1,0 +1,578 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Examples &mdash; bca4abm 0.4
+ documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Software Implementation" href="software.html" />
+    <link rel="prev" title="Getting Started" href="gettingstarted.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> bca4abm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-setup">Basic Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#abm-example">ABM Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#models">Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data">Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#outputs">Outputs</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#four-step-example">Four-Step Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Outputs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="software.html">Software Implementation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resources.html">Resources</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bca4abm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Examples</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/examples.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="examples">
+<span id="id1"></span><h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
+<p>There are two example implementations included in the project, one for an activity-based model and one for
+for a four-step (trip-based) model.  bca4abm requires model outputs for a base and a build alternative. The required model
+outputs which are input to bca4abm need to be the same in each alternative. The values
+in the model outputs can be different, but the files, the formats, the number of
+matrices, etc. all need to be the same.  The outputs need to be in open data formats - CSV and <a class="reference external" href="https://pypi.org/project/OpenMatrix">open matrix (OMX)</a>.</p>
+<div class="section" id="basic-setup">
+<h2>Basic Setup<a class="headerlink" href="#basic-setup" title="Permalink to this headline">¶</a></h2>
+<p>Each benefits calculator model has the same folder setup:</p>
+<blockquote>
+<div><ul class="simple">
+<li>configs - setting and data processor expression files for the overall tool and for each data processor</li>
+<li>data  - base and build model scenario input data tables and matrices</li>
+<li>output - an empty output folder</li>
+<li>run_bca.py - script to run the model</li>
+</ul>
+</div></blockquote>
+<p>The <code class="docutils literal notranslate"><span class="pre">configs</span></code> folder contains settings, expressions files, and other files required for specifying
+model utilities and form.  The first place to start in the <code class="docutils literal notranslate"><span class="pre">configs</span></code> folder is <code class="docutils literal notranslate"><span class="pre">settings.yaml</span></code>, which
+is the main settings file for the model run.  This file includes:</p>
+<ul>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">models</span></code> - list of model steps to run - auto demographics processor, person trips processor, etc.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">resume_after</span></code> - to resume running the data pipeline after the last successful checkpoint</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">trace_hh_id</span></code> - trace household id; comment out for no trace</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">trace_od</span></code> - trace origin, destination pair in accessibility calculation; comment out for no trace</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">chunk_size</span></code> - batch size for processing choosers</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">output_tables</span></code> - list of output tables to write to CSV</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">dump</span></code> - True or False and specifies if bca4abm should write the output intermediate CSV tables for debugging</p>
+</li>
+<li><p class="first">global variables that can be used in expressions tables and Python code such as:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">DISCOUNT_RATE</span></code> - cost discounting factor</li>
+<li><code class="docutils literal notranslate"><span class="pre">ANNUALIZATION_FACTOR</span></code> - daily to annual factor</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>Included in the <code class="docutils literal notranslate"><span class="pre">configs</span></code> folder are the model specification files that store the configuration files for each model. Also included
+in the <code class="docutils literal notranslate"><span class="pre">configs</span></code> folder is the <code class="docutils literal notranslate"><span class="pre">tables.yaml</span></code> file that stores the file names for each data processor input table,
+as well as the mapping from input column names to column names used in the expressions.  The file also specifies the input
+table file name and the name of the table used in the expressions.  All fields to be used in expressions must be in the mapping
+since the mapping defines which fields are loaded into memory.</p>
+</div>
+<div class="section" id="abm-example">
+<h2>ABM Example<a class="headerlink" href="#abm-example" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="models">
+<h3>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h3>
+<p>The models are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>demographics_processor - disaggregate person calculations</li>
+<li>person_trips_processor - disaggregate trip calculations</li>
+<li>auto_ownership_processor - disaggregate person (and household) auto ownership calculations</li>
+<li>physical_activity_processor - disaggregate person and trip physical activity calculations</li>
+<li>aggregate_trips_processor - aggregate (matrix-based) calculations</li>
+<li>link_daily_processor - daily link-based calculations</li>
+<li>link_processor - time period link-based calculations</li>
+<li>finalize_abm_results - writes results by equity group (aka COC or community of concern)</li>
+<li>write_data_dictionary - writes data pipeline data table column types for debugging</li>
+<li>write_tables - writes output files</li>
+</ul>
+</div></blockquote>
+<p>The current set of files are below.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="41%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Model</th>
+<th class="head">Specification Files</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>demographics_processor</td>
+<td><ul class="first last simple">
+<li>demographics.yaml</li>
+<li>demographics.csv</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>person_trips_processor</td>
+<td><ul class="first last simple">
+<li>person_trips.yaml</li>
+<li>person_trips.csv</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>auto_ownership_processor</td>
+<td><ul class="first last simple">
+<li>auto_ownership.yaml</li>
+<li>auto_ownership.csv</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>physical_activity_processor</td>
+<td><ul class="first last simple">
+<li>physical_activity.yaml</li>
+<li>physical_activity_person.csv</li>
+<li>physical_activity_trip.csv</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>aggregate_trips_processor</td>
+<td><ul class="first last simple">
+<li>aggregate_trips.yaml</li>
+<li>aggregate_trips.csv</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>link_daily_processor</td>
+<td><ul class="first last simple">
+<li>link_daily.yaml</li>
+<li>link_daily.csv</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>link_processor</td>
+<td><ul class="first last simple">
+<li>link.yaml</li>
+<li>link.csv</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>ABM expression file specifics:</p>
+<blockquote>
+<div><ul class="simple">
+<li>All target fields specified in the expressions file will be aggregated and written out to the summary results file.  Each summary result entry is named as follows: the two digit processor abbreviation + the target field.  For example: AO_base_auto_ownership_cost.</li>
+<li>aggregate_trips.csv references the fields in aggregate_data_manifest.csv as: <cite>base_trips, build_trips, base_ivt, build_ivt, vot, aoc_units, base_aoc, build_aoc, toll_units, base_toll, build_toll</cite></li>
+<li>auto_ownership.csv, demographics.csv, physical_activity_person.csv refer to the person table as <cite>persons</cite></li>
+<li>link.csv, link_daily.csv refer to the links table as <cite>links</cite></li>
+<li>person_trips.csv refers to the trips table as <cite>trips</cite></li>
+<li>physical_activity_trip.csv refers to the base and build trips as <cite>trips, base, build</cite></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="data">
+<h3>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">data</span></code> folder contains the input data for the base and build scenario.</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Disaggregate data</p>
+<ul class="simple">
+<li>persons.csv - base and build alternative person records</li>
+<li>base_households.csv - base alternative households</li>
+<li>build_households.csv - build alternative households</li>
+<li>basetrips_normal.csv - base alternative trips with base alternative trip level-of-service</li>
+<li>basetrips_buildlos.csv - base alternative trips with build alternative trip level-of-service</li>
+<li>buildtrips_normal.csv - build alternative trips with build alternative trip level-of-service</li>
+<li>buildtrips_baselos.csv - build alternative trips with base alternative trip level-of-service</li>
+</ul>
+</li>
+<li><p class="first">Aggregate data</p>
+<ul>
+<li><p class="first">aggregate_data_manifest.csv - aggregate markets for which to apply the aggregate calculations defined in aggregate_trips.csv - each row in the manifest contains a trip matrix, an in-vehicle time matrix, an auto operating cost matrix, and a toll matrix.  Each matrix will be loaded for the base and build alternative from the base and build data folders.  These matrices + the additional settings in each row for units, value-of-time, etc. are referenced in the expressions.</p>
+</li>
+<li><p class="first">base data folder</p>
+<blockquote>
+<div><ul class="simple">
+<li>testlos.omx - base alternative level-of-service matrices - IVT, opercost, tollcost</li>
+<li>testtrips.omx - base alternative trips</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">build data folder</p>
+<blockquote>
+<div><ul class="simple">
+<li>testlos.omx - build alternative level-of-service matrices - IVT, opercost, tollcost</li>
+<li>testtrips.omx - build alternative trips</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</li>
+<li><p class="first">Link data</p>
+<ul class="simple">
+<li>link_data_manifest.csv - link time period tables to process in link processor.  The daily like table is not specified since it is handled by a separate daily link processor.</li>
+<li>base data folder<ul>
+<li>link_ampk.csv - base alternative AM peak link records</li>
+<li>link_daily.csv - base alternative daily link records</li>
+</ul>
+</li>
+<li>build data folder<ul>
+<li>link_ampk.csv - build alternative AM peak link records</li>
+<li>link_daily.csv - build alternative daily  link records</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="outputs">
+<h3>Outputs<a class="headerlink" href="#outputs" title="Permalink to this headline">¶</a></h3>
+<p>The ABM example outputs are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>asim.log - log file</li>
+<li>data_dict.txt - pipeline table data and fields</li>
+<li>final_summary_results.csv - all calculated measures.  All target fields specified in the expressions file will be aggregated and written out to the summary results file. Each summary result entry is named as follows: the two digit processor abbreviation + the target field. For example: <cite>AO_base_auto_ownership_cost</cite>.</li>
+<li>final_checkpoints.csv - tables in the pipeline for debugging if desired</li>
+<li>final_coc_results.csv - results by community of concern</li>
+<li>final_coc_silos.csv - results by community of concern</li>
+<li>pipeline.h5.h5 - HDF5 data pipeline which contains all the data tables in pandas format and can be read into pandas with <cite>pd.read_hdf</cite>.</li>
+<li>If <cite>trace_hh_id</cite> is specified in the settings file:<ul>
+<li>auto_ownership.csv - results by person</li>
+<li>demographics.csv - results by person</li>
+<li>person_trips.csv - results by person</li>
+<li>physical_activity_persons.csv - results by person</li>
+<li>physical_activity_trips.csv - results by trip</li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="four-step-example">
+<h2>Four-Step Example<a class="headerlink" href="#four-step-example" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id2">
+<h3>Models<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>The models are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>aggregate_demographics_processor - zone-based calculations to identify equity groups</li>
+<li>aggregate_zone_processor - zone-based calculations such as auto ownership and destination choice logsums benefits</li>
+<li>aggregate_zone_benefits - sum benefits by equity group</li>
+<li>aggregate_od_processor - OD pair-based calaculations such as travel time savings</li>
+<li>link_daily_processor - daily link-based calculations such as safety and emissions</li>
+<li>write_data_dictionary - writes data pipeline data table column types for debugging</li>
+<li>write_tables - writes output files</li>
+</ul>
+</div></blockquote>
+<p>The current set of files are below.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="41%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Model</th>
+<th class="head">Specification Files</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>aggregate_demographics_processor</td>
+<td><ul class="first last simple">
+<li>aggregate_demographics.yaml</li>
+<li>aggregate_demographics.csv</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>aggregate_zone_processor</td>
+<td><ul class="first last simple">
+<li>aggregate_zone.yaml</li>
+<li>aggregate_zone.csv</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>aggregate_od_processor</td>
+<td><ul class="first last simple">
+<li>aggregate_od.yaml</li>
+<li>aggregate_od.csv</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>link_daily_processor</td>
+<td><ul class="first last simple">
+<li>link_daily.yaml</li>
+<li>link_daily.csv</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>4Step expression file specifics:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The <cite>silo</cite> column in the expressions files is used for specifying the relevant communities-of-concern (COC) for the result. An <cite>*</cite> is used to specify that the result applies to everyone.  If the result applies to just one COC, for example, low_income hhs, then the silo entry should correspond to a valid <cite>coc_silos</cite> entry in the setting file, such as <cite>coc_lowinc.</cite></li>
+<li>aggregate_demographics.csv refers to the zone table as <cite>cvals</cite></li>
+<li>aggregate_zone.csv refers to the zone table as <cite>zones</cite> and prepends <cite>base_</cite> or <cite>build_</cite></li>
+<li>aggregate_od.csv refers to the matrices specified in <cite>aggregate_od_matrices</cite> by name and appends <cite>_base</cite> or <cite>_build</cite></li>
+<li>link.csv refers to the links table specified in the <cite>link_daily_file_names</cite> by <cite>links</cite> plus the name appended</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="id3">
+<h3>Data<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">data</span></code> folder contains the input data for the base and build scenario.</p>
+<blockquote>
+<div><ul class="simple">
+<li>Link<ul>
+<li>linksMD1.csv - link MD1 period assignment results</li>
+<li>linksPM2.csv - link PM2 assignment results</li>
+</ul>
+</li>
+<li>OD<ul>
+<li>assign_mfs.omx - assignment matrices</li>
+<li>skims_mfs.omx - skims matrices</li>
+<li>mode_choice_pa.omx - mode choice production-attraction matrices</li>
+<li>parking_cost.omx - parking costs at the destination</li>
+</ul>
+</li>
+<li>Zone<ul>
+<li>mf.cval.csv - see above</li>
+<li>cocs.csv - externally defined COC share of households by zone</li>
+<li>Productions files such as ma.hboprh.csv (hbo high inc)</li>
+<li>Destination choice logsums files such as ma.hbohdcls.csv (hbo high inc)</li>
+</ul>
+</li>
+<li>zone_districts.csv - zone district scheme for district-to-district O-D processor aggregate report and for zone labels if zones non-sequential</li>
+<li>moves_2010_summer_running_rates.csv - EPA MOVES emissions rate table lookup file</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="id4">
+<h3>Outputs<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>The 4step example outputs are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>bca.log - log file</li>
+<li>data_dict.txt - pipeline table data and fields</li>
+<li>final_aggregate_results.csv - results by measure and COC, including for everyone</li>
+<li>pipeline.h5.h5 - HDF5 data pipeline which contains all the data tables in pandas format and can be read into pandas with <cite>pd.read_hdf</cite>.</li>
+<li>Intermediate outputs for debugging<ul>
+<li>final_zone_demographics.csv - demographics processor calculated fields for each zone</li>
+<li>final_aggregate_zone_summary.csv - zone processor calculated fields for each zone</li>
+<li>final_aggregate_od_zone_summary.csv - OD processor calculated fields summed to each origin zone</li>
+<li>final_aggregate_od_district_summary.csv - District-to-district OD processor calculated fields summed</li>
+<li>link_daily_results_base|build.csv - link processor calculated fields</li>
+</ul>
+</li>
+<li>If <cite>trace_od</cite> is specified in the settings file:<ul>
+<li>aggregate_demographics.csv - demographics processor calculated fields for the trace origin zone</li>
+<li>aggregate_zone.csv - zone processor calculated fields for the trace origin zone</li>
+<li>aggregate_od.csv - OD processor calculated fields for the trace OD pair</li>
+<li>link_daily_results_build.csv - build scenario link processor calculated fields for links in the trace origin or destination zone</li>
+<li>link_daily_results_base.csv - base scenario link processor calculated fields for links in the trace origin or destination zone</li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="software.html" class="btn btn-neutral float-right" title="Software Implementation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="gettingstarted.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright contributing authors
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
