@@ -1,8 +1,12 @@
 from setuptools import setup, find_packages
 setup(
     name="bca4abm",
-    version='0.3',
-    author='RSG Inc',
+    version='0.4',
+    description='Benefit Calculations for Travel Models',
+    author='contributing authors',
+    author_email='ben.stabler@rsginc.com',
+    license='BSD-3',
+    url='https://github.com/RSGInc/bca4abm',
     packages=find_packages(exclude=['*.tests']),
     install_requires=[
         'numpy >= 1.8.0',
