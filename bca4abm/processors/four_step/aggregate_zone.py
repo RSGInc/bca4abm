@@ -30,16 +30,9 @@ Maybe the ma.<purpose|income>dcls.csv files should be added to the
 mf.cval.csv before input to the bca tool?
 """
 
-
-@inject.injectable()
-def aggregate_zone_spec():
-    return bca.read_assignment_spec('aggregate_zone.csv')
-
-
 @inject.step()
 def aggregate_zone_processor(
         zones,
-        aggregate_zone_spec,
         trace_od):
     """
     zones: orca table
@@ -50,7 +43,10 @@ def aggregate_zone_processor(
 
     trace_label = 'aggregate_zone'
     model_settings = config.read_model_settings('aggregate_zone.yaml')
-
+    
+    spec_file_name = model_settings.get('spec_file_name', 'aggregate_zone.csv')
+    aggregate_zone_spec = bca.read_assignment_spec(spec_file_name)
+    
     zones_df = zones.to_frame()
 
     logger.info("Running aggregate_zone_processor with %d zones"
