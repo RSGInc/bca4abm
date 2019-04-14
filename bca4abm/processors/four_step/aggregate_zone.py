@@ -45,7 +45,7 @@ def aggregate_zone_processor(
     zones: orca table
 
     zone data for base and build scenario dat files combined into a single dataframe
-    with columns names prefixed with 'base_' or 'build_' indexed by ZONE
+    with columns names prefixed with base_ or build_ indexed by ZONE
     """
 
     trace_label = 'aggregate_zone'

@@ -1,4 +1,6 @@
 
+.. _examples:
+
 Examples
 ========
 
@@ -6,7 +8,7 @@ There are two example implementations included in the project, one for an activi
 for a four-step (trip-based) model.  bca4abm requires model outputs for a base and a build alternative. The required model 
 outputs which are input to bca4abm need to be the same in each alternative. The values 
 in the model outputs can be different, but the files, the formats, the number of 
-matrices, etc. all need to be the same.  The outputs need to be in open data formats - CSV and open matrix (OMX).
+matrices, etc. all need to be the same.  The outputs need to be in open data formats - CSV and `open matrix (OMX) <https://pypi.org/project/OpenMatrix>`_.
 
 Basic Setup
 -----------

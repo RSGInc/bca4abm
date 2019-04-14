@@ -14,8 +14,9 @@ calculating benefits based on a variety of input data types:
 bca4abm is implemented in the `ActivitySim framework <https://github.com/activitysim/activitysim>`_ and
 therefore exposes its calculations in CSV files that contain pandas and numpy 
 expressions that operate on the input data tables and matrices. This design avoids 
-having to modify Python code when making changes to the benefit calculations. 
-Users are recommended to refer to the ActivitySim documentation for more information.
+having to modify Python code when making changes to the benefit calculations.  Users are therefore strongly 
+encouraged to refer to the `ActivitySim documentation <https://activitysim.github.io/activitysim/>`_ for 
+more information about how bca4abm works and operates.
 
 Benefits
 --------
@@ -44,6 +45,8 @@ Example trip-based model benefits that have been calculated with the benefits ca
   * highway noise reductions by link
   * vehicle operating cost reductions by link
 
+Refer to the :ref:`resources` page for more information on the ABM and trip-based model example projects.  
+
 The tool is especially useful for auditing results from travel models.  The benefits calculator provides 
 a tremendous amount of information that is converted into easily understandable units such as 
 minutes and dollars.  This helps to illuminate model system components, relationships, and their sensitivities.
@@ -57,6 +60,7 @@ Contents
 
    gettingstarted
    examples
+   software
    resources
 
 Indices and tables

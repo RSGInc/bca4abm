@@ -2,7 +2,7 @@
 Getting Started
 ===============
 
-bca4abm includes an activity-based model and four-step trip-based model example to help get you started.  
+bca4abm includes activity-based model and four-step trip-based model :ref:`examples` to help get you started.  
 
 Installation
 ------------
