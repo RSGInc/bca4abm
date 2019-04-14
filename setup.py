@@ -8,6 +8,7 @@ setup(
     license='BSD-3',
     url='https://github.com/RSGInc/bca4abm',
     packages=find_packages(exclude=['*.tests']),
+    include_package_data=True,
     install_requires=[
         'numpy >= 1.8.0',
         'openmatrix >= 0.2.2',
