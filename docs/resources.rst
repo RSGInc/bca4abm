@@ -10,5 +10,7 @@ Resources
 
 3. `GitHub Repository <https://github.com/RSGInc/bca4abm>`_
 
-4. `ActivitySim <http://www.activitysim.org>`_
+4. `Oregon Metro MCE Benefits Calculator Setup <https://github.com/MetroModelingServices/metro_mce>`_
+
+5. `ActivitySim <http://www.activitysim.org>`_
 
