@@ -109,8 +109,9 @@ def physical_activity_processor(
 
     trip_trace_rows = trace_hh_id and trips_df.household_id == trace_hh_id
 
-    rows_per_chunk = physical_activity_rpc(chunk_size, trips_df, persons_df,
-                                           physical_activity_trip_spec, trace_label)
+    rows_per_chunk, effective_chunk_size = \
+        physical_activity_rpc(chunk_size, trips_df, persons_df,
+                              physical_activity_trip_spec, trace_label)
 
     logger.info("physical_activity_processor chunk_size %s rows_per_chunk %s" %
                 (chunk_size, rows_per_chunk))
@@ -179,9 +180,10 @@ def physical_activity_processor(
         result_list.append(coc_summary)
 
         chunk_trace_label = 'trace_label chunk_%s' % i
-        cum_size = chunk.log_df_size(chunk_trace_label, 'trips_chunk', trips_chunk, cum_size=None)
-        cum_size = chunk.log_df_size(chunk_trace_label, 'persons_chunk', persons_chunk, cum_size)
-        chunk.log_chunk_size(chunk_trace_label, cum_size)
+        chunk.log_open(chunk_trace_label, chunk_size, effective_chunk_size)
+        chunk.log_df(chunk_trace_label, 'trips_chunk', trips_chunk)
+        chunk.log_df(chunk_trace_label, 'persons_chunk', persons_chunk)
+        chunk.log_close(chunk_trace_label)
 
     if len(result_list) > 1:
 

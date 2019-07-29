@@ -2,7 +2,7 @@ import os.path
 
 import numpy.testing as npt
 import pandas as pd
-import orca
+from activitysim.core import inject
 
 import pandas.util.testing as pdt
 import pytest
@@ -17,11 +17,11 @@ from bca4abm.util.misc import expect_columns, missing_columns, extra_columns
 def inject_default_directories(request):
 
     parent_dir = os.path.dirname(__file__)
-    orca.add_injectable("configs_dir", os.path.join(parent_dir, 'configs'))
-    orca.add_injectable("data_dir", os.path.join(parent_dir, 'data'))
-    orca.add_injectable("output_dir", os.path.join(parent_dir, 'output'))
+    inject.add_injectable("configs_dir", os.path.join(parent_dir, 'configs'))
+    inject.add_injectable("data_dir", os.path.join(parent_dir, 'data'))
+    inject.add_injectable("output_dir", os.path.join(parent_dir, 'output'))
 
-    request.addfinalizer(orca.clear_cache)
+    request.addfinalizer(inject.clear_cache)
 
 
 def test_misc():
@@ -40,7 +40,7 @@ def test_misc():
 def test_read_csv_table():
 
     settings = {'persons': 'persons.csv'}
-    data_dir = orca.eval_variable('data_dir')
+    data_dir = inject.get_injectable('data_dir')
 
     df = bca.read_csv_table(data_dir, settings, table_name="persons",  index_col='person_id')
 
@@ -50,7 +50,7 @@ def test_read_csv_table():
 def test_read_csv_table_with_tsv():
 
     settings = {'persons': 'persons.tsv'}
-    data_dir = orca.eval_variable('data_dir')
+    data_dir = inject.get_injectable('data_dir')
 
     df = bca.read_csv_table(data_dir, settings, table_name="persons",  index_col='person_id')
 
@@ -60,7 +60,7 @@ def test_read_csv_table_with_tsv():
 def test_read_csv_table_with_txt():
 
     settings = {'persons': 'persons.txt'}
-    data_dir = orca.eval_variable('data_dir')
+    data_dir = inject.get_injectable('data_dir')
 
     df = bca.read_csv_table(data_dir, settings, table_name="persons",  index_col='person_id')
 

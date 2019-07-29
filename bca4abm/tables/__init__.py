@@ -1,9 +1,10 @@
+from __future__ import absolute_import
 # bca4abm
 # Copyright (C) 2016 RSG Inc
 # See full license in LICENSE.txt.
 
-import trips
-import households
-import persons
-import benefits
-import zones
+from . import trips
+from . import households
+from . import persons
+from . import benefits
+from . import zones

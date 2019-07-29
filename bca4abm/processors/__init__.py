@@ -1,9 +1,10 @@
+from __future__ import absolute_import
 # bca4abm
 # Copyright (C) 2016 RSG Inc
 # See full license in LICENSE.txt.
 
-import initialize
-import aggregate_trips
-import link
-import abm
-import four_step
+from . import initialize
+from . import aggregate_trips
+from . import link
+from . import abm
+from . import four_step

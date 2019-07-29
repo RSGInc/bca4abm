@@ -1,6 +1,7 @@
 # bca4abm
 # See full license in LICENSE.txt.
 
+from builtins import range
 import logging
 
 import os.path
@@ -30,6 +31,7 @@ def read_csv_file(data_dir, file_name):
 def read_zone_indexed_csv_file(data_dir, file_name, zone_aliases, zone_ids_index):
 
     fpath = os.path.join(data_dir, file_name)
+    logger.info("read zone indexed csv file: " + fpath)
 
     df = bca.read_csv_or_tsv(fpath, header=0, comment='#').rename(columns=zone_aliases)
 
@@ -46,7 +48,7 @@ def read_zone_indexed_csv_file(data_dir, file_name, zone_aliases, zone_ids_index
         df.index = df.index + 1
 
         if 'zone' in df:
-            assert (df.index.values == range(1, len(df) + 1)).all()
+            assert (df.index.values == list(range(1, len(df) + 1))).all()
 
     df.index.name = 'ZONE'
 
@@ -90,7 +92,7 @@ def check_zone_index(df, zone_ids):
     if zone_ids is not None:
         expected_index = zone_ids.values
     else:
-        expected_index = range(1, len(df) + 1)
+        expected_index = list(range(1, len(df) + 1))
     assert (df.index.values == expected_index).all()
     assert df.index.name == 'ZONE'
 

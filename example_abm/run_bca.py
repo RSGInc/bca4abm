@@ -1,3 +1,4 @@
+from __future__ import print_function
 # bca4abm
 # Copyright (C) 2016 RSG Inc
 # See full license in LICENSE.txt.
@@ -30,14 +31,14 @@ parent_dir = os.path.dirname(__file__)
 handle_standard_args()
 
 tracing.config_logger()
-tracing.delete_csv_files(output_dir=inject.get_injectable('output_dir'))
+tracing.delete_csv_files()  # only modifies output_dir
 
 warnings.simplefilter("always")
 
 logging.captureWarnings(capture=True)
 
 old_settings = np.seterr(divide='raise', over='raise', invalid='raise', under='ignore')
-print "numpy.geterr: %s" % np.geterr()
+print("numpy.geterr: %s" % np.geterr())
 
 
 t0 = tracing.print_elapsed_time()
@@ -50,7 +51,7 @@ MODELS = setting('models')
 resume_after = setting('resume_after', None)
 
 if resume_after:
-    print "resume_after", resume_after
+    print("resume_after", resume_after)
 
 
 pipeline.run(models=MODELS, resume_after=resume_after)
@@ -59,5 +60,3 @@ pipeline.run(models=MODELS, resume_after=resume_after)
 pipeline.close_pipeline()
 
 t0 = tracing.print_elapsed_time("all models", t0)
-
-

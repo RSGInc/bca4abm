@@ -3,7 +3,6 @@ import os.path
 import logging
 import numpy.testing as npt
 import pandas as pd
-import orca
 
 import pytest
 import yaml
@@ -18,7 +17,7 @@ from bca4abm import bca4abm as bca
 
 
 def teardown_function(func):
-    orca.clear_cache()
+    inject.clear_cache()
     inject.reinject_decorated_tables()
 
 
@@ -35,13 +34,13 @@ def close_handlers():
 def inject_settings(chunk_size=None, trace_hh_id=None, trace_od=None):
 
     configs_dir = os.path.join(os.path.dirname(__file__), 'configs')
-    orca.add_injectable("configs_dir", configs_dir)
+    inject.add_injectable("configs_dir", configs_dir)
 
     output_dir = os.path.join(os.path.dirname(__file__), 'output')
-    orca.add_injectable("output_dir", output_dir)
+    inject.add_injectable("output_dir", output_dir)
 
     data_dir = os.path.join(os.path.dirname(__file__), 'data')
-    orca.add_injectable("data_dir", data_dir)
+    inject.add_injectable("data_dir", data_dir)
 
     with open(os.path.join(configs_dir, 'settings.yaml')) as f:
         settings = yaml.load(f)
@@ -52,7 +51,7 @@ def inject_settings(chunk_size=None, trace_hh_id=None, trace_od=None):
         if trace_od is not None:
             settings['trace_od'] = trace_od
 
-    orca.add_injectable("settings", settings)
+    inject.add_injectable("settings", settings)
 
     return settings
 
@@ -64,7 +63,7 @@ def run_abm(models, resume_after=None, chunk_size=None, trace_hh_id=None, trace_
         trace_hh_id=trace_hh_id,
         trace_od=trace_od)
 
-    orca.clear_cache()
+    inject.clear_cache()
 
     tracing.config_logger()
 

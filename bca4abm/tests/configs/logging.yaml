@@ -1,6 +1,6 @@
 # Config for logging
 # ------------------
-# See http://docs.python.org/2.7/library/logging.config.html#configuration-dictionary-schema
+# See http://docs.python.org/3.7/library/logging.config.html#configuration-dictionary-schema
 
 logging:
   version: 1
@@ -9,18 +9,18 @@ logging:
 
   # Configuring the default (root) logger is highly recommended
   root:
-    level: !!python/name:logging.NOTSET
+    level: NOTSET
     handlers: [console]
 
   loggers:
 
     bca4abm:
-      level: !!python/name:logging.DEBUG
+      level: DEBUG
       handlers: [console, logfile]
       propagate: false
 
     orca:
-      level: !!python/name:logging.INFO
+      level: INFO
       handlers: [console, logfile]
       propagate: false
 
@@ -28,26 +28,26 @@ logging:
 
     logfile:
       class: logging.FileHandler
-      filename: !!python/object/apply:bca4abm.tracing.log_file_path ['bca.log']
+      filename: !!python/object/apply:bca4abm.config.log_file_path ['bca.log']
       mode: w
       formatter: fileFormatter
-      level: !!python/name:logging.NOTSET
+      level: NOTSET
 
     console:
       class: logging.StreamHandler
       stream: ext://sys.stdout
       formatter: simpleFormatter
-      #level: !!python/name:logging.NOTSET
-      level: !!python/name:logging.WARN
+      #level: NOTSET
+      level: WARN
 
   formatters:
 
     simpleFormatter:
-      class: !!python/name:logging.Formatter
+      class: logging.Formatter
       format: '%(levelname)s - %(name)s - %(message)s'
       datefmt: '%d/%m/%Y %H:%M:%S'
 
     fileFormatter:
-      class: !!python/name:logging.Formatter
+      class: logging.Formatter
       format: '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
       datefmt: '%d/%m/%Y %H:%M:%S'

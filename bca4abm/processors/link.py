@@ -49,7 +49,7 @@ def read_csv_file(data_dir, file_name, column_map=None):
     fpath = os.path.join(data_dir, file_name)
 
     if column_map:
-        usecols = column_map.keys()
+        usecols = list(column_map.keys())
         # print "read_bca_table usecols: ", usecols
         # FIXME - should we allow comment lines?
         df = bca.read_csv_or_tsv(fpath, header=0, usecols=usecols)
@@ -76,7 +76,7 @@ def add_tables_to_locals(data_dir, model_settings, locals_dict):
     if tables_tag in model_settings:
 
         file_list = model_settings.get(tables_tag)
-        for var_name, filename in file_list.iteritems():
+        for var_name, filename in list(file_list.items()):
 
             # print "add_tables_to_locals %s = %s" % (var_name, filename)
 
@@ -109,7 +109,7 @@ def eval_link_spec(link_spec, link_file_names, data_dir,
         link_data_subdir = 'base-data' if scenario == 'base' else 'build-data'
 
         df_list = []
-        for suffix, link_file_name in link_file_names.iteritems():
+        for suffix, link_file_name in list(link_file_names.items()):
 
             df = read_csv_file(data_dir=os.path.join(data_dir, link_data_subdir),
                                file_name=link_file_name,
@@ -150,6 +150,10 @@ def eval_link_spec(link_spec, link_file_names, data_dir,
         results[scenario] = summary
 
         if trace_results is not None:
+            # FIXME: manually setting df.index.name to prevent
+            # activitysim.tracing.write_df_csv() from attempting to reset the index.
+            # write_df_csv() should be able to handle a multi-index dataframe.
+            trace_results.index.name = trace_results.index.names[0]
             tracing.write_csv(trace_results,
                               file_name="%s_results_%s" % (trace_tag, scenario),
                               index_label='index',

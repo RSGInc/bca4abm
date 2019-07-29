@@ -5,16 +5,15 @@ import pandas as pd
 import pandas.util.testing as pdt
 import pytest
 
-import orca
 from activitysim.core import inject
 from activitysim.core import config
 
 
-# orca injectables complicate matters because the decorators are executed at module load time
+# inject injectables complicate matters because the decorators are executed at module load time
 # and since py.test collects modules and loads them at the start of a run
 # if a test method does something that has a lasting side-effect, then that side effect
 # will carry over not just to subsequent test functions, but to subsequently called modules
-# for instance, columns added with add_column will remain attached to orca tables
+# for instance, columns added with add_column will remain attached to inject tables
 # pytest-xdist allows us to run py.test with the --boxed option which runs every function
 # with a brand new python interpreter
 # py.test --boxed --cov bca4abm
@@ -33,7 +32,7 @@ def inject_default_directories(request):
     inject.add_injectable("data_dir", os.path.join(parent_dir, 'data'))
     inject.add_injectable("output_dir", os.path.join(parent_dir, 'output'))
 
-    request.addfinalizer(orca.clear_cache)
+    request.addfinalizer(inject.clear_cache)
 
 
 def test_read_persons_table():
@@ -44,7 +43,7 @@ def test_read_persons_table():
     # expect all of and only the columns specified by persons_column_map values
     persons = inject.get_table('persons').to_frame()
     assert expect_columns(persons,
-                          table_settings['persons_column_map'].values())
+                          list(table_settings['persons_column_map'].values()))
 
     assert persons.shape[0] == 27
 
@@ -55,10 +54,10 @@ def test_read_households_table():
 
     households = inject.get_table('households').to_frame()
     assert not missing_columns(households,
-                               table_settings['base_households_column_map'].values())
+                               list(table_settings['base_households_column_map'].values()))
 
     assert not missing_columns(households,
-                               table_settings['build_households_column_map'].values())
+                               list(table_settings['build_households_column_map'].values()))
 
     assert households.shape[0] == 9
 

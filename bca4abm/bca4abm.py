@@ -1,7 +1,10 @@
+from __future__ import print_function
 # bca4abm
 # Copyright (C) 2016 RSG Inc
 # See full license in LICENSE.txt.
 
+from builtins import zip
+from builtins import str
 import logging
 
 import pandas as pd
@@ -45,7 +48,7 @@ def read_csv_table(data_dir, settings, table_name, index_col=None):
     column_map = table_name + "_column_map"
 
     if column_map in settings:
-        usecols = settings[column_map].keys()
+        usecols = list(settings[column_map].keys())
         # print "read_bca_table usecols: ", usecols
         # FIXME - should we allow comment lines?
         df = read_csv_or_tsv(fpath, header=0, usecols=usecols, comment='#')
@@ -113,6 +116,8 @@ def read_assignment_spec(fname):
 # generator for chunked iteration over dataframe by chunk_size
 def chunked_df(df, rows_per_chunk, trace_rows=None):
 
+    logger.debug("rows_per_chunk ", rows_per_chunk)
+
     assert df.shape[0] > 0
 
     # generator to iterate over choosers in chunk_size chunks
@@ -153,15 +158,26 @@ def chunked_df_by_chunk_id(df, trace_rows, rows_per_chunk, chunk_id_col='chunk_i
 
 
 def calc_rows_per_chunk(chunk_size, df, spec, extra_columns=0, trace_label=None):
-    """
-    simple rows_per_chunk calculator for chunking calls to assign_variables
+    """simple rows_per_chunk calculator for chunking calls to assign_variables
+
+    ActivitySim's chunk.rows_per_chunk method handles the main logic, including
+    a missing/zero chunk size
+
+    Parameters
+    ----------
+    chunk_size : int
+    df : pandas DataFrame
+    spec : pandas DataFrame
+    extra_columns : int, optional
+    trace_label : str, optional
+
+    Returns
+    -------
+    num_rows : int
+    effective_chunk_size : int
     """
 
     num_rows = len(df.index)
-
-    # if not chunking, then return num_choosers
-    if chunk_size == 0:
-        return num_rows
 
     df_row_size = len(df.columns)
 
@@ -209,13 +225,13 @@ def eval_and_sum(assignment_expressions, df, locals_dict,
     if group_by_column_names is None:
         group_by_column_names = []
 
-    rows_per_chunk = \
+    rows_per_chunk, effective_chunk_size = \
         calc_rows_per_chunk(chunk_size, df, assignment_expressions,
                             extra_columns=len(group_by_column_names),
                             trace_label='eval_and_sum')
 
     logger.info("eval_and_sum chunk_size %s rows_per_chunk %s df rows %s" %
-                (chunk_size, rows_per_chunk, df.shape[0]))
+                (effective_chunk_size, rows_per_chunk, df.shape[0]))
 
     summary = None
     result_list = []
@@ -255,9 +271,10 @@ def eval_and_sum(assignment_expressions, df, locals_dict,
 
         # note: chunk size will log low if there are more spec temp vars than extra_columns
         trace_label = 'eval_and_sum chunk_%s' % i
-        cum_size = chunk.log_df_size(trace_label, 'df_chunk', df_chunk, cum_size=None)
-        cum_size = chunk.log_df_size(trace_label, 'assigned_chunk', assigned_chunk, cum_size)
-        chunk.log_chunk_size(trace_label, cum_size)
+        chunk.log_open(trace_label, chunk_size, effective_chunk_size)
+        chunk.log_df(trace_label, 'df_chunk', df_chunk)
+        chunk.log_df(trace_label, 'assigned_chunk', assigned_chunk)
+        chunk.log_close(trace_label)
 
     assert result_list
 

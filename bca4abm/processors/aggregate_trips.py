@@ -43,7 +43,7 @@ def read_aggregate_trips_manifest(data_dir, model_settings):
     column_map = "aggregate_trips_manifest_column_map"
     if column_map in model_settings:
         manifest.rename(columns=model_settings[column_map], inplace=True)
-        assert not missing_columns(manifest, model_settings[column_map].values())
+        assert not missing_columns(manifest, list(model_settings[column_map].values()))
 
     return manifest
 

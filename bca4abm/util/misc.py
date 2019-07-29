@@ -1,6 +1,8 @@
+from __future__ import print_function
 # bca4abm
 # See full license in LICENSE.txt.
 
+from builtins import zip
 import logging
 
 import pandas as pd
@@ -93,10 +95,10 @@ def expect_columns(table, expected_column_names):
     extra_column_names = extra_columns(table, expected_column_names)
 
     for c in missing_column_names:
-        print "expect_columns MISSING expected column %s" % c
+        print("expect_columns MISSING expected column %s" % c)
 
     for c in extra_column_names:
-        print "expect_columns FOUND unexpected column %s" % c
+        print("expect_columns FOUND unexpected column %s" % c)
 
     if missing_column_names or extra_column_names:
         missing = ", ".join(missing_column_names)
@@ -125,7 +127,7 @@ def add_aggregate_results(results, spec, source='', zonal=True):
 
     # target can appear more than once, so this ensures we only use the final one
     seen = set()
-    for e in reversed(zip(spec.target, spec.silos, spec.description)):
+    for e in reversed(list(zip(spec.target, spec.silos, spec.description))):
         target, silos, description = e
 
         # nothing to do if we already handled a later occurrence of this same target

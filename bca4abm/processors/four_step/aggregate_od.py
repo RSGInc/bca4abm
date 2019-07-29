@@ -1,9 +1,11 @@
 # bca4abm
 # See full license in LICENSE.txt.
 
+from builtins import object
 import logging
 
 import os
+import psutil
 import re
 import pandas as pd
 import numpy as np
@@ -18,7 +20,6 @@ from activitysim.core import inject
 from activitysim.core import tracing
 from activitysim.core import pipeline
 from activitysim.core import assign
-from activitysim.core.util import memory_info
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,16 @@ OD_aggregate_manifest.csv file tells this processor what data it can
 use and how to reference it.  The following input data tables are required:
 assign_mfs.omx, inputs and results of the zone aggregate processor, and skims_mfs.omx.
 """
+
+
+def memory_info():
+
+    def GB(bytes):
+        gb = (bytes / (1024 * 1024 * 1024.0))
+        return "%s GB" % (round(gb, 2), )
+
+    mi = psutil.Process().memory_full_info()
+    return "memory_info: vms: %s rss: %s uss: %s" % (GB(mi.vms), GB(mi.rss), GB(mi.uss))
 
 
 class ODSkims(object):
@@ -122,17 +133,17 @@ class ODSkims(object):
     def log_skim_usage(self):
 
         num_skims = len(self.usage)
-        num_used = (np.asanyarray(self.usage.values()) > 0).sum()
+        num_used = (np.asanyarray(list(self.usage.values())) > 0).sum()
         num_unused = num_skims - num_used
 
-        avg_used = (np.asanyarray(self.usage.values())).sum() / float(num_used or 1)
-        max_used = np.asanyarray(self.usage.values()).max()
+        avg_used = (np.asanyarray(list(self.usage.values()))).sum() / float(num_used or 1)
+        max_used = np.asanyarray(list(self.usage.values())).max()
 
         logger.debug("  %s (cached=%s) %s skims in omx file %s used (%s avg %s max) %s unused" %
                      (self.name, self.cache_skims,
                       num_skims, num_used, avg_used, max_used, num_unused))
 
-        for key, n in self.usage.iteritems():
+        for key, n in self.usage.items():
             logger.info("%s.%s %s" % (self.name, key, n))
             # if n > 4:
             #     logger.info("%s.%s %s" % (self.name, key, n))
@@ -152,7 +163,7 @@ def create_skim_locals_dict(model_settings, data_dir, zones_df, cache_skims):
         raise RuntimeError("No list of aggregate_od_matrices found in model_settings")
 
     local_od_skims = {}
-    for local_name, omx_file_name in aggregate_od_matrices.iteritems():
+    for local_name, omx_file_name in aggregate_od_matrices.items():
 
         for scenario in ['base', 'build']:
             full_local_name = '_'.join([local_name, scenario])
@@ -261,7 +272,7 @@ def aggregate_od_processor(
 
     logger.debug('%s mem after assign_variables, %s' % (trace_label, memory_info(),))
 
-    for local_name, od_skims in local_skims.iteritems():
+    for local_name, od_skims in local_skims.items():
         logger.debug("closing %s" % local_name)
         od_skims.log_skim_usage()
         od_skims.close()

@@ -2,28 +2,22 @@
 Getting Started
 ===============
 
-bca4abm includes activity-based model and four-step trip-based model :ref:`examples` to help get you started.  
+bca4abm includes activity-based model and four-step trip-based model :ref:`examples` to help get you started.
 
 Installation
 ------------
 
-* Install `Anaconda Python 2.7 <https://www.continuum.io/downloads>`_, which includes a number of required Python packages.
+* Install `Anaconda 64bit Python 3 <https://www.anaconda.com/distribution/>`__, which includes a number of required Python packages.
 * Create and activate an Anaconda environment (i.e. a Python install just for this project).
 
-:: 
+::
 
-  conda create -n bca4abmtest python=2.7
+  conda create -n bca4abmtest python=3.7
   activate bca4abmtest
-
-* Get and install other required libraries from the `Python Package Index <https://pypi.python.org/pypi>`_
-
-:: 
-
-  pip install orca toolz zbox openmatrix activitysim
 
 * Get and install the bca4abm package from `GitHub <https://github.com/RSGInc/bca4abm>`_
 
-:: 
+::
 
   pip install https://github.com/RSGInc/bca4abm/zipball/master
 
@@ -33,7 +27,7 @@ Running the Model
 
 * Activate the conda Python environment
 
-:: 
+::
 
   activate bca4abmtest
 
@@ -60,13 +54,13 @@ Expressions
 
 To help illustrate how the benefits calculator works, an example set of expressions for calculating zone benefits is below.  Each input is a zone data table with
 each row a zone and each column a zone attribute.  The example processes the
-base and build home-based-other productions by zone, as well as the base and build mode choice logsum, and calculates 
-an accessibility benefit measure.  The idea here is that improvements in multi-modal accessibility (i.e. the logsum) between the 
-based and build scenario results in increased accessibility or additional travel options.  The accessibility benefit is calculated 
+base and build home-based-other productions by zone, as well as the base and build mode choice logsum, and calculates
+an accessibility benefit measure.  The idea here is that improvements in multi-modal accessibility (i.e. the logsum) between the
+based and build scenario results in increased accessibility or additional travel options.  The accessibility benefit is calculated
 using the rule-of-half.  As a result, the calculation is half the difference in the productions
-times the difference in the logsums divided by utilities per minute for home-based-other trips times the value-of-time for 
+times the difference in the logsums divided by utilities per minute for home-based-other trips times the value-of-time for
 home-based-other trips times the annual discount rate times a daily to annual factor.  The result is monetized benefits for increases
-in accessibility by zone.  
+in accessibility by zone.
 
 +-------------------------------------------+------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 |  Description                              | Target                 | Expression                                                                                                                                 |
@@ -76,7 +70,7 @@ in accessibility by zone.
 |  hbo productions in base scenario         |  base_prod_hbo         |  zones.base_hboprl + zones.base_hboprm + zones.base_hboprh                                                                                 |
 +-------------------------------------------+------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 |  hbo productions in build scenario        |  build_prod_hbo        |  zones.build_hboprl + zones.build_hboprm + zones.build_hboprh                                                                              |
-+-------------------------------------------+------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+ 
++-------------------------------------------+------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 |  hbo logsum in base scenario              |  base_ls_hbo           |  zones.base_hbodcls                                                                                                                        |
 +-------------------------------------------+------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 |  hbo logsum in build scenario             |  build_ls_hbo          |  zones.build_hbodcls                                                                                                                       |

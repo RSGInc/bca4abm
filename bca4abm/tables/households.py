@@ -1,6 +1,7 @@
 # bca4abm
 # See full license in LICENSE.txt.
 
+from builtins import range
 import logging
 
 import os.path
@@ -37,7 +38,7 @@ def households(data_dir, settings):
 
     # - assign chunk_ids
     assert 'chunk_id' not in households.columns
-    households['chunk_id'] = pd.Series(range(len(households)), households.index)
+    households['chunk_id'] = pd.Series(list(range(len(households))), households.index)
 
     return households
 
