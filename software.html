@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Software Implementation &mdash; bca4abm 0.4
+  <title>Software Implementation &mdash; bca4abm 0.5
  documentation</title>
   
 
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.4
+                0.5
 
               </div>
             
@@ -242,6 +242,36 @@ being implemented in the ActivitySim framework means:</p>
 <dt id="bca4abm.bca4abm.calc_rows_per_chunk">
 <code class="descclassname">bca4abm.bca4abm.</code><code class="descname">calc_rows_per_chunk</code><span class="sig-paren">(</span><em>chunk_size</em>, <em>df</em>, <em>spec</em>, <em>extra_columns=0</em>, <em>trace_label=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.calc_rows_per_chunk" title="Permalink to this definition">¶</a></dt>
 <dd><p>simple rows_per_chunk calculator for chunking calls to assign_variables</p>
+<p>ActivitySim’s chunk.rows_per_chunk method handles the main logic, including
+a missing/zero chunk size</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>chunk_size</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd></dd>
+<dt><strong>df</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
+<dd></dd>
+<dt><strong>spec</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
+<dd></dd>
+<dt><strong>extra_columns</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span></dt>
+<dd></dd>
+<dt><strong>trace_label</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>num_rows</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd></dd>
+<dt><strong>effective_chunk_size</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -557,6 +587,7 @@ assign_mfs.omx, inputs and results of the zone aggregate processor, and skims_mf
 <blockquote>
 <div><ul class="simple">
 <li>v0.4 - first release</li>
+<li>v0.5 - add Python 3.5+ support</li>
 </ul>
 </div></blockquote>
 </div>
