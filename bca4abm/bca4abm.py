@@ -28,7 +28,13 @@ def read_csv_or_tsv(fpath, header='infer', usecols=None, comment=None):
     else:
         sep = ','
 
-    return pd.read_csv(fpath, sep=sep, header=header, usecols=usecols, comment=comment)
+    try:
+        return pd.read_csv(fpath, sep=sep, header=header, usecols=usecols, comment=comment)
+    except UnicodeDecodeError:
+        logger.warning(
+            "Reading %s with default utf-8 encoding failed, trying cp1252 instead", fpath)
+        return pd.read_csv(fpath, sep=sep, header=header, usecols=usecols, comment=comment,
+                           encoding='cp1252')
 
 
 def read_csv_table(data_dir, settings, table_name, index_col=None):
@@ -91,7 +97,7 @@ def read_assignment_spec(fname):
     configs_dir = inject.get_injectable('configs_dir')
     fpath = os.path.join(configs_dir, fname)
 
-    cfg = pd.read_csv(fpath, comment='#')
+    cfg = read_csv_or_tsv(fpath, comment='#')
 
     # drop null expressions
     # cfg = cfg.dropna(subset=[expression_name])
