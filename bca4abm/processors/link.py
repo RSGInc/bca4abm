@@ -90,7 +90,7 @@ def add_tables_to_locals(data_dir, model_settings, locals_dict):
 
 def eval_link_spec(link_spec, link_file_names, data_dir,
                    link_file_column_map, link_index_fields,
-                   model_settings, chunk_size, trace_tag=None, trace_od=None):
+                   model_settings, trace_tag=None, trace_od=None):
 
     # accept a single string as well as a dict of {suffix: filename}
     if isinstance(link_file_names, str):
@@ -144,7 +144,6 @@ def eval_link_spec(link_spec, link_file_names, data_dir,
                              links_df,
                              locals_dict,
                              df_alias='links',
-                             chunk_size=chunk_size,
                              trace_rows=trace_rows)
 
         results[scenario] = summary
@@ -171,9 +170,7 @@ def eval_link_spec(link_spec, link_file_names, data_dir,
 
 
 @inject.step()
-def link_processor(
-        link_spec,
-        chunk_size, data_dir):
+def link_processor(link_spec, data_dir):
 
     trace_label = 'link'
     model_settings = config.read_model_settings('link.yaml')
@@ -191,8 +188,7 @@ def link_processor(
                                      data_dir,
                                      model_settings.get('link_table_column_map', None),
                                      link_index_fields,
-                                     model_settings=model_settings,
-                                     chunk_size=chunk_size)
+                                     model_settings=model_settings)
 
         assigned_column_names = row_results.columns.values
         row_results.insert(loc=0, column='description', value=row.description)
@@ -210,9 +206,7 @@ def link_processor(
 
 
 @inject.step()
-def link_daily_processor(
-        link_daily_spec,
-        chunk_size, data_dir, trace_od):
+def link_daily_processor(link_daily_spec, data_dir, trace_od):
 
     trace_label = 'link_daily'
     model_settings = config.read_model_settings('link_daily.yaml')
@@ -230,7 +224,6 @@ def link_daily_processor(
                              model_settings.get('link_daily_table_column_map', None),
                              model_settings.get('link_daily_index_fields', None),
                              model_settings=model_settings,
-                             chunk_size=chunk_size,
                              trace_tag=trace_label,
                              trace_od=trace_od)
 

@@ -122,8 +122,6 @@ def read_assignment_spec(fname):
 # generator for chunked iteration over dataframe by chunk_size
 def chunked_df(df, rows_per_chunk, trace_rows=None):
 
-    logger.debug("rows_per_chunk ", rows_per_chunk)
-
     assert df.shape[0] > 0
 
     # generator to iterate over choosers in chunk_size chunks
