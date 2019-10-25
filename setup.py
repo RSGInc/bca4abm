@@ -10,13 +10,13 @@ setup(
     packages=find_packages(exclude=['*.tests']),
     include_package_data=True,
     install_requires=[
-        'numpy >= 1.8.0',
-        'openmatrix >= 0.2.2',
-        'pandas >= 0.23.0',
+        'numpy >= 1.8.0, <1.16',
+        'openmatrix >= 0.2.2, <0.3.4.2',
+        'pandas >= 0.23.0, <0.25',
         'pyyaml >= 3.0, <5.1',
-        'tables >= 3.1.0',
-        'toolz >= 0.7',
-        'zbox >= 1.2',
+        'tables >= 3.1.0, <3.5',
+        'toolz == 0.8.1',
+        'zbox == 1.2',
         'activitysim == 0.7',
     ]
 )
