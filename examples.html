@@ -183,35 +183,28 @@ matrices, etc. all need to be the same.  The outputs need to be in open data for
 <p>Each benefits calculator model has the same folder setup:</p>
 <blockquote>
 <div><ul class="simple">
-<li>configs - setting and data processor expression files for the overall tool and for each data processor</li>
-<li>data  - base and build model scenario input data tables and matrices</li>
-<li>output - an empty output folder</li>
-<li>run_bca.py - script to run the model</li>
+<li><p>configs - setting and data processor expression files for the overall tool and for each data processor</p></li>
+<li><p>data  - base and build model scenario input data tables and matrices</p></li>
+<li><p>output - an empty output folder</p></li>
+<li><p>run_bca.py - script to run the model</p></li>
 </ul>
 </div></blockquote>
 <p>The <code class="docutils literal notranslate"><span class="pre">configs</span></code> folder contains settings, expressions files, and other files required for specifying
 model utilities and form.  The first place to start in the <code class="docutils literal notranslate"><span class="pre">configs</span></code> folder is <code class="docutils literal notranslate"><span class="pre">settings.yaml</span></code>, which
 is the main settings file for the model run.  This file includes:</p>
 <ul>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">models</span></code> - list of model steps to run - auto demographics processor, person trips processor, etc.</p>
-</li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">resume_after</span></code> - to resume running the data pipeline after the last successful checkpoint</p>
-</li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">trace_hh_id</span></code> - trace household id; comment out for no trace</p>
-</li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">trace_od</span></code> - trace origin, destination pair in accessibility calculation; comment out for no trace</p>
-</li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">chunk_size</span></code> - batch size for processing choosers</p>
-</li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">output_tables</span></code> - list of output tables to write to CSV</p>
-</li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">dump</span></code> - True or False and specifies if bca4abm should write the output intermediate CSV tables for debugging</p>
-</li>
-<li><p class="first">global variables that can be used in expressions tables and Python code such as:</p>
+<li><p><code class="docutils literal notranslate"><span class="pre">models</span></code> - list of model steps to run - auto demographics processor, person trips processor, etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">resume_after</span></code> - to resume running the data pipeline after the last successful checkpoint</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trace_hh_id</span></code> - trace household id; comment out for no trace</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trace_od</span></code> - trace origin, destination pair in accessibility calculation; comment out for no trace</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chunk_size</span></code> - batch size for processing choosers</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_tables</span></code> - list of output tables to write to CSV</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dump</span></code> - True or False and specifies if bca4abm should write the output intermediate CSV tables for debugging</p></li>
+<li><p>global variables that can be used in expressions tables and Python code such as:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">DISCOUNT_RATE</span></code> - cost discounting factor</li>
-<li><code class="docutils literal notranslate"><span class="pre">ANNUALIZATION_FACTOR</span></code> - daily to annual factor</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DISCOUNT_RATE</span></code> - cost discounting factor</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ANNUALIZATION_FACTOR</span></code> - daily to annual factor</p></li>
 </ul>
 </div></blockquote>
 </li>
@@ -229,77 +222,77 @@ since the mapping defines which fields are loaded into memory.</p>
 <p>The models are:</p>
 <blockquote>
 <div><ul class="simple">
-<li>demographics_processor - disaggregate person calculations</li>
-<li>person_trips_processor - disaggregate trip calculations</li>
-<li>auto_ownership_processor - disaggregate person (and household) auto ownership calculations</li>
-<li>physical_activity_processor - disaggregate person and trip physical activity calculations</li>
-<li>aggregate_trips_processor - aggregate (matrix-based) calculations</li>
-<li>link_daily_processor - daily link-based calculations</li>
-<li>link_processor - time period link-based calculations</li>
-<li>finalize_abm_results - writes results by equity group (aka COC or community of concern)</li>
-<li>write_data_dictionary - writes data pipeline data table column types for debugging</li>
-<li>write_tables - writes output files</li>
+<li><p>demographics_processor - disaggregate person calculations</p></li>
+<li><p>person_trips_processor - disaggregate trip calculations</p></li>
+<li><p>auto_ownership_processor - disaggregate person (and household) auto ownership calculations</p></li>
+<li><p>physical_activity_processor - disaggregate person and trip physical activity calculations</p></li>
+<li><p>aggregate_trips_processor - aggregate (matrix-based) calculations</p></li>
+<li><p>link_daily_processor - daily link-based calculations</p></li>
+<li><p>link_processor - time period link-based calculations</p></li>
+<li><p>finalize_abm_results - writes results by equity group (aka COC or community of concern)</p></li>
+<li><p>write_data_dictionary - writes data pipeline data table column types for debugging</p></li>
+<li><p>write_tables - writes output files</p></li>
 </ul>
 </div></blockquote>
 <p>The current set of files are below.</p>
-<table border="1" class="docutils">
+<table class="docutils align-default">
 <colgroup>
-<col width="41%" />
-<col width="59%" />
+<col style="width: 41%" />
+<col style="width: 59%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Model</th>
-<th class="head">Specification Files</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>Model</p></th>
+<th class="head"><p>Specification Files</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td>demographics_processor</td>
-<td><ul class="first last simple">
-<li>demographics.yaml</li>
-<li>demographics.csv</li>
+<tbody>
+<tr class="row-even"><td><p>demographics_processor</p></td>
+<td><ul class="simple">
+<li><p>demographics.yaml</p></li>
+<li><p>demographics.csv</p></li>
 </ul>
 </td>
 </tr>
-<tr class="row-odd"><td>person_trips_processor</td>
-<td><ul class="first last simple">
-<li>person_trips.yaml</li>
-<li>person_trips.csv</li>
+<tr class="row-odd"><td><p>person_trips_processor</p></td>
+<td><ul class="simple">
+<li><p>person_trips.yaml</p></li>
+<li><p>person_trips.csv</p></li>
 </ul>
 </td>
 </tr>
-<tr class="row-even"><td>auto_ownership_processor</td>
-<td><ul class="first last simple">
-<li>auto_ownership.yaml</li>
-<li>auto_ownership.csv</li>
+<tr class="row-even"><td><p>auto_ownership_processor</p></td>
+<td><ul class="simple">
+<li><p>auto_ownership.yaml</p></li>
+<li><p>auto_ownership.csv</p></li>
 </ul>
 </td>
 </tr>
-<tr class="row-odd"><td>physical_activity_processor</td>
-<td><ul class="first last simple">
-<li>physical_activity.yaml</li>
-<li>physical_activity_person.csv</li>
-<li>physical_activity_trip.csv</li>
+<tr class="row-odd"><td><p>physical_activity_processor</p></td>
+<td><ul class="simple">
+<li><p>physical_activity.yaml</p></li>
+<li><p>physical_activity_person.csv</p></li>
+<li><p>physical_activity_trip.csv</p></li>
 </ul>
 </td>
 </tr>
-<tr class="row-even"><td>aggregate_trips_processor</td>
-<td><ul class="first last simple">
-<li>aggregate_trips.yaml</li>
-<li>aggregate_trips.csv</li>
+<tr class="row-even"><td><p>aggregate_trips_processor</p></td>
+<td><ul class="simple">
+<li><p>aggregate_trips.yaml</p></li>
+<li><p>aggregate_trips.csv</p></li>
 </ul>
 </td>
 </tr>
-<tr class="row-odd"><td>link_daily_processor</td>
-<td><ul class="first last simple">
-<li>link_daily.yaml</li>
-<li>link_daily.csv</li>
+<tr class="row-odd"><td><p>link_daily_processor</p></td>
+<td><ul class="simple">
+<li><p>link_daily.yaml</p></li>
+<li><p>link_daily.csv</p></li>
 </ul>
 </td>
 </tr>
-<tr class="row-even"><td>link_processor</td>
-<td><ul class="first last simple">
-<li>link.yaml</li>
-<li>link.csv</li>
+<tr class="row-even"><td><p>link_processor</p></td>
+<td><ul class="simple">
+<li><p>link.yaml</p></li>
+<li><p>link.csv</p></li>
 </ul>
 </td>
 </tr>
@@ -308,12 +301,12 @@ since the mapping defines which fields are loaded into memory.</p>
 <p>ABM expression file specifics:</p>
 <blockquote>
 <div><ul class="simple">
-<li>All target fields specified in the expressions file will be aggregated and written out to the summary results file.  Each summary result entry is named as follows: the two digit processor abbreviation + the target field.  For example: AO_base_auto_ownership_cost.</li>
-<li>aggregate_trips.csv references the fields in aggregate_data_manifest.csv as: <cite>base_trips, build_trips, base_ivt, build_ivt, vot, aoc_units, base_aoc, build_aoc, toll_units, base_toll, build_toll</cite></li>
-<li>auto_ownership.csv, demographics.csv, physical_activity_person.csv refer to the person table as <cite>persons</cite></li>
-<li>link.csv, link_daily.csv refer to the links table as <cite>links</cite></li>
-<li>person_trips.csv refers to the trips table as <cite>trips</cite></li>
-<li>physical_activity_trip.csv refers to the base and build trips as <cite>trips, base, build</cite></li>
+<li><p>All target fields specified in the expressions file will be aggregated and written out to the summary results file.  Each summary result entry is named as follows: the two digit processor abbreviation + the target field.  For example: AO_base_auto_ownership_cost.</p></li>
+<li><p>aggregate_trips.csv references the fields in aggregate_data_manifest.csv as: <cite>base_trips, build_trips, base_ivt, build_ivt, vot, aoc_units, base_aoc, build_aoc, toll_units, base_toll, build_toll</cite></p></li>
+<li><p>auto_ownership.csv, demographics.csv, physical_activity_person.csv refer to the person table as <cite>persons</cite></p></li>
+<li><p>link.csv, link_daily.csv refer to the links table as <cite>links</cite></p></li>
+<li><p>person_trips.csv refers to the trips table as <cite>trips</cite></p></li>
+<li><p>physical_activity_trip.csv refers to the base and build trips as <cite>trips, base, build</cite></p></li>
 </ul>
 </div></blockquote>
 </div>
@@ -322,50 +315,51 @@ since the mapping defines which fields are loaded into memory.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">data</span></code> folder contains the input data for the base and build scenario.</p>
 <blockquote>
 <div><ul>
-<li><p class="first">Disaggregate data</p>
+<li><p>Disaggregate data</p>
 <ul class="simple">
-<li>persons.csv - base and build alternative person records</li>
-<li>base_households.csv - base alternative households</li>
-<li>build_households.csv - build alternative households</li>
-<li>basetrips_normal.csv - base alternative trips with base alternative trip level-of-service</li>
-<li>basetrips_buildlos.csv - base alternative trips with build alternative trip level-of-service</li>
-<li>buildtrips_normal.csv - build alternative trips with build alternative trip level-of-service</li>
-<li>buildtrips_baselos.csv - build alternative trips with base alternative trip level-of-service</li>
+<li><p>persons.csv - base and build alternative person records</p></li>
+<li><p>base_households.csv - base alternative households</p></li>
+<li><p>build_households.csv - build alternative households</p></li>
+<li><p>basetrips_normal.csv - base alternative trips with base alternative trip level-of-service</p></li>
+<li><p>basetrips_buildlos.csv - base alternative trips with build alternative trip level-of-service</p></li>
+<li><p>buildtrips_normal.csv - build alternative trips with build alternative trip level-of-service</p></li>
+<li><p>buildtrips_baselos.csv - build alternative trips with base alternative trip level-of-service</p></li>
 </ul>
 </li>
-<li><p class="first">Aggregate data</p>
+<li><p>Aggregate data</p>
 <ul>
-<li><p class="first">aggregate_data_manifest.csv - aggregate markets for which to apply the aggregate calculations defined in aggregate_trips.csv - each row in the manifest contains a trip matrix, an in-vehicle time matrix, an auto operating cost matrix, and a toll matrix.  Each matrix will be loaded for the base and build alternative from the base and build data folders.  These matrices + the additional settings in each row for units, value-of-time, etc. are referenced in the expressions.</p>
-</li>
-<li><p class="first">base data folder</p>
+<li><p>aggregate_data_manifest.csv - aggregate markets for which to apply the aggregate calculations defined in aggregate_trips.csv - each row in the manifest contains a trip matrix, an in-vehicle time matrix, an auto operating cost matrix, and a toll matrix.  Each matrix will be loaded for the base and build alternative from the base and build data folders.  These matrices + the additional settings in each row for units, value-of-time, etc. are referenced in the expressions.</p></li>
+<li><p>base data folder</p>
 <blockquote>
 <div><ul class="simple">
-<li>testlos.omx - base alternative level-of-service matrices - IVT, opercost, tollcost</li>
-<li>testtrips.omx - base alternative trips</li>
+<li><p>testlos.omx - base alternative level-of-service matrices - IVT, opercost, tollcost</p></li>
+<li><p>testtrips.omx - base alternative trips</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">build data folder</p>
+<li><p>build data folder</p>
 <blockquote>
 <div><ul class="simple">
-<li>testlos.omx - build alternative level-of-service matrices - IVT, opercost, tollcost</li>
-<li>testtrips.omx - build alternative trips</li>
+<li><p>testlos.omx - build alternative level-of-service matrices - IVT, opercost, tollcost</p></li>
+<li><p>testtrips.omx - build alternative trips</p></li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 </li>
-<li><p class="first">Link data</p>
+<li><p>Link data</p>
 <ul class="simple">
-<li>link_data_manifest.csv - link time period tables to process in link processor.  The daily like table is not specified since it is handled by a separate daily link processor.</li>
-<li>base data folder<ul>
-<li>link_ampk.csv - base alternative AM peak link records</li>
-<li>link_daily.csv - base alternative daily link records</li>
+<li><p>link_data_manifest.csv - link time period tables to process in link processor.  The daily like table is not specified since it is handled by a separate daily link processor.</p></li>
+<li><p>base data folder</p>
+<ul>
+<li><p>link_ampk.csv - base alternative AM peak link records</p></li>
+<li><p>link_daily.csv - base alternative daily link records</p></li>
 </ul>
 </li>
-<li>build data folder<ul>
-<li>link_ampk.csv - build alternative AM peak link records</li>
-<li>link_daily.csv - build alternative daily  link records</li>
+<li><p>build data folder</p>
+<ul>
+<li><p>link_ampk.csv - build alternative AM peak link records</p></li>
+<li><p>link_daily.csv - build alternative daily  link records</p></li>
 </ul>
 </li>
 </ul>
@@ -378,19 +372,20 @@ since the mapping defines which fields are loaded into memory.</p>
 <p>The ABM example outputs are:</p>
 <blockquote>
 <div><ul class="simple">
-<li>asim.log - log file</li>
-<li>data_dict.txt - pipeline table data and fields</li>
-<li>final_summary_results.csv - all calculated measures.  All target fields specified in the expressions file will be aggregated and written out to the summary results file. Each summary result entry is named as follows: the two digit processor abbreviation + the target field. For example: <cite>AO_base_auto_ownership_cost</cite>.</li>
-<li>final_checkpoints.csv - tables in the pipeline for debugging if desired</li>
-<li>final_coc_results.csv - results by community of concern</li>
-<li>final_coc_silos.csv - results by community of concern</li>
-<li>pipeline.h5.h5 - HDF5 data pipeline which contains all the data tables in pandas format and can be read into pandas with <cite>pd.read_hdf</cite>.</li>
-<li>If <cite>trace_hh_id</cite> is specified in the settings file:<ul>
-<li>auto_ownership.csv - results by person</li>
-<li>demographics.csv - results by person</li>
-<li>person_trips.csv - results by person</li>
-<li>physical_activity_persons.csv - results by person</li>
-<li>physical_activity_trips.csv - results by trip</li>
+<li><p>asim.log - log file</p></li>
+<li><p>data_dict.txt - pipeline table data and fields</p></li>
+<li><p>final_summary_results.csv - all calculated measures.  All target fields specified in the expressions file will be aggregated and written out to the summary results file. Each summary result entry is named as follows: the two digit processor abbreviation + the target field. For example: <cite>AO_base_auto_ownership_cost</cite>.</p></li>
+<li><p>final_checkpoints.csv - tables in the pipeline for debugging if desired</p></li>
+<li><p>final_coc_results.csv - results by community of concern</p></li>
+<li><p>final_coc_silos.csv - results by community of concern</p></li>
+<li><p>pipeline.h5.h5 - HDF5 data pipeline which contains all the data tables in pandas format and can be read into pandas with <cite>pd.read_hdf</cite>.</p></li>
+<li><p>If <cite>trace_hh_id</cite> is specified in the settings file:</p>
+<ul>
+<li><p>auto_ownership.csv - results by person</p></li>
+<li><p>demographics.csv - results by person</p></li>
+<li><p>person_trips.csv - results by person</p></li>
+<li><p>physical_activity_persons.csv - results by person</p></li>
+<li><p>physical_activity_trips.csv - results by trip</p></li>
 </ul>
 </li>
 </ul>
@@ -404,52 +399,52 @@ since the mapping defines which fields are loaded into memory.</p>
 <p>The models are:</p>
 <blockquote>
 <div><ul class="simple">
-<li>aggregate_demographics_processor - zone-based calculations to identify equity groups</li>
-<li>aggregate_zone_processor - zone-based calculations such as auto ownership and destination choice logsums benefits</li>
-<li>aggregate_zone_benefits - sum benefits by equity group</li>
-<li>aggregate_od_processor - OD pair-based calaculations such as travel time savings</li>
-<li>link_daily_processor - daily link-based calculations such as safety and emissions</li>
-<li>write_data_dictionary - writes data pipeline data table column types for debugging</li>
-<li>write_tables - writes output files</li>
+<li><p>aggregate_demographics_processor - zone-based calculations to identify equity groups</p></li>
+<li><p>aggregate_zone_processor - zone-based calculations such as auto ownership and destination choice logsums benefits</p></li>
+<li><p>aggregate_zone_benefits - sum benefits by equity group</p></li>
+<li><p>aggregate_od_processor - OD pair-based calaculations such as travel time savings</p></li>
+<li><p>link_daily_processor - daily link-based calculations such as safety and emissions</p></li>
+<li><p>write_data_dictionary - writes data pipeline data table column types for debugging</p></li>
+<li><p>write_tables - writes output files</p></li>
 </ul>
 </div></blockquote>
 <p>The current set of files are below.</p>
-<table border="1" class="docutils">
+<table class="docutils align-default">
 <colgroup>
-<col width="41%" />
-<col width="59%" />
+<col style="width: 41%" />
+<col style="width: 59%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Model</th>
-<th class="head">Specification Files</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>Model</p></th>
+<th class="head"><p>Specification Files</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td>aggregate_demographics_processor</td>
-<td><ul class="first last simple">
-<li>aggregate_demographics.yaml</li>
-<li>aggregate_demographics.csv</li>
+<tbody>
+<tr class="row-even"><td><p>aggregate_demographics_processor</p></td>
+<td><ul class="simple">
+<li><p>aggregate_demographics.yaml</p></li>
+<li><p>aggregate_demographics.csv</p></li>
 </ul>
 </td>
 </tr>
-<tr class="row-odd"><td>aggregate_zone_processor</td>
-<td><ul class="first last simple">
-<li>aggregate_zone.yaml</li>
-<li>aggregate_zone.csv</li>
+<tr class="row-odd"><td><p>aggregate_zone_processor</p></td>
+<td><ul class="simple">
+<li><p>aggregate_zone.yaml</p></li>
+<li><p>aggregate_zone.csv</p></li>
 </ul>
 </td>
 </tr>
-<tr class="row-even"><td>aggregate_od_processor</td>
-<td><ul class="first last simple">
-<li>aggregate_od.yaml</li>
-<li>aggregate_od.csv</li>
+<tr class="row-even"><td><p>aggregate_od_processor</p></td>
+<td><ul class="simple">
+<li><p>aggregate_od.yaml</p></li>
+<li><p>aggregate_od.csv</p></li>
 </ul>
 </td>
 </tr>
-<tr class="row-odd"><td>link_daily_processor</td>
-<td><ul class="first last simple">
-<li>link_daily.yaml</li>
-<li>link_daily.csv</li>
+<tr class="row-odd"><td><p>link_daily_processor</p></td>
+<td><ul class="simple">
+<li><p>link_daily.yaml</p></li>
+<li><p>link_daily.csv</p></li>
 </ul>
 </td>
 </tr>
@@ -458,11 +453,11 @@ since the mapping defines which fields are loaded into memory.</p>
 <p>4Step expression file specifics:</p>
 <blockquote>
 <div><ul class="simple">
-<li>The <cite>silo</cite> column in the expressions files is used for specifying the relevant communities-of-concern (COC) for the result. An <cite>*</cite> is used to specify that the result applies to everyone.  If the result applies to just one COC, for example, low_income hhs, then the silo entry should correspond to a valid <cite>coc_silos</cite> entry in the setting file, such as <cite>coc_lowinc.</cite></li>
-<li>aggregate_demographics.csv refers to the zone table as <cite>cvals</cite></li>
-<li>aggregate_zone.csv refers to the zone table as <cite>zones</cite> and prepends <cite>base_</cite> or <cite>build_</cite></li>
-<li>aggregate_od.csv refers to the matrices specified in <cite>aggregate_od_matrices</cite> by name and appends <cite>_base</cite> or <cite>_build</cite></li>
-<li>link.csv refers to the links table specified in the <cite>link_daily_file_names</cite> by <cite>links</cite> plus the name appended</li>
+<li><p>The <cite>silo</cite> column in the expressions files is used for specifying the relevant communities-of-concern (COC) for the result. An <cite>*</cite> is used to specify that the result applies to everyone.  If the result applies to just one COC, for example, low_income hhs, then the silo entry should correspond to a valid <cite>coc_silos</cite> entry in the setting file, such as <cite>coc_lowinc.</cite></p></li>
+<li><p>aggregate_demographics.csv refers to the zone table as <cite>cvals</cite></p></li>
+<li><p>aggregate_zone.csv refers to the zone table as <cite>zones</cite> and prepends <cite>base_</cite> or <cite>build_</cite></p></li>
+<li><p>aggregate_od.csv refers to the matrices specified in <cite>aggregate_od_matrices</cite> by name and appends <cite>_base</cite> or <cite>_build</cite></p></li>
+<li><p>link.csv refers to the links table specified in the <cite>link_daily_file_names</cite> by <cite>links</cite> plus the name appended</p></li>
 </ul>
 </div></blockquote>
 </div>
@@ -471,27 +466,30 @@ since the mapping defines which fields are loaded into memory.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">data</span></code> folder contains the input data for the base and build scenario.</p>
 <blockquote>
 <div><ul class="simple">
-<li>Link<ul>
-<li>linksMD1.csv - link MD1 period assignment results</li>
-<li>linksPM2.csv - link PM2 assignment results</li>
+<li><p>Link</p>
+<ul>
+<li><p>linksMD1.csv - link MD1 period assignment results</p></li>
+<li><p>linksPM2.csv - link PM2 assignment results</p></li>
 </ul>
 </li>
-<li>OD<ul>
-<li>assign_mfs.omx - assignment matrices</li>
-<li>skims_mfs.omx - skims matrices</li>
-<li>mode_choice_pa.omx - mode choice production-attraction matrices</li>
-<li>parking_cost.omx - parking costs at the destination</li>
+<li><p>OD</p>
+<ul>
+<li><p>assign_mfs.omx - assignment matrices</p></li>
+<li><p>skims_mfs.omx - skims matrices</p></li>
+<li><p>mode_choice_pa.omx - mode choice production-attraction matrices</p></li>
+<li><p>parking_cost.omx - parking costs at the destination</p></li>
 </ul>
 </li>
-<li>Zone<ul>
-<li>mf.cval.csv - see above</li>
-<li>cocs.csv - externally defined COC share of households by zone</li>
-<li>Productions files such as ma.hboprh.csv (hbo high inc)</li>
-<li>Destination choice logsums files such as ma.hbohdcls.csv (hbo high inc)</li>
+<li><p>Zone</p>
+<ul>
+<li><p>mf.cval.csv - see above</p></li>
+<li><p>cocs.csv - externally defined COC share of households by zone</p></li>
+<li><p>Productions files such as ma.hboprh.csv (hbo high inc)</p></li>
+<li><p>Destination choice logsums files such as ma.hbohdcls.csv (hbo high inc)</p></li>
 </ul>
 </li>
-<li>zone_districts.csv - zone district scheme for district-to-district O-D processor aggregate report and for zone labels if zones non-sequential</li>
-<li>moves_2010_summer_running_rates.csv - EPA MOVES emissions rate table lookup file</li>
+<li><p>zone_districts.csv - zone district scheme for district-to-district O-D processor aggregate report and for zone labels if zones non-sequential</p></li>
+<li><p>moves_2010_summer_running_rates.csv - EPA MOVES emissions rate table lookup file</p></li>
 </ul>
 </div></blockquote>
 </div>
@@ -500,24 +498,26 @@ since the mapping defines which fields are loaded into memory.</p>
 <p>The 4step example outputs are:</p>
 <blockquote>
 <div><ul class="simple">
-<li>bca.log - log file</li>
-<li>data_dict.txt - pipeline table data and fields</li>
-<li>final_aggregate_results.csv - results by measure and COC, including for everyone</li>
-<li>pipeline.h5.h5 - HDF5 data pipeline which contains all the data tables in pandas format and can be read into pandas with <cite>pd.read_hdf</cite>.</li>
-<li>Intermediate outputs for debugging<ul>
-<li>final_zone_demographics.csv - demographics processor calculated fields for each zone</li>
-<li>final_aggregate_zone_summary.csv - zone processor calculated fields for each zone</li>
-<li>final_aggregate_od_zone_summary.csv - OD processor calculated fields summed to each origin zone</li>
-<li>final_aggregate_od_district_summary.csv - District-to-district OD processor calculated fields summed</li>
-<li>link_daily_results_base|build.csv - link processor calculated fields</li>
+<li><p>bca.log - log file</p></li>
+<li><p>data_dict.txt - pipeline table data and fields</p></li>
+<li><p>final_aggregate_results.csv - results by measure and COC, including for everyone</p></li>
+<li><p>pipeline.h5.h5 - HDF5 data pipeline which contains all the data tables in pandas format and can be read into pandas with <cite>pd.read_hdf</cite>.</p></li>
+<li><p>Intermediate outputs for debugging</p>
+<ul>
+<li><p>final_zone_demographics.csv - demographics processor calculated fields for each zone</p></li>
+<li><p>final_aggregate_zone_summary.csv - zone processor calculated fields for each zone</p></li>
+<li><p>final_aggregate_od_zone_summary.csv - OD processor calculated fields summed to each origin zone</p></li>
+<li><p>final_aggregate_od_district_summary.csv - District-to-district OD processor calculated fields summed</p></li>
+<li><p>link_daily_results_base|build.csv - link processor calculated fields</p></li>
 </ul>
 </li>
-<li>If <cite>trace_od</cite> is specified in the settings file:<ul>
-<li>aggregate_demographics.csv - demographics processor calculated fields for the trace origin zone</li>
-<li>aggregate_zone.csv - zone processor calculated fields for the trace origin zone</li>
-<li>aggregate_od.csv - OD processor calculated fields for the trace OD pair</li>
-<li>link_daily_results_build.csv - build scenario link processor calculated fields for links in the trace origin or destination zone</li>
-<li>link_daily_results_base.csv - base scenario link processor calculated fields for links in the trace origin or destination zone</li>
+<li><p>If <cite>trace_od</cite> is specified in the settings file:</p>
+<ul>
+<li><p>aggregate_demographics.csv - demographics processor calculated fields for the trace origin zone</p></li>
+<li><p>aggregate_zone.csv - zone processor calculated fields for the trace origin zone</p></li>
+<li><p>aggregate_od.csv - OD processor calculated fields for the trace OD pair</p></li>
+<li><p>link_daily_results_build.csv - build scenario link processor calculated fields for links in the trace origin or destination zone</p></li>
+<li><p>link_daily_results_base.csv - base scenario link processor calculated fields for links in the trace origin or destination zone</p></li>
 </ul>
 </li>
 </ul>

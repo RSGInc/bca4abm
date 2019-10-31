@@ -194,41 +194,48 @@ framework are additional core components for benefits calculation.</p>
 framework.  As summarized <a class="reference external" href="https://activitysim.github.io/activitysim/#software-design">here</a>,
 being implemented in the ActivitySim framework means:</p>
 <ul class="simple">
-<li>Overall Design<ul>
-<li>Implemented in Python, and makes heavy use of the vectorized backend C/C++ libraries in <a class="reference external" href="http://pandas.pydata.org">pandas</a> and <a class="reference external" href="http://www.numpy.org">numpy</a>.</li>
-<li>Vectorization instead of for loops when possible</li>
-<li>Runs sub-models that solve Python expression files that operate on data tables</li>
+<li><p>Overall Design</p>
+<ul>
+<li><p>Implemented in Python, and makes heavy use of the vectorized backend C/C++ libraries in <a class="reference external" href="http://pandas.pydata.org">pandas</a> and <a class="reference external" href="http://www.numpy.org">numpy</a>.</p></li>
+<li><p>Vectorization instead of for loops when possible</p></li>
+<li><p>Runs sub-models that solve Python expression files that operate on data tables</p></li>
 </ul>
 </li>
-<li>Data Handling<ul>
-<li>Inputs are in CSV format, with the exception of settings</li>
-<li>CSVs are read-in as pandas tables and stored in an intermediate HDF5 binary file that is used for data I/O throughout the model run</li>
-<li>Key outputs are written to CSV files</li>
+<li><p>Data Handling</p>
+<ul>
+<li><p>Inputs are in CSV format, with the exception of settings</p></li>
+<li><p>CSVs are read-in as pandas tables and stored in an intermediate HDF5 binary file that is used for data I/O throughout the model run</p></li>
+<li><p>Key outputs are written to CSV files</p></li>
 </ul>
 </li>
-<li>Key Data Structures<ul>
-<li><a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html">pandas.DataFrame</a> - A data table with rows and columns, similar to an R data frame, Excel worksheet, or database table</li>
-<li><a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.Series.html">pandas.Series</a> - a vector of data, a column in a DataFrame table or a 1D array</li>
-<li><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.array.html">numpy.array</a> - an N-dimensional array of items of the same type, such as a matrix</li>
+<li><p>Key Data Structures</p>
+<ul>
+<li><p><a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html">pandas.DataFrame</a> - A data table with rows and columns, similar to an R data frame, Excel worksheet, or database table</p></li>
+<li><p><a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.Series.html">pandas.Series</a> - a vector of data, a column in a DataFrame table or a 1D array</p></li>
+<li><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.array.html">numpy.array</a> - an N-dimensional array of items of the same type, such as a matrix</p></li>
 </ul>
 </li>
-<li>Model Orchestrator<ul>
-<li><a class="reference external" href="https://github.com/UDST/orca">ORCA</a> is used for running the overall model system and for defining dynamic data tables, columns, and injectables (functions). ActivitySim wraps ORCA functionality to make a Data Pipeline tool, which allows for re-starting at any model step.</li>
+<li><p>Model Orchestrator</p>
+<ul>
+<li><p><a class="reference external" href="https://github.com/UDST/orca">ORCA</a> is used for running the overall model system and for defining dynamic data tables, columns, and injectables (functions). ActivitySim wraps ORCA functionality to make a Data Pipeline tool, which allows for re-starting at any model step.</p></li>
 </ul>
 </li>
-<li>Expressions<ul>
-<li>Model expressions are in CSV files and contain Python expressions, mainly pandas/numpy expression that operate on the input data tables. This helps to avoid modifying Python code when making changes to the model calculations.</li>
+<li><p>Expressions</p>
+<ul>
+<li><p>Model expressions are in CSV files and contain Python expressions, mainly pandas/numpy expression that operate on the input data tables. This helps to avoid modifying Python code when making changes to the model calculations.</p></li>
 </ul>
 </li>
-<li><a class="reference external" href="https://activitysim.github.io/activitysim/development.html">Code Documentation</a><ul>
-<li>Python code according to <a class="reference external" href="https://pypi.python.org/pypi/pycodestyle">pycodestyle</a> style guide</li>
-<li>Written in <a class="reference external" href="http://docutils.sourceforge.net/rst.html">reStructuredText</a> markup, built with <a class="reference external" href="http://www.sphinx-doc.org/en/stable">Sphinx</a> and docstrings written in <a class="reference external" href="https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt">numpydoc</a></li>
+<li><p><a class="reference external" href="https://activitysim.github.io/activitysim/development.html">Code Documentation</a></p>
+<ul>
+<li><p>Python code according to <a class="reference external" href="https://pypi.python.org/pypi/pycodestyle">pycodestyle</a> style guide</p></li>
+<li><p>Written in <a class="reference external" href="http://docutils.sourceforge.net/rst.html">reStructuredText</a> markup, built with <a class="reference external" href="http://www.sphinx-doc.org/en/stable">Sphinx</a> and docstrings written in <a class="reference external" href="https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt">numpydoc</a></p></li>
 </ul>
 </li>
-<li><a class="reference external" href="https://activitysim.github.io/activitysim/development.html">Testing</a><ul>
-<li>A protected master branch that can only be written to after tests have passed</li>
-<li><a class="reference external" href="https://docs.pytest.org/en/latest/">pytest</a> for tests</li>
-<li><a class="reference external" href="https://travis-ci.org">TravisCI</a> for building and testing with each commit</li>
+<li><p><a class="reference external" href="https://activitysim.github.io/activitysim/development.html">Testing</a></p>
+<ul>
+<li><p>A protected master branch that can only be written to after tests have passed</p></li>
+<li><p><a class="reference external" href="https://docs.pytest.org/en/latest/">pytest</a> for tests</p></li>
+<li><p><a class="reference external" href="https://travis-ci.org">TravisCI</a> for building and testing with each commit</p></li>
 </ul>
 </li>
 </ul>
@@ -240,139 +247,105 @@ being implemented in the ActivitySim framework means:</p>
 <span id="bca4abm"></span><h3>bca4abm<a class="headerlink" href="#module-bca4abm.bca4abm" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="bca4abm.bca4abm.calc_rows_per_chunk">
-<code class="descclassname">bca4abm.bca4abm.</code><code class="descname">calc_rows_per_chunk</code><span class="sig-paren">(</span><em>chunk_size</em>, <em>df</em>, <em>spec</em>, <em>extra_columns=0</em>, <em>trace_label=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.calc_rows_per_chunk" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.bca4abm.</code><code class="sig-name descname">calc_rows_per_chunk</code><span class="sig-paren">(</span><em class="sig-param">chunk_size</em>, <em class="sig-param">df</em>, <em class="sig-param">spec</em>, <em class="sig-param">extra_columns=0</em>, <em class="sig-param">trace_label=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.calc_rows_per_chunk" title="Permalink to this definition">¶</a></dt>
 <dd><p>simple rows_per_chunk calculator for chunking calls to assign_variables</p>
 <p>ActivitySim’s chunk.rows_per_chunk method handles the main logic, including
 a missing/zero chunk size</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt><strong>chunk_size</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd></dd>
-<dt><strong>df</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
-<dd></dd>
-<dt><strong>spec</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
-<dd></dd>
-<dt><strong>extra_columns</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span></dt>
-<dd></dd>
-<dt><strong>trace_label</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
-<dd></dd>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>chunk_size</strong><span class="classifier">int</span></dt><dd></dd>
+<dt><strong>df</strong><span class="classifier">pandas DataFrame</span></dt><dd></dd>
+<dt><strong>spec</strong><span class="classifier">pandas DataFrame</span></dt><dd></dd>
+<dt><strong>extra_columns</strong><span class="classifier">int, optional</span></dt><dd></dd>
+<dt><strong>trace_label</strong><span class="classifier">str, optional</span></dt><dd></dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>num_rows</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd></dd>
-<dt><strong>effective_chunk_size</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd></dd>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>num_rows</strong><span class="classifier">int</span></dt><dd></dd>
+<dt><strong>effective_chunk_size</strong><span class="classifier">int</span></dt><dd></dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="bca4abm.bca4abm.eval_and_sum">
-<code class="descclassname">bca4abm.bca4abm.</code><code class="descname">eval_and_sum</code><span class="sig-paren">(</span><em>assignment_expressions</em>, <em>df</em>, <em>locals_dict</em>, <em>group_by_column_names=None</em>, <em>df_alias=None</em>, <em>chunk_size=0</em>, <em>trace_rows=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.eval_and_sum" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.bca4abm.</code><code class="sig-name descname">eval_and_sum</code><span class="sig-paren">(</span><em class="sig-param">assignment_expressions</em>, <em class="sig-param">df</em>, <em class="sig-param">locals_dict</em>, <em class="sig-param">group_by_column_names=None</em>, <em class="sig-param">df_alias=None</em>, <em class="sig-param">chunk_size=0</em>, <em class="sig-param">trace_rows=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.eval_and_sum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate assignment_expressions against df, and sum the results
 (sum by group if list of group_by_column_names is specified.
 e.g. group by coc column names and return sums grouped by community of concern.)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>assignment_expressions</strong></dt>
-<dd></dd>
-<dt><strong>df</strong></dt>
-<dd></dd>
-<dt><strong>locals_dict</strong></dt>
-<dd></dd>
-<dt><strong>group_by_column_names</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array of str</span></dt>
-<dd><p class="first last">list of names of the columns to group by (e.g. coc_column_names of trip_coc_end)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>assignment_expressions</strong></dt><dd></dd>
+<dt><strong>df</strong></dt><dd></dd>
+<dt><strong>locals_dict</strong></dt><dd></dd>
+<dt><strong>group_by_column_names</strong><span class="classifier">array of str</span></dt><dd><p>list of names of the columns to group by (e.g. coc_column_names of trip_coc_end)</p>
 </dd>
-<dt><strong>df_alias</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">assign_variables df_alias (name of df in assignment_expressions)</p>
+<dt><strong>df_alias</strong><span class="classifier">str</span></dt><dd><p>assign_variables df_alias (name of df in assignment_expressions)</p>
 </dd>
-<dt><strong>chunk_size</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd></dd>
-<dt><strong>trace_rows</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array of bool</span></dt>
-<dd><p class="first last">array indicating which rows in df are to be traced</p>
+<dt><strong>chunk_size</strong><span class="classifier">int</span></dt><dd></dd>
+<dt><strong>trace_rows</strong><span class="classifier">array of bool</span></dt><dd><p>array indicating which rows in df are to be traced</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="bca4abm.bca4abm.read_assignment_spec">
-<code class="descclassname">bca4abm.bca4abm.</code><code class="descname">read_assignment_spec</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.read_assignment_spec" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.bca4abm.</code><code class="sig-name descname">read_assignment_spec</code><span class="sig-paren">(</span><em class="sig-param">fname</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.read_assignment_spec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a CSV model specification into a Pandas DataFrame or Series.</p>
 <p>The CSV is expected to have columns for component descriptions
 targets, and expressions,</p>
 <p>The CSV is required to have a header with column names. For example:</p>
 <blockquote>
-<div>Description,Target,Expression,Silos</div></blockquote>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt><strong>fname</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Name of a CSV spec file.</p>
+<div><p>Description,Target,Expression,Silos</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>fname</strong><span class="classifier">str</span></dt><dd><p>Name of a CSV spec file.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>spec</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas.DataFrame</span></dt>
-<dd><p class="first last">The description column is dropped from the returned data and the
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>spec</strong><span class="classifier">pandas.DataFrame</span></dt><dd><p>The description column is dropped from the returned data and the
 expression values are set as the table index.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="bca4abm.bca4abm.scalar_assign_variables">
-<code class="descclassname">bca4abm.bca4abm.</code><code class="descname">scalar_assign_variables</code><span class="sig-paren">(</span><em>assignment_expressions</em>, <em>locals_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.scalar_assign_variables" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.bca4abm.</code><code class="sig-name descname">scalar_assign_variables</code><span class="sig-paren">(</span><em class="sig-param">assignment_expressions</em>, <em class="sig-param">locals_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.scalar_assign_variables" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate a set of variable expressions from a spec in the context
 of a given data table.</p>
 <p>Python expressions are evaluated in the context of this function using
 Python’s eval function.
 Users should take care that these expressions must result in
 a scalar</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt><strong>assignment_expressions</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas sequence of str</span></dt>
-<dd></dd>
-<dt><strong>locals_dict</strong> <span class="classifier-delimiter">:</span> <span class="classifier">Dict</span></dt>
-<dd><p class="first last">This is a dictionary of local variables that will be the environment
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>assignment_expressions</strong><span class="classifier">pandas sequence of str</span></dt><dd></dd>
+<dt><strong>locals_dict</strong><span class="classifier">Dict</span></dt><dd><p>This is a dictionary of local variables that will be the environment
 for an evaluation of an expression that begins with &#64;</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>variables</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas.DataFrame</span></dt>
-<dd><p class="first last">Will have the index of <cite>df</cite> and columns of <cite>exprs</cite>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>variables</strong><span class="classifier">pandas.DataFrame</span></dt><dd><p>Will have the index of <cite>df</cite> and columns of <cite>exprs</cite>.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -380,7 +353,7 @@ for an evaluation of an expression that begins with &#64;</p>
 <span id="aggregate-trips"></span><h3>aggregate_trips<a class="headerlink" href="#module-bca4abm.processors.aggregate_trips" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="bca4abm.processors.aggregate_trips.aggregate_trips_processor">
-<code class="descclassname">bca4abm.processors.aggregate_trips.</code><code class="descname">aggregate_trips_processor</code><span class="sig-paren">(</span><em>aggregate_trips_spec</em>, <em>settings</em>, <em>data_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.aggregate_trips.aggregate_trips_processor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.aggregate_trips.</code><code class="sig-name descname">aggregate_trips_processor</code><span class="sig-paren">(</span><em class="sig-param">aggregate_trips_spec</em>, <em class="sig-param">settings</em>, <em class="sig-param">data_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.aggregate_trips.aggregate_trips_processor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute aggregate trips benefits</p>
 <p>The data manifest contains a list of trip count files (one for base, one for build)
 along with their their corresponding in-vehicle-time (ivt), operating cost (aoc),
@@ -391,7 +364,7 @@ vector computations in the aggregate_trips_spec</p>
 
 <dl class="data">
 <dt id="bca4abm.processors.aggregate_trips.logger">
-<code class="descclassname">bca4abm.processors.aggregate_trips.</code><code class="descname">logger</code><em class="property"> = &lt;logging.Logger object&gt;</em><a class="headerlink" href="#bca4abm.processors.aggregate_trips.logger" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.aggregate_trips.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.aggregate_trips (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.aggregate_trips.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Aggregate trips processor</p>
 </dd></dl>
 
@@ -400,7 +373,7 @@ vector computations in the aggregate_trips_spec</p>
 <span id="link"></span><h3>link<a class="headerlink" href="#module-bca4abm.processors.link" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
 <dt id="bca4abm.processors.link.logger">
-<code class="descclassname">bca4abm.processors.link.</code><code class="descname">logger</code><em class="property"> = &lt;logging.Logger object&gt;</em><a class="headerlink" href="#bca4abm.processors.link.logger" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.link.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.link (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.link.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Link processor</p>
 </dd></dl>
 
@@ -416,13 +389,13 @@ vector computations in the aggregate_trips_spec</p>
 <span id="auto-ownership"></span><h3>auto_ownership<a class="headerlink" href="#module-bca4abm.processors.abm.auto_ownership" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="bca4abm.processors.abm.auto_ownership.auto_ownership_processor">
-<code class="descclassname">bca4abm.processors.abm.auto_ownership.</code><code class="descname">auto_ownership_processor</code><span class="sig-paren">(</span><em>persons_merged</em>, <em>auto_ownership_spec</em>, <em>auto_ownership_settings</em>, <em>coc_column_names</em>, <em>chunk_size</em>, <em>trace_hh_id</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.abm.auto_ownership.auto_ownership_processor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.abm.auto_ownership.</code><code class="sig-name descname">auto_ownership_processor</code><span class="sig-paren">(</span><em class="sig-param">persons_merged</em>, <em class="sig-param">auto_ownership_spec</em>, <em class="sig-param">auto_ownership_settings</em>, <em class="sig-param">coc_column_names</em>, <em class="sig-param">chunk_size</em>, <em class="sig-param">trace_hh_id</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.abm.auto_ownership.auto_ownership_processor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute auto ownership benefits</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="bca4abm.processors.abm.auto_ownership.logger">
-<code class="descclassname">bca4abm.processors.abm.auto_ownership.</code><code class="descname">logger</code><em class="property"> = &lt;logging.Logger object&gt;</em><a class="headerlink" href="#bca4abm.processors.abm.auto_ownership.logger" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.abm.auto_ownership.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.abm.auto_ownership (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.abm.auto_ownership.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>auto ownership processor</p>
 </dd></dl>
 
@@ -431,7 +404,7 @@ vector computations in the aggregate_trips_spec</p>
 <span id="demographics"></span><h3>demographics<a class="headerlink" href="#module-bca4abm.processors.abm.demographics" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
 <dt id="bca4abm.processors.abm.demographics.logger">
-<code class="descclassname">bca4abm.processors.abm.demographics.</code><code class="descname">logger</code><em class="property"> = &lt;logging.Logger object&gt;</em><a class="headerlink" href="#bca4abm.processors.abm.demographics.logger" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.abm.demographics.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.abm.demographics (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.abm.demographics.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Demographics processor</p>
 </dd></dl>
 
@@ -440,13 +413,13 @@ vector computations in the aggregate_trips_spec</p>
 <span id="person-trips"></span><h3>person_trips<a class="headerlink" href="#module-bca4abm.processors.abm.person_trips" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
 <dt id="bca4abm.processors.abm.person_trips.logger">
-<code class="descclassname">bca4abm.processors.abm.person_trips.</code><code class="descname">logger</code><em class="property"> = &lt;logging.Logger object&gt;</em><a class="headerlink" href="#bca4abm.processors.abm.person_trips.logger" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.abm.person_trips.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.abm.person_trips (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.abm.person_trips.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Person trips processor</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="bca4abm.processors.abm.person_trips.person_trips_processor">
-<code class="descclassname">bca4abm.processors.abm.person_trips.</code><code class="descname">person_trips_processor</code><span class="sig-paren">(</span><em>trips_with_demographics</em>, <em>person_trips_spec</em>, <em>person_trips_settings</em>, <em>coc_column_names</em>, <em>settings</em>, <em>chunk_size</em>, <em>trace_hh_id</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.abm.person_trips.person_trips_processor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.abm.person_trips.</code><code class="sig-name descname">person_trips_processor</code><span class="sig-paren">(</span><em class="sig-param">trips_with_demographics</em>, <em class="sig-param">person_trips_spec</em>, <em class="sig-param">person_trips_settings</em>, <em class="sig-param">coc_column_names</em>, <em class="sig-param">settings</em>, <em class="sig-param">chunk_size</em>, <em class="sig-param">trace_hh_id</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.abm.person_trips.person_trips_processor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute disaggregate trips benefits</p>
 </dd></dl>
 
@@ -455,13 +428,13 @@ vector computations in the aggregate_trips_spec</p>
 <span id="physical-activity"></span><h3>physical_activity<a class="headerlink" href="#module-bca4abm.processors.abm.physical_activity" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
 <dt id="bca4abm.processors.abm.physical_activity.logger">
-<code class="descclassname">bca4abm.processors.abm.physical_activity.</code><code class="descname">logger</code><em class="property"> = &lt;logging.Logger object&gt;</em><a class="headerlink" href="#bca4abm.processors.abm.physical_activity.logger" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.abm.physical_activity.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.abm.physical_activity (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.abm.physical_activity.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>physical activity processor</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="bca4abm.processors.abm.physical_activity.physical_activity_processor">
-<code class="descclassname">bca4abm.processors.abm.physical_activity.</code><code class="descname">physical_activity_processor</code><span class="sig-paren">(</span><em>trips_with_demographics</em>, <em>persons_merged</em>, <em>physical_activity_trip_spec</em>, <em>physical_activity_person_spec</em>, <em>physical_activity_settings</em>, <em>coc_column_names</em>, <em>settings</em>, <em>chunk_size</em>, <em>trace_hh_id</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.abm.physical_activity.physical_activity_processor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.abm.physical_activity.</code><code class="sig-name descname">physical_activity_processor</code><span class="sig-paren">(</span><em class="sig-param">trips_with_demographics</em>, <em class="sig-param">persons_merged</em>, <em class="sig-param">physical_activity_trip_spec</em>, <em class="sig-param">physical_activity_person_spec</em>, <em class="sig-param">physical_activity_settings</em>, <em class="sig-param">coc_column_names</em>, <em class="sig-param">settings</em>, <em class="sig-param">chunk_size</em>, <em class="sig-param">trace_hh_id</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.abm.physical_activity.physical_activity_processor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute physical benefits</p>
 <p>Physical activity benefits generally accrue if the net physical activity for an individual
 exceeds a certain threshold. We calculate individual physical activity based on trips,
@@ -478,25 +451,20 @@ We chunk trips by household id to ensure that all of a persons trips are in the 
 <span id="aggregate-demographics"></span><h3>aggregate_demographics<a class="headerlink" href="#module-bca4abm.processors.four_step.aggregate_demographics" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="bca4abm.processors.four_step.aggregate_demographics.aggregate_demographics_processor">
-<code class="descclassname">bca4abm.processors.four_step.aggregate_demographics.</code><code class="descname">aggregate_demographics_processor</code><span class="sig-paren">(</span><em>zone_hhs</em>, <em>aggregate_demographics_spec</em>, <em>settings</em>, <em>trace_od</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_demographics.aggregate_demographics_processor" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>zone_hhs</strong> <span class="classifier-delimiter">:</span> <span class="classifier">orca table</span></dt>
-<dd><p class="first last">input zone demographics</p>
+<code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_demographics.</code><code class="sig-name descname">aggregate_demographics_processor</code><span class="sig-paren">(</span><em class="sig-param">zone_hhs</em>, <em class="sig-param">aggregate_demographics_spec</em>, <em class="sig-param">settings</em>, <em class="sig-param">trace_od</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_demographics.aggregate_demographics_processor" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>zone_hhs</strong><span class="classifier">orca table</span></dt><dd><p>input zone demographics</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="data">
 <dt id="bca4abm.processors.four_step.aggregate_demographics.logger">
-<code class="descclassname">bca4abm.processors.four_step.aggregate_demographics.</code><code class="descname">logger</code><em class="property"> = &lt;logging.Logger object&gt;</em><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_demographics.logger" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_demographics.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.four_step.aggregate_demographics (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_demographics.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Aggregate demographics processor</p>
 <p>each row in the data table to solve is an origin zone and this processor
 calculates communities of concern (COC) / market segments based on mf.cval.csv</p>
@@ -507,7 +475,7 @@ calculates communities of concern (COC) / market segments based on mf.cval.csv</
 <span id="aggregate-zone"></span><h3>aggregate_zone<a class="headerlink" href="#module-bca4abm.processors.four_step.aggregate_zone" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="bca4abm.processors.four_step.aggregate_zone.aggregate_zone_processor">
-<code class="descclassname">bca4abm.processors.four_step.aggregate_zone.</code><code class="descname">aggregate_zone_processor</code><span class="sig-paren">(</span><em>zones</em>, <em>trace_od</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_zone.aggregate_zone_processor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_zone.</code><code class="sig-name descname">aggregate_zone_processor</code><span class="sig-paren">(</span><em class="sig-param">zones</em>, <em class="sig-param">trace_od</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_zone.aggregate_zone_processor" title="Permalink to this definition">¶</a></dt>
 <dd><p>zones: orca table</p>
 <p>zone data for base and build scenario dat files combined into a single dataframe
 with columns names prefixed with <a href="#id1"><span class="problematic" id="id2">base_</span></a> or <a href="#id3"><span class="problematic" id="id4">build_</span></a> indexed by ZONE</p>
@@ -515,7 +483,7 @@ with columns names prefixed with <a href="#id1"><span class="problematic" id="id
 
 <dl class="data">
 <dt id="bca4abm.processors.four_step.aggregate_zone.logger">
-<code class="descclassname">bca4abm.processors.four_step.aggregate_zone.</code><code class="descname">logger</code><em class="property"> = &lt;logging.Logger object&gt;</em><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_zone.logger" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_zone.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.four_step.aggregate_zone (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_zone.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Aggregate zone processor</p>
 <p>each row in the data table to solve is an origin zone and this
 processor calculates zonal auto ownership differences as well as the
@@ -529,36 +497,28 @@ mf.cval.csv before input to the bca tool?</p>
 <span id="aggregate-od"></span><h3>aggregate_od<a class="headerlink" href="#module-bca4abm.processors.four_step.aggregate_od" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="bca4abm.processors.four_step.aggregate_od.ODSkims">
-<em class="property">class </em><code class="descclassname">bca4abm.processors.four_step.aggregate_od.</code><code class="descname">ODSkims</code><span class="sig-paren">(</span><em>omx_file_path</em>, <em>name</em>, <em>zone_index</em>, <em>transpose=False</em>, <em>cache_skims=True</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_od.ODSkims" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_od.</code><code class="sig-name descname">ODSkims</code><span class="sig-paren">(</span><em class="sig-param">omx_file_path</em>, <em class="sig-param">name</em>, <em class="sig-param">zone_index</em>, <em class="sig-param">transpose=False</em>, <em class="sig-param">cache_skims=True</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_od.ODSkims" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper for skim arrays to facilitate use of skims by aggregate_od_processor</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>skims_dict</strong> <span class="classifier-delimiter">:</span> <span class="classifier">empty dict to cache skims read from file</span></dt>
-<dd></dd>
-<dt><strong>omx: open omx file object</strong></dt>
-<dd><p class="first last">this is only used to load skims on demand that were not preloaded</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>skims_dict</strong><span class="classifier">empty dict to cache skims read from file</span></dt><dd></dd>
+<dt><strong>omx: open omx file object</strong></dt><dd><p>this is only used to load skims on demand that were not preloaded</p>
 </dd>
-<dt><strong>length: int</strong></dt>
-<dd><p class="first last">number of zones in skim to return in skim matrix
+<dt><strong>length: int</strong></dt><dd><p>number of zones in skim to return in skim matrix
 in case the skims contain additional external zones that should be trimmed out so skim
 array is correct shape to match (flattened) O-D tiled columns in the od dataframe</p>
 </dd>
-<dt><strong>transpose: bool</strong></dt>
-<dd><p class="first last">whether to transpose the matrix before flattening. (i.e. act as a D-O instead of O-D skim)</p>
+<dt><strong>transpose: bool</strong></dt><dd><p>whether to transpose the matrix before flattening. (i.e. act as a D-O instead of O-D skim)</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="bca4abm.processors.four_step.aggregate_od.create_zone_matrices">
-<code class="descclassname">bca4abm.processors.four_step.aggregate_od.</code><code class="descname">create_zone_matrices</code><span class="sig-paren">(</span><em>model_settings</em>, <em>zones</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_od.create_zone_matrices" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_od.</code><code class="sig-name descname">create_zone_matrices</code><span class="sig-paren">(</span><em class="sig-param">model_settings</em>, <em class="sig-param">zones</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_od.create_zone_matrices" title="Permalink to this definition">¶</a></dt>
 <dd><p>ODSkims look-alikes that have identical values for all zone origins/dests</p>
 <p>i.e. we either repeat (origin_zone_matrices) or tile (dest_zone_matrices) zone values
 to expand zones columns into ODSkims-style flattened arrays</p>
@@ -566,7 +526,7 @@ to expand zones columns into ODSkims-style flattened arrays</p>
 
 <dl class="data">
 <dt id="bca4abm.processors.four_step.aggregate_od.logger">
-<code class="descclassname">bca4abm.processors.four_step.aggregate_od.</code><code class="descname">logger</code><em class="property"> = &lt;logging.Logger object&gt;</em><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_od.logger" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_od.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.four_step.aggregate_od (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_od.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Aggregate OD processor</p>
 <p>each row in the data table to solve is an OD pair and this processor
 calculates trip differences.  It requires the access to input zone tables,
@@ -586,8 +546,8 @@ assign_mfs.omx, inputs and results of the zone aggregate processor, and skims_mf
 <h2>Release Notes<a class="headerlink" href="#release-notes" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul class="simple">
-<li>v0.4 - first release</li>
-<li>v0.5 - add Python 3.5+ support</li>
+<li><p>v0.4 - first release</p></li>
+<li><p>v0.5 - add Python 3.5+ support</p></li>
 </ul>
 </div></blockquote>
 </div>

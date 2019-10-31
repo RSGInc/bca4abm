@@ -168,36 +168,48 @@
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Install <a class="reference external" href="https://www.anaconda.com/distribution/">Anaconda 64bit Python 3</a>, which includes a number of required Python packages.</li>
-<li>Create and activate an Anaconda environment (i.e. a Python install just for this project).</li>
+<li><p>Install <a class="reference external" href="https://www.anaconda.com/distribution/">Anaconda 64bit Python 3</a>, which includes a number of required Python packages.</p></li>
+<li><p>Create and activate an Anaconda environment (i.e. a Python install just for this project).</p></li>
 </ul>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">bca4abmtest</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.7</span>
 <span class="n">activate</span> <span class="n">bca4abmtest</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Get and install the bca4abm package from <a class="reference external" href="https://github.com/RSGInc/bca4abm">GitHub</a></li>
+<li><p>Get and install the bca4abm package from <a class="reference external" href="https://github.com/RSGInc/bca4abm">GitHub</a></p></li>
 </ul>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">RSGInc</span><span class="o">/</span><span class="n">bca4abm</span><span class="o">/</span><span class="n">zipball</span><span class="o">/</span><span class="n">master</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Support for Python 2 has been discontinued by most major Python packages, including
+many of bca4abm’s dependencies. For the most up-to-date and stable version of bca4abm,
+using python 3.6+ is recommended, although older versions may still work with some package
+version fiddling.</p>
+<p>A stable/tested Python 2.7 version of bca4abm can be installed with the following command,
+however this branch will not benefit from any bug fixes or improvements moving forward.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">RSGInc</span><span class="o">/</span><span class="n">bca4abm</span><span class="o">/</span><span class="n">zipball</span><span class="o">/</span><span class="n">py2</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="running-the-model">
 <h2>Running the Model<a class="headerlink" href="#running-the-model" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Activate the conda Python environment</li>
+<li><p>Activate the conda Python environment</p></li>
 </ul>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">activate</span> <span class="n">bca4abmtest</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Change to the ABM or 4step example folder and then run the run_bca.py program</li>
+<li><p>Change to the ABM or 4step example folder and then run the run_bca.py program</p></li>
 </ul>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_bca</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Check the outputs folder for results, for example the <code class="docutils literal notranslate"><span class="pre">final_aggregate_results.csv</span></code> file for the 4step example</li>
+<li><p>Check the outputs folder for results, for example the <code class="docutils literal notranslate"><span class="pre">final_aggregate_results.csv</span></code> file for the 4step example</p></li>
 </ul>
 </div>
 <div class="section" id="process-overview">
@@ -205,10 +217,10 @@
 <p>The basic steps to run the benefits calculator with your travel model are below:</p>
 <blockquote>
 <div><ul class="simple">
-<li>Run procedures to export results from the travel model to produce the base and build scenario inputs required for the calculator</li>
-<li>The calculator reads the travel model output files for a base and build scenario</li>
-<li>The calculator evaluates user-defined Python expressions (see below) for each data processor to calculate benefits.  Expressions are segmented by equity group when applicable, and include subtracting the base from the build quantity, monetization, annualization, etc.</li>
-<li>The summation of the calculations by benefit and equity group are written out</li>
+<li><p>Run procedures to export results from the travel model to produce the base and build scenario inputs required for the calculator</p></li>
+<li><p>The calculator reads the travel model output files for a base and build scenario</p></li>
+<li><p>The calculator evaluates user-defined Python expressions (see below) for each data processor to calculate benefits.  Expressions are segmented by equity group when applicable, and include subtracting the base from the build quantity, monetization, annualization, etc.</p></li>
+<li><p>The summation of the calculations by benefit and equity group are written out</p></li>
 </ul>
 </div></blockquote>
 </div>
@@ -223,54 +235,54 @@ using the rule-of-half.  As a result, the calculation is half the difference in 
 times the difference in the logsums divided by utilities per minute for home-based-other trips times the value-of-time for
 home-based-other trips times the annual discount rate times a daily to annual factor.  The result is monetized benefits for increases
 in accessibility by zone.</p>
-<table border="1" class="docutils">
+<table class="docutils align-default">
 <colgroup>
-<col width="21%" />
-<col width="12%" />
-<col width="68%" />
+<col style="width: 21%" />
+<col style="width: 12%" />
+<col style="width: 68%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Description</th>
-<th class="head">Target</th>
-<th class="head">Expression</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>Description</p></th>
+<th class="head"><p>Target</p></th>
+<th class="head"><p>Expression</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td>#zone input data tables</td>
-<td>&#160;</td>
-<td>&#160;</td>
+<tbody>
+<tr class="row-even"><td><p>#zone input data tables</p></td>
+<td></td>
+<td></td>
 </tr>
-<tr class="row-odd"><td>hbo productions in base scenario</td>
-<td>base_prod_hbo</td>
-<td>zones.base_hboprl + zones.base_hboprm + zones.base_hboprh</td>
+<tr class="row-odd"><td><p>hbo productions in base scenario</p></td>
+<td><p>base_prod_hbo</p></td>
+<td><p>zones.base_hboprl + zones.base_hboprm + zones.base_hboprh</p></td>
 </tr>
-<tr class="row-even"><td>hbo productions in build scenario</td>
-<td>build_prod_hbo</td>
-<td>zones.build_hboprl + zones.build_hboprm + zones.build_hboprh</td>
+<tr class="row-even"><td><p>hbo productions in build scenario</p></td>
+<td><p>build_prod_hbo</p></td>
+<td><p>zones.build_hboprl + zones.build_hboprm + zones.build_hboprh</p></td>
 </tr>
-<tr class="row-odd"><td>hbo logsum in base scenario</td>
-<td>base_ls_hbo</td>
-<td>zones.base_hbodcls</td>
+<tr class="row-odd"><td><p>hbo logsum in base scenario</p></td>
+<td><p>base_ls_hbo</p></td>
+<td><p>zones.base_hbodcls</p></td>
 </tr>
-<tr class="row-even"><td>hbo logsum in build scenario</td>
-<td>build_ls_hbo</td>
-<td>zones.build_hbodcls</td>
+<tr class="row-even"><td><p>hbo logsum in build scenario</p></td>
+<td><p>build_ls_hbo</p></td>
+<td><p>zones.build_hbodcls</p></td>
 </tr>
-<tr class="row-odd"><td>#calculate travel options benefit by zone</td>
-<td>&#160;</td>
-<td>&#160;</td>
+<tr class="row-odd"><td><p>#calculate travel options benefit by zone</p></td>
+<td></td>
+<td></td>
 </tr>
-<tr class="row-even"><td>access benefit hbo</td>
-<td>access_benefit_hbo</td>
-<td>(0.5 * (base_prod_hbo + build_prod_hbo) * (build_ls_hbo - base_ls_hbo) / UPM_HBO) * (VOT_HBO / 60) * DISCOUNT_RATE * ANNUALIZATION_FACTOR</td>
+<tr class="row-even"><td><p>access benefit hbo</p></td>
+<td><p>access_benefit_hbo</p></td>
+<td><p>(0.5 * (base_prod_hbo + build_prod_hbo) * (build_ls_hbo - base_ls_hbo) / UPM_HBO) * (VOT_HBO / 60) * DISCOUNT_RATE * ANNUALIZATION_FACTOR</p></td>
 </tr>
-<tr class="row-odd"><td>#add up all travel purposes if calculated</td>
-<td>&#160;</td>
-<td>&#160;</td>
+<tr class="row-odd"><td><p>#add up all travel purposes if calculated</p></td>
+<td></td>
+<td></td>
 </tr>
-<tr class="row-even"><td>travel options benefit</td>
-<td>travel_options_benefit</td>
-<td>access_benefit_hbo + access_benefit_hbr + access_benefit_hbs + access_benefit_hbw + access_benefit_nhbnw + access_benefit_nhbw</td>
+<tr class="row-even"><td><p>travel options benefit</p></td>
+<td><p>travel_options_benefit</p></td>
+<td><p>access_benefit_hbo + access_benefit_hbr + access_benefit_hbs + access_benefit_hbw + access_benefit_nhbnw + access_benefit_nhbw</p></td>
 </tr>
 </tbody>
 </table>

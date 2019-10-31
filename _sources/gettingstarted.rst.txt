@@ -21,6 +21,20 @@ Installation
 
   pip install https://github.com/RSGInc/bca4abm/zipball/master
 
+.. note::
+
+  Support for Python 2 has been discontinued by most major Python packages, including
+  many of bca4abm's dependencies. For the most up-to-date and stable version of bca4abm,
+  using python 3.6+ is recommended, although older versions may still work with some package
+  version fiddling.
+
+  A stable/tested Python 2.7 version of bca4abm can be installed with the following command,
+  however this branch will not benefit from any bug fixes or improvements moving forward.
+
+  ::
+
+    pip install https://github.com/RSGInc/bca4abm/zipball/py2
+
 
 Running the Model
 -----------------
