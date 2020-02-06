@@ -15,11 +15,11 @@ Installation
   conda create -n bca4abmtest python=3.7
   activate bca4abmtest
 
-* Get and install the bca4abm package from `GitHub <https://github.com/RSGInc/bca4abm>`_
+* Get and install the bca4abm package from `PyPi <https://pypi.org/>`_
 
 ::
 
-  pip install https://github.com/RSGInc/bca4abm/zipball/master
+  pip install bca4abm
 
 .. note::
 
@@ -39,19 +39,27 @@ Installation
 Running the Model
 -----------------
 
-* Activate the conda Python environment
+* View the list of available examples
 
 ::
 
-  activate bca4abmtest
+  bca4abm create --list
 
-* Change to the ABM or 4step example folder and then run the run_bca.py program
+* Create a local copy of an example folder
 
 ::
 
-  python run_bca.py
+  bca4abm create --example example_4step
+
+* Run the example
+
+::
+
+  bca4abm run example_4step
 
 * Check the outputs folder for results, for example the ``final_aggregate_results.csv`` file for the 4step example
+
+More usage information can be found via ``bca4abm -h`` and ``bca4abm [command] -h``
 
 Process Overview
 ----------------
