@@ -71,7 +71,9 @@ def create(args):
     # FIXME: change this to generic root package directory
     root_dir = os.path.abspath(os.path.join(__file__, '../../..'))
     example_dirs = [
-        item for item in os.listdir(root_dir) if os.path.isdir(item) and 'example' in item
+        item for item in os.listdir(root_dir)
+        if os.path.isdir(os.path.join(root_dir, item))
+        and 'example' in item
     ]
 
     if args.list:
