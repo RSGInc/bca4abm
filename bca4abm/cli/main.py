@@ -69,16 +69,7 @@ def create(args):
     be run with the 'bca run' command.
     """
 
-    # FIXME: change this to generic root package directory
-    root_dir = os.path.abspath(os.path.join(__file__, '../../..'))
-    # print(os.listdir(root_dir))
-    print(pkg_resources.resource_listdir('bca4abm', ''))
-    print(os.listdir(sys.prefix))
-    example_dirs = [
-        item for item in os.listdir(root_dir)
-        if os.path.isdir(os.path.join(root_dir, item))
-        and 'example' in item
-    ]
+    example_dirs = pkg_resources.resource_listdir('bca4abm', 'examples')
 
     if args.list:
         print('Available examples:')
@@ -96,7 +87,8 @@ def create(args):
         else:
             dest_path = args.destination
 
-        example_path = os.path.join(root_dir, args.example)
+        resource = os.path.join('examples', args.example)
+        example_path = pkg_resources.resource_filename('bca4abm', resource)
 
         print('copying files from %s...' % args.example)
         shutil.copytree(example_path, dest_path)
