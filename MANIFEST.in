@@ -1,2 +1,1 @@
-graft example_4step
-graft example_abm
+graft bca4abm/examples
