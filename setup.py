@@ -6,6 +6,15 @@ with open(os.path.join('bca4abm', '__init__.py')) as f:
     info = re.search(r'__.*', f.read(), re.S)
     exec(info[0])
 
+def include_examples(exname):
+    paths = []
+    for (path, directory, filenames) in os.walk(exname, topdown=True):
+        for filename in filenames:
+            if not filename.startswith('.'):
+                paths.append((path, [os.path.join(path, filename)]))
+
+    return paths
+
 setup(
     name='bca4abm',
     version=__version__,
@@ -16,6 +25,7 @@ setup(
     url='https://github.com/RSGInc/bca4abm',
     packages=find_packages(exclude=['*.tests']),
     include_package_data=True,
+    data_files=include_examples('example_4step'),
     entry_points={'console_scripts': ['bca4abm=bca4abm.cli.main:main']},
     install_requires=[
         'numpy >= 1.16.1',

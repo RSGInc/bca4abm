@@ -1,3 +1,2 @@
-include papers/*
-include example_4step/*
-include example_abm/*
+graft example_4step
+graft example_abm

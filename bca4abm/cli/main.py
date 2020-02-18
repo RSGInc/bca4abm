@@ -11,6 +11,7 @@ import sys
 import warnings
 import logging
 import argparse
+import pkg_resources
 
 from activitysim.core import tracing
 from activitysim.core import pipeline
@@ -70,6 +71,9 @@ def create(args):
 
     # FIXME: change this to generic root package directory
     root_dir = os.path.abspath(os.path.join(__file__, '../../..'))
+    # print(os.listdir(root_dir))
+    print(pkg_resources.resource_listdir('bca4abm', ''))
+    print(os.listdir(sys.prefix))
     example_dirs = [
         item for item in os.listdir(root_dir)
         if os.path.isdir(os.path.join(root_dir, item))
