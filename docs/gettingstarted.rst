@@ -49,13 +49,19 @@ Running the Model
 
 ::
 
-  bca4abm create --example example_4step
+  bca4abm create --example example_4step --destination my_test_example
 
 * Run the example
 
 ::
 
-  bca4abm run example_4step
+  bca4abm run --working_dir my_test_example
+
+or
+
+::
+
+  bca4abm run -c my_test_example/configs -d my_test_example/data -o my_test_example/output
 
 * Check the outputs folder for results, for example the ``final_aggregate_results.csv`` file for the 4step example
 

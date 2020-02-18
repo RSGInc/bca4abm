@@ -25,7 +25,7 @@ import bca4abm
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--version', action='version', version=bca4abm.__version__)
+    parser.add_argument('-V', '--version', action='version', version=bca4abm.__version__)
 
     # print help if no subcommand is provided
     parser.set_defaults(func=lambda x: parser.print_help())
@@ -100,42 +100,62 @@ def subparser_run(subparsers):
     """Run command args
     """
     parser_run = subparsers.add_parser('run', description=run.__doc__, help='run bca4abm')
-    parser_run.add_argument('project_dir', type=str, help='path to example/project directory')
-    parser_run.add_argument('-c', '--config', type=str, help='path to config dir')
-    parser_run.add_argument('-o', '--output', type=str, help='path to output dir')
-    parser_run.add_argument('-d', '--data', type=str, help='path to data dir')
-    parser_run.add_argument('-r', '--resume', type=str, help='resume after step')
-    parser_run.add_argument('-p', '--pipeline', help='pipeline file name')
+    parser_run.add_argument('-w', '--working_dir',
+                            type=str,
+                            metavar='PATH',
+                            help='path to example/project directory (default: %s)' % os.getcwd())
+    parser_run.add_argument('-c', '--config',
+                            type=str,
+                            metavar='PATH',
+                            help='path to config dir')
+    parser_run.add_argument('-o', '--output',
+                            type=str,
+                            metavar='PATH',
+                            help='path to output dir')
+    parser_run.add_argument('-d', '--data',
+                            type=str,
+                            metavar='PATH',
+                            help='path to data dir')
+    parser_run.add_argument('-r', '--resume',
+                            type=str,
+                            metavar='STEPNAME',
+                            help='resume after step')
+    parser_run.add_argument('-p', '--pipeline',
+                            type=str,
+                            metavar='FILE',
+                            help='pipeline file name')
     parser_run.set_defaults(func=run)
 
 
 def run(args):
     """
-    Run bca4abm on an existing project folder.
+    Run bca4abm. Specify a project folder using the '--working_dir' option,
+    or point to the config, data, and output folders directly with
+    '--config', '--data', and '--output'.
 
-    This command will read the settings/configs found in the
-    configs directory of your project folder.
     """
 
-    if not os.path.exists(args.project_dir):
-        sys.exit("error: could not find project folder '%s'" % args.project_dir)
-
-    os.chdir(args.project_dir)
+    if args.working_dir and os.path.exists(args.working_dir):
+        os.chdir(args.working_dir)
 
     if args.config:
-        if not os.path.exists(args.config):
-            sys.exit("Could not find configs dir '%s'" % dir)
         inject.add_injectable('configs_dir', args.config)
 
     if args.data:
-        if not os.path.exists(args.data):
-            sys.exit("Could not find data dir '%s'" % dir)
         inject.add_injectable('data_dir', args.data)
 
     if args.output:
-        if not os.path.exists(args.output):
-            sys.exit("Could not find output dir '%s'." % args.output)
         inject.add_injectable('output_dir', args.output)
+
+    for injectable in ['configs_dir', 'data_dir', 'output_dir']:
+        try:
+            dir_path = inject.get_injectable(injectable)
+        except RuntimeError:
+            sys.exit('Error: please specify either a --working_dir '
+                     "containing 'configs', 'data', and 'output' folders "
+                     'or all three of --config, --data, and --output')
+        if not os.path.exists(dir_path):
+            sys.exit("Could not find %s '%s'" % (injectable, os.path.abspath(dir_path)))
 
     if args.pipeline:
         inject.add_injectable('pipeline_file_name', args.pipeline)
