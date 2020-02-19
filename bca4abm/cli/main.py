@@ -25,7 +25,7 @@ import bca4abm
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('-V', '--version', action='version', version=bca4abm.__version__)
+    parser.add_argument('--version', '-V', action='version', version=bca4abm.__version__)
 
     # print help if no subcommand is provided
     parser.set_defaults(func=lambda x: parser.print_help())
