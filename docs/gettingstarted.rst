@@ -67,6 +67,17 @@ or
 
 More usage information can be found via ``bca4abm -h`` and ``bca4abm [command] -h``
 
+.. note::
+
+  A customizable run script for power users can be found in the `Github repo <https://github.com/RSGInc/bca4abm/tree/master/scripts>`__.
+  This script takes many of the same arguments as the ``bca4abm run`` command, including paths to
+  ``--config``, ``--data``, and ``--output`` directories. It looks for these folders in the current
+  working directory by default.
+
+  ::
+
+    python run_bca.py
+
 Process Overview
 ----------------
 
