@@ -30,11 +30,11 @@ after_success:
 - cd docs
 - make clean
 - make html
-- touch build/html/.nojekyll
+- touch _build/html/.nojekyll
 
 deploy:
   provider: pages
-  local_dir: docs/build/html
+  local_dir: docs/_build/html
   skip_cleanup: true
   github_token: $GH_TOKEN
   keep_history: true
