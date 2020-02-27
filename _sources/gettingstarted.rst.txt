@@ -15,11 +15,11 @@ Installation
   conda create -n bca4abmtest python=3.7
   activate bca4abmtest
 
-* Get and install the bca4abm package from `GitHub <https://github.com/RSGInc/bca4abm>`_
+* Get and install the bca4abm package from `PyPi <https://pypi.org/>`_
 
 ::
 
-  pip install https://github.com/RSGInc/bca4abm/zipball/master
+  pip install bca4abm
 
 .. note::
 
@@ -39,19 +39,44 @@ Installation
 Running the Model
 -----------------
 
-* Activate the conda Python environment
+* View the list of available examples
 
 ::
 
-  activate bca4abmtest
+  bca4abm create --list
 
-* Change to the ABM or 4step example folder and then run the run_bca.py program
+* Create a local copy of an example folder
 
 ::
 
-  python run_bca.py
+  bca4abm create --example example_4step --destination my_test_example
+
+* Run the example
+
+::
+
+  bca4abm run --working_dir my_test_example
+
+or
+
+::
+
+  bca4abm run -c my_test_example/configs -d my_test_example/data -o my_test_example/output
 
 * Check the outputs folder for results, for example the ``final_aggregate_results.csv`` file for the 4step example
+
+More usage information can be found via ``bca4abm -h`` and ``bca4abm [command] -h``
+
+.. note::
+
+  A customizable run script for power users can be found in the `Github repo <https://github.com/RSGInc/bca4abm/tree/master/scripts>`__.
+  This script takes many of the same arguments as the ``bca4abm run`` command, including paths to
+  ``--config``, ``--data``, and ``--output`` directories. It looks for these folders in the current
+  working directory by default.
+
+  ::
+
+    python run_bca.py
 
 Process Overview
 ----------------

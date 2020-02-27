@@ -8,8 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting Started &mdash; bca4abm 0.5
- documentation</title>
+  <title>Getting Started &mdash; bca4abm 0.5 documentation</title>
   
 
   
@@ -22,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -63,7 +62,6 @@
             
               <div class="version">
                 0.5
-
               </div>
             
           
@@ -176,9 +174,9 @@
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Get and install the bca4abm package from <a class="reference external" href="https://github.com/RSGInc/bca4abm">GitHub</a></p></li>
+<li><p>Get and install the bca4abm package from <a class="reference external" href="https://pypi.org/">PyPi</a></p></li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">RSGInc</span><span class="o">/</span><span class="n">bca4abm</span><span class="o">/</span><span class="n">zipball</span><span class="o">/</span><span class="n">master</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">bca4abm</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -197,20 +195,41 @@ however this branch will not benefit from any bug fixes or improvements moving f
 <div class="section" id="running-the-model">
 <h2>Running the Model<a class="headerlink" href="#running-the-model" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>Activate the conda Python environment</p></li>
+<li><p>View the list of available examples</p></li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">activate</span> <span class="n">bca4abmtest</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bca4abm</span> <span class="n">create</span> <span class="o">--</span><span class="nb">list</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Change to the ABM or 4step example folder and then run the run_bca.py program</p></li>
+<li><p>Create a local copy of an example folder</p></li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_bca</span><span class="o">.</span><span class="n">py</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bca4abm</span> <span class="n">create</span> <span class="o">--</span><span class="n">example</span> <span class="n">example_4step</span> <span class="o">--</span><span class="n">destination</span> <span class="n">my_test_example</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Run the example</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bca4abm</span> <span class="n">run</span> <span class="o">--</span><span class="n">working_dir</span> <span class="n">my_test_example</span>
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bca4abm</span> <span class="n">run</span> <span class="o">-</span><span class="n">c</span> <span class="n">my_test_example</span><span class="o">/</span><span class="n">configs</span> <span class="o">-</span><span class="n">d</span> <span class="n">my_test_example</span><span class="o">/</span><span class="n">data</span> <span class="o">-</span><span class="n">o</span> <span class="n">my_test_example</span><span class="o">/</span><span class="n">output</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>Check the outputs folder for results, for example the <code class="docutils literal notranslate"><span class="pre">final_aggregate_results.csv</span></code> file for the 4step example</p></li>
 </ul>
+<p>More usage information can be found via <code class="docutils literal notranslate"><span class="pre">bca4abm</span> <span class="pre">-h</span></code> and <code class="docutils literal notranslate"><span class="pre">bca4abm</span> <span class="pre">[command]</span> <span class="pre">-h</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A customizable run script for power users can be found in the <a class="reference external" href="https://github.com/RSGInc/bca4abm/tree/master/scripts">Github repo</a>.
+This script takes many of the same arguments as the <code class="docutils literal notranslate"><span class="pre">bca4abm</span> <span class="pre">run</span></code> command, including paths to
+<code class="docutils literal notranslate"><span class="pre">--config</span></code>, <code class="docutils literal notranslate"><span class="pre">--data</span></code>, and <code class="docutils literal notranslate"><span class="pre">--output</span></code> directories. It looks for these folders in the current
+working directory by default.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_bca</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="process-overview">
 <h2>Process Overview<a class="headerlink" href="#process-overview" title="Permalink to this headline">¶</a></h2>
