@@ -1,14 +1,22 @@
 from setuptools import setup, find_packages
+import os
+import re
+
+with open(os.path.join('bca4abm', '__init__.py')) as f:
+    info = re.search(r'__.*', f.read(), re.S)
+    exec(info[0])
+
 setup(
-    name="bca4abm",
-    version='0.5',
-    description='Benefit Calculations for Travel Models',
+    name='bca4abm',
+    version=__version__,
+    description=__doc__,
     author='contributing authors',
     author_email='ben.stabler@rsginc.com',
     license='BSD-3',
     url='https://github.com/RSGInc/bca4abm',
     packages=find_packages(exclude=['*.tests']),
     include_package_data=True,
+    entry_points={'console_scripts': ['bca4abm=bca4abm.cli.main:main']},
     install_requires=[
         'numpy >= 1.16.1',
         'openmatrix >= 0.3.4.1',
@@ -18,6 +26,5 @@ setup(
         'toolz >= 0.8.1',
         'zbox >= 1.2',
         'activitysim >= 0.9.1',
-        'future >= 0.16.0'
     ]
 )
