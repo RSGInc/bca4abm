@@ -1,43 +1,37 @@
 Silos,Description,Target,Expression
-# link volume calculations,,,
-,,_auto_volume_MD,links.svol + links.hvol
-,,_auto_volume_PM,links.svol_PM2 + links.hvol_PM2
-,,_med_truck_volume_MD,links.mtvol
-,,_med_truck_volume_PM,links.mtvol_PM2
-,,_heavy_truck_volume_MD,links.htvol
-,,_heavy_truck_volume_PM,links.htvol_PM2
-,,_truck_volume_MD,_med_truck_volume_MD + _heavy_truck_volume_MD
-,,_truck_volume_PM,_med_truck_volume_PM + _heavy_truck_volume_PM
-,,_auto_volume_daily,LINK_PEAK_TOD_SHARE_AUTO *_auto_volume_PM + LINK_OFFPEAK_TOD_SHARE_AUTO * _auto_volume_MD
-,,_med_truck_volume_daily,LINK_PEAK_TOD_SHARE_AUTO * _med_truck_volume_PM + LINK_OFFPEAK_TOD_SHARE_AUTO * _med_truck_volume_MD
-,,_heavy_truck_volume_daily,LINK_PEAK_TOD_SHARE_AUTO * _heavy_truck_volume_PM + LINK_OFFPEAK_TOD_SHARE_AUTO * _heavy_truck_volume_MD
-,,_truck_volume_daily,LINK_PEAK_TOD_SHARE_AUTO * _truck_volume_PM + LINK_OFFPEAK_TOD_SHARE_AUTO * _truck_volume_MD
+# link data processing,,,
+,,_auto_volume_daily,links[links.columns[links.columns.str.contains('auto_volume')]].sum(axis=1)
+,,_med_truck_volume_daily,links[links.columns[links.columns.str.contains('mtvol')]].sum(axis=1)
+,,_heavy_truck_volume_daily,links[links.columns[links.columns.str.contains('htvol')]].sum(axis=1)
+,,_truck_volume_daily,_med_truck_volume_daily + _heavy_truck_volume_daily
 ,,_total_volume_daily,_auto_volume_daily + _truck_volume_daily
-,,_length_MD,links.length
-,,_length_PM,links.length_PM2
-,,_length,"pd.concat([_length_MD,_length_PM],axis=1).max(axis=1)"
-,,_waterf_MD,links.waterf
-,,_waterf_PM,links.waterf_PM2
-,,_waterf,"pd.concat([_waterf_MD,_waterf_PM],axis=1).max(axis=1)"
-,,_noisef_MD,links.noisef
-,,_noisef_PM,links.noisef_PM2
-,,_noisef,"pd.concat([_noisef_MD, _noisef_PM],axis=1).max(axis=1)"
-,,_vmt_total,_total_volume_daily * _length
-,,_freeway_MD,links.volume_delay_func==1
-,,_arterial_MD,(links.volume_delay_func==2) | (links.volume_delay_func==4)
-,,_collector_MD,links.volume_delay_func==9
-,,_ramp_MD,links.volume_delay_func==10
-,,_freeway_PM,links.volume_delay_func_PM2==1
-,,_arterial_PM,(links.volume_delay_func_PM2==2) | (links.volume_delay_func_PM2==4)
-,,_collector_PM,links.volume_delay_func_PM2==9
-,,_ramp_PM,links.volume_delay_func_PM2==10
-,,_freeway,_freeway_MD | _freeway_PM
-,,_arterial,_arterial_MD | _arterial_PM
-,,_collector,_collector_MD | _collector_PM
-,,_ramp,_ramp_MD | _ramp_PM
-,,_speed_MD,links.speed
-,,_speed_PM,links.speed_PM2
-,,_speed,"pd.concat([_speed_MD,_speed_PM],axis=1).max(axis=1)"
+,,_length,links.length_h1
+,,_waterf,1 - links.waterf_h1
+,,_noisef,1 - links.noisef_h1
+*,,vmt_total,_total_volume_daily * _length
+,,_freeway,(links.type_h1==10) | (links.type_h1==19)
+,,_arterial,(links.type_h1==20)
+,,_collector,(links.type_h1==29) | (links.type_h1==30) | (links.type_h1==40)
+,,_ramp,(links.type_h1==70) | (links.type_h1==79)
+*,,vmt_total_freeway,"np.where((_freeway==1),vmt_total,0)"
+*,,vmt_total_arterial,"np.where((_arterial==1),vmt_total,0)"
+,,_speed,links.speed_h1
+,,_urbrur,"pd.Series(links.mpa_h1, dtype='bool')"
+,,_barrier,"pd.Series(links.barrier_h1, dtype='bool')"
+,,_num_lanes,links.num_lanes_h1
+,,_num_lanes_original,_num_lanes
+,don't count turning lane for crash equations,_num_lanes,_num_lanes - _num_lanes%1
+,,_num_lanes_x,"np.where((_num_lanes>1), 4, 2)"
+,,_divhwy,"pd.Series(links.divhwy_h1, dtype='bool')"
+,,_signal,"pd.Series(links.signal_h1, dtype='bool')"
+,,_stop,"pd.Series(links.stop_h1, dtype='bool')"
+# calculations,,,
+,HSM - Freeway,_hsm_fwy,(_freeway==1) | (_ramp==1)
+,HSM - Rural Multi Lane Highways,_hsm_rural_XL,(((_urbrur==0) & (_arterial==1)) | ((_urbrur==0) & (_collector==1))) & (_num_lanes>1)
+,HSM - Rural Two Lane Highways,_hsm_rural_2L,(((_urbrur==0) & (_arterial==1)) | ((_urbrur==0) & (_collector==1))) & (_num_lanes==1)
+,HSM - Urban/Suburban Arterials,_hsm_urb_Art,(((_urbrur==1) & (_arterial==1)) | ((_urbrur==1) & (_collector==1)))
+,Two way total volume for saftey calculations,_adt,"np.where((_total_volume_daily==0),0.001,2*_total_volume_daily)"
+,length should not be zero for log calculations,_length,"np.where((_length==0),0.001,_length)"
 # safety costs - intersection computations at to_node,,,
 ,indegree of to_node,_to_indegree,links.i.groupby(links.j).transform('count')
 ,outdegree of to_node,_to_outdegree,"links.j.apply(lambda x, links=links: len(links[links.i==x]))"
@@ -51,37 +45,401 @@ Silos,Description,Target,Expression
 ,min leg volume from out links at to_node,_min_out_vol,"links['j'].apply(lambda x, links=links, _seg_volume=_seg_volume: min( _seg_volume[links.i==x]) if (links.i==x).any() else 0.0)"
 ,max volume at to_node,_max_vol,"pd.concat([_max_in_vol,_max_out_vol],axis=1).max(axis=1)"
 ,min volume at to_node,_min_vol,"pd.concat([_min_in_vol,_min_out_vol],axis=1).min(axis=1)"
+# Freeways crashes,,,
+,MV - FI - Rural - 4 lanes,_nmvfi_r4,"np.where((_urbrur==0) & (_num_lanes==2) & (_hsm_fwy==1),_length*np.exp(-5.975+1.492*np.log(0.001*_adt)),0)"
+,MV - FI - Rural - 6 lanes,_nmvfi_r6,"np.where((_urbrur==0) & (_num_lanes==3) & (_hsm_fwy==1),_length*np.exp(-6.092+1.492*np.log(0.001*_adt)),0)"
+,MV - FI - Rural - >=8 lanes,_nmvfi_r8,"np.where((_urbrur==0) & (_num_lanes>=4) & (_hsm_fwy==1),_length*np.exp(-6.140+1.492*np.log(0.001*_adt)),0)"
+,MV - FI - Urban - 4 lanes,_nmvfi_u4,"np.where((_urbrur==1) & (_num_lanes==2) & (_hsm_fwy==1),_length*np.exp(-5.470+1.492*np.log(0.001*_adt)),0)"
+,MV - FI - Urban - 6 lanes,_nmvfi_u6,"np.where((_urbrur==1) & (_num_lanes==3) & (_hsm_fwy==1),_length*np.exp(-5.587+1.492*np.log(0.001*_adt)),0)"
+,MV - FI - Urban - 8 lanes,_nmvfi_u8,"np.where((_urbrur==1) & (_num_lanes==4) & (_hsm_fwy==1),_length*np.exp(-5.635+1.492*np.log(0.001*_adt)),0)"
+,MV - FI - Urban - >=10 lanes,_nmvfi_u10,"np.where((_urbrur==1) & (_num_lanes>=5) & (_hsm_fwy==1),_length*np.exp(-5.842+1.492*np.log(0.001*_adt)),0)"
+,,_nmvfi,_nmvfi_r4 + _nmvfi_r6 + _nmvfi_r8 + _nmvfi_u4 + _nmvfi_u6 + _nmvfi_u8 + _nmvfi_u10
+,MV - PDO - Rural - 4 lanes,_nmvpdo_r4,"np.where((_urbrur==0) & (_num_lanes==2) & (_hsm_fwy==1),_length*np.exp(-6.882+1.936*np.log(0.001*_adt)),0)"
+,MV - PDO - Rural - 6 lanes,_nmvpdo_r6,"np.where((_urbrur==0) & (_num_lanes==3) & (_hsm_fwy==1),_length*np.exp(-7.141+1.936*np.log(0.001*_adt)),0)"
+,MV - PDO - Rural - >=8 lanes,_nmvpdo_r8,"np.where((_urbrur==0) & (_num_lanes>=4) & (_hsm_fwy==1),_length*np.exp(-7.329+1.936*np.log(0.001*_adt)),0)"
+,MV - PDO - Urban - 4 lanes,_nmvpdo_u4,"np.where((_urbrur==1) & (_num_lanes==2) & (_hsm_fwy==1),_length*np.exp(-6.548+1.936*np.log(0.001*_adt)),0)"
+,MV - PDO - Urban - 6 lanes,_nmvpdo_u6,"np.where((_urbrur==1) & (_num_lanes==3) & (_hsm_fwy==1),_length*np.exp(-6.809+1.936*np.log(0.001*_adt)),0)"
+,MV - PDO - Urban - 8 lanes,_nmvpdo_u8,"np.where((_urbrur==1) & (_num_lanes==4) & (_hsm_fwy==1),_length*np.exp(-6.997+1.936*np.log(0.001*_adt)),0)"
+,MV - PDO - Urban - >=10 lanes,_nmvpdo_u10,"np.where((_urbrur==1) & (_num_lanes>=5) & (_hsm_fwy==1),_length*np.exp(-7.260+1.936*np.log(0.001*_adt)),0)"
+,,_nmvpdo,_nmvpdo_r4 + _nmvpdo_r6 + _nmvpdo_r8 + _nmvpdo_u4 + _nmvpdo_u6 + _nmvpdo_u8 + _nmvpdo_u10
+,SV - FI - Rural - 4 lanes,_nsvfi_r4,"np.where((_urbrur==0) & (_num_lanes==2) & (_hsm_fwy==1),_length*np.exp(-2.126+0.646*np.log(0.001*_adt)),0)"
+,SV - FI - Rural - 6 lanes,_nsvfi_r6,"np.where((_urbrur==0) & (_num_lanes==3) & (_hsm_fwy==1),_length*np.exp(-2.055+0.646*np.log(0.001*_adt)),0)"
+,SV - FI - Rural - >=8 lanes,_nsvfi_r8,"np.where((_urbrur==0) & (_num_lanes>=4) & (_hsm_fwy==1),_length*np.exp(-1.985+0.646*np.log(0.001*_adt)),0)"
+,SV - FI - Urban - 4 lanes,_nsvfi_u4,"np.where((_urbrur==1) & (_num_lanes==2) & (_hsm_fwy==1),_length*np.exp(-2.126+0.646*np.log(0.001*_adt)),0)"
+,SV - FI - Urban - 6 lanes,_nsvfi_u6,"np.where((_urbrur==1) & (_num_lanes==3) & (_hsm_fwy==1),_length*np.exp(-2.055+0.646*np.log(0.001*_adt)),0)"
+,SV - FI - Urban - 8 lanes,_nsvfi_u8,"np.where((_urbrur==1) & (_num_lanes==4) & (_hsm_fwy==1),_length*np.exp(-1.985+0.646*np.log(0.001*_adt)),0)"
+,SV - FI - Urban - >=10 lanes,_nsvfi_u10,"np.where((_urbrur==1) & (_num_lanes>=5) & (_hsm_fwy==1),_length*np.exp(-1.915+0.646*np.log(0.001*_adt)),0)"
+,,_nsvfi,_nsvfi_r4 + _nsvfi_r6 + _nsvfi_r8 + _nsvfi_u4 + _nsvfi_u6 + _nsvfi_u8 + _nsvfi_u10
+,SV - PDO - Rural - 4 lanes,_nsvpdo_r4,"np.where((_urbrur==0) & (_num_lanes==2) & (_hsm_fwy==1),_length*np.exp(-2.235+0.876*np.log(0.001*_adt)),0)"
+,SV - PDO - Rural - 6 lanes,_nsvpdo_r6,"np.where((_urbrur==0) & (_num_lanes==3) & (_hsm_fwy==1),_length*np.exp(-2.274+0.876*np.log(0.001*_adt)),0)"
+,SV - PDO - Rural - >=8 lanes,_nsvpdo_r8,"np.where((_urbrur==0) & (_num_lanes>=4) & (_hsm_fwy==1),_length*np.exp(-2.312+0.876*np.log(0.001*_adt)),0)"
+,SV - PDO - Urban - 4 lanes,_nsvpdo_u4,"np.where((_urbrur==1) & (_num_lanes==2) & (_hsm_fwy==1),_length*np.exp(-2.235+0.876*np.log(0.001*_adt)),0)"
+,SV - PDO - Urban - 6 lanes,_nsvpdo_u6,"np.where((_urbrur==1) & (_num_lanes==3) & (_hsm_fwy==1),_length*np.exp(-2.274+0.876*np.log(0.001*_adt)),0)"
+,SV - PDO - Urban - 8 lanes,_nsvpdo_u8,"np.where((_urbrur==1) & (_num_lanes==4) & (_hsm_fwy==1),_length*np.exp(-2.312+0.876*np.log(0.001*_adt)),0)"
+,SV - PDO - Urban - >=10 lanes,_nsvpdo_u10,"np.where((_urbrur==1) & (_num_lanes>=5) & (_hsm_fwy==1),_length*np.exp(-2.351+0.876*np.log(0.001*_adt)),0)"
+,,_nsvpdo,_nsvpdo_r4 + _nsvpdo_r6 + _nsvpdo_r8 + _nsvpdo_u4 + _nsvpdo_u6 + _nsvpdo_u8 + _nsvpdo_u10
+,CMF Lane Width FI,_cmflwfi_fwy,"np.where((LW_FWY<13)  & (_hsm_fwy==1), np.exp(-0.0376*(LW_FWY-12)), 0.963)"
+,CMF Lane Width PDO,_cmflwpdo_fwy,"np.where((_hsm_fwy==1),1, 0)"
+,CMF - presence of median barrier FI,_cmfmpfi_fwy,"np.where((_hsm_fwy==1) & (_barrier==1),0.131, 1)"
+,CMF - presence of median barrier PDO,_cmfmppdo_fwy,"np.where((_hsm_fwy==1) & (_barrier==1),0.169, 1)"
+,Divide by half since calculation is repeated for both directions,_nfi_fwy,0.5*(_nsvfi + _nmvfi)*_cmflwfi_fwy*_cmfmpfi_fwy
+,Divide by half since calculation is repeated for both directions,_npdo_fwy,0.5*(_nsvpdo + _nmvpdo)*_cmflwpdo_fwy*_cmfmppdo_fwy
+,,_nf_fwy,_nfi_fwy*PERCENT_FATAL
+,,_ni_fwy,_nfi_fwy-_nf_fwy
+*,,f_crashes_fwy,_nf_fwy*CfwyF
+*,,i_crashes_fwy,_ni_fwy*CfwyI
+*,,p_crashes_fwy,_npdo_fwy*CfwyP
+*,Final Total Freeway Crashes,_ntot_fwy,f_crashes_fwy+i_crashes_fwy+p_crashes_fwy
+# Rural X Lane Highways,,,
+,,_ntot_rxl,"np.where((_hsm_rural_XL==1) & (_divhwy==1),CrxlD*(np.exp(-9.025 + 1.049*np.log(_adt) + np.log(_length))),0)"
+,,_ntot_rxl,"np.where((_hsm_rural_XL==1) & (_divhwy==0),CrxlU*(np.exp(-9.653 + 1.176*np.log(_adt) + np.log(_length))),_ntot_rxl)"
+,,_nfi_rxl,"np.where((_hsm_rural_XL==1) & (_divhwy==1),CrxlD*(np.exp(-8.837 + 0.958*np.log(_adt) + np.log(_length))),0)"
+,,_nfi_rxl,"np.where((_hsm_rural_XL==1) & (_divhwy==0),CrxlU*(np.exp(-9.410 + 1.094*np.log(_adt) + np.log(_length))),_nfi_rxl)"
+,,_npdo_rxl,_ntot_rxl-_nfi_rxl
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==1),(1.03 + 0.0001380*(_adt - 400)),0)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (_adt>2000) & (_divhwy==1),1.25,_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (_adt<400) & (_divhwy==1),1.03,_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (LW_HWY>=10) & (_divhwy==1),(1.01 + 0.0000875*(_adt - 400)),_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (LW_HWY>=10)  & (_adt>2000) & (_divhwy==1),1.15,_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (LW_HWY>=10)  & (_adt<400) & (_divhwy==1),1.01,_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (LW_HWY>=11) & (_divhwy==1),(1.01 + 0.0000125*(_adt - 400)),_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (LW_HWY>=11)  & (_adt>2000) & (_divhwy==1),1.03,_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (LW_HWY>=11)  & (_adt<400) & (_divhwy==1),1.01,_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (LW_HWY>=12) & (_divhwy==1),1,_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0),(1.03 + 0.0001380*(_adt - 400)),_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (_adt>2000) & (_divhwy==0),1.25,_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (_adt<400) & (_divhwy==0),1.03,_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (LW_HWY>=10) & (_divhwy==0),(1.01 + 0.0000875*(_adt - 400)),_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (LW_HWY>=10)  & (_adt>2000) & (_divhwy==0),1.15,_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (LW_HWY>=10)  & (_adt<400) & (_divhwy==0),1.01,_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (LW_HWY>=11) & (_divhwy==0),(1.01 + 0.0000125*(_adt - 400)),_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (LW_HWY>=11)  & (_adt>2000) & (_divhwy==0),1.03,_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (LW_HWY>=11)  & (_adt<400) & (_divhwy==0),1.01,_cmfra_xl)"
+,,_cmfra_xl,"np.where((_hsm_rural_XL==1) & (LW_HWY>=12) & (_divhwy==0),1,_cmfra_xl)"
+,,_pra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0),0.27,0)"
+,,_pra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==1),0.5,_pra_xl)"
+,CMF Lane Width - Rural XL,_cmflw_xl,"np.where((_hsm_rural_XL==1),((_cmfra_xl-1)*_pra_xl+1),0)"
+,,_cmfwra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0),(1.10 + 0.00025000*(_adt - 400)),0)"
+,,_cmfwra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0) & (_adt>2000),1.5,_cmfwra_xl)"
+,,_cmfwra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0) & (_adt<400),1.1,_cmfwra_xl)"
+,,_cmfwra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0) & (OSW_HWY>=2),(1.07 + 0.00014300*(_adt - 400)),_cmfwra_xl)"
+,,_cmfwra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0) & (OSW_HWY>=2) & (_adt>2000),1.3,_cmfwra_xl)"
+,,_cmfwra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0) & (OSW_HWY>=2) & (_adt<400),1.07,_cmfwra_xl)"
+,,_cmfwra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0) & (OSW_HWY>=4),(1.02 + 0.00008125*(_adt - 400)),_cmfwra_xl)"
+,,_cmfwra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0) & (OSW_HWY>=4) & (_adt>2000),1.15,_cmfwra_xl)"
+,,_cmfwra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0) & (OSW_HWY>=4) & (_adt<400),1.02,_cmfwra_xl)"
+,,_cmfwra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0) & (OSW_HWY>=6),1,_cmfwra_xl)"
+,,_cmfwra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0) & (OSW_HWY>=8),(0.98 - 0.00006875*(_adt - 400)),_cmfwra_xl)"
+,,_cmfwra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0) & (OSW_HWY>=8) & (_adt>2000),0.87,_cmfwra_xl)"
+,,_cmfwra_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0) & (OSW_HWY>=8) & (_adt<400),0.98,_cmfwra_xl)"
+,,_cmfrsw_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==0),((_cmfwra_xl * 1.00 - 1)*_pra_xl + 1),0)"
+,,_cmfrsw_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==1),1.18,_cmfrsw_xl)"
+,,_cmfrsw_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==1) & (OSW_HWY>=2),1.13,_cmfrsw_xl)"
+,,_cmfrsw_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==1) & (OSW_HWY>=4),1.09,_cmfrsw_xl)"
+,,_cmfrsw_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==1) & (OSW_HWY>=6),1.04,_cmfrsw_xl)"
+,CMF Shoulder Width - Rural XL,_cmfrsw_xl,"np.where((_hsm_rural_XL==1) & (_divhwy==1) & (OSW_HWY>=8),1,_cmfrsw_xl)"
+,Divide by half since calculation is repeated for both directions,_ntot_rxl,0.5*_ntot_rxl*_cmflw_xl*_cmfrsw_xl
+,Divide by half since calculation is repeated for both directions,_nfi_rxl,0.5*_nfi_rxl*_cmflw_xl*_cmfrsw_xl
+,,_npdo_rxl,_ntot_rxl-_nfi_rxl
+,,_nf_rxl,_nfi_rxl*PERCENT_FATAL
+,,_ni_rxl,_nfi_rxl-_nf_rxl
+,Total Rural Multi Lane RS Crashes,_ntot_rxl,_nf_rxl+_ni_rxl+_npdo_rxl
+,Total Rural X Lane Intersection crashes,_ntot_rxl_x,"np.where((_hsm_rural_XL==1) & (_is_intersection==1) & (_num_legs==3) & (_stop==1),Crxl3ST_X*(np.exp(-12.526 + 1.204*np.log(_max_vol + 1) + 0.236*np.log(_min_vol + 1)))*(1/_num_legs),0)"
+,Discount by number of legs since the calculation gets repeated for each to_node in the intersection,_ntot_rxl_x,"np.where((_hsm_rural_XL==1) & (_is_intersection==1) & (_num_legs==4) & (_stop==1),Crxl4ST_X*(np.exp(-10.008 + 0.848*np.log(_max_vol + 1) + 0.448*np.log(_min_vol + 1)))*(1/_num_legs),_ntot_rxl_x)"
+,,_ntot_rxl_x,"np.where((_hsm_rural_XL==1) & (_is_intersection==1) & (_num_legs==4) & (_signal==1),Crxl4SG_X*(np.exp(-7.182 + 0.722*np.log(_max_vol + 1) + 0.337*np.log(_min_vol + 1)))*(1/_num_legs),_ntot_rxl_x)"
+,,_nfi_rxl_x,"np.where((_hsm_rural_XL==1) & (_is_intersection==1) & (_num_legs==3) & (_stop==1),Crxl3ST_X*(np.exp(-12.664 + 1.107*np.log(_max_vol + 1) + 0.272*np.log(_min_vol + 1)))*(1/_num_legs),0)"
+,,_nfi_rxl_x,"np.where((_hsm_rural_XL==1) & (_is_intersection==1) & (_num_legs==4) & (_stop==1),Crxl4ST_X*(np.exp(-11.554 + 0.888*np.log(_max_vol + 1) + 0.525*np.log(_min_vol + 1)))*(1/_num_legs),_nfi_rxl_x)"
+,,_nfi_rxl_x,"np.where((_hsm_rural_XL==1) & (_is_intersection==1) & (_num_legs==4) & (_signal==1),Crxl4SG_X*(np.exp(-6.393 + 0.638*np.log(_max_vol + 1) + 0.232*np.log(_min_vol + 1)))*(1/_num_legs),_nfi_rxl_x)"
+,,_nf_rxl_x,"np.where((_hsm_rural_XL==1) & (_is_intersection==1) & (_signal==1),(_ntot_rxl_x*PERCENT_FATAL),0)"
+,,_nf_rxl_x,"np.where((_hsm_rural_XL==1) & (_is_intersection==1) & (_stop==1) & (_num_legs==3),(_ntot_rxl_x*PERCENT_FATAL),_nf_rxl_x)"
+,,_nf_rxl_x,"np.where((_hsm_rural_XL==1) & (_is_intersection==1) & (_stop==1) & (_num_legs==4),(_ntot_rxl_x*PERCENT_FATAL),_nf_rxl_x)"
+,,_ni_rxl_x,_nfi_rxl_x-_nf_rxl_x
+,,_np_rxl_x,_ntot_rxl_x-_nfi_rxl_x
+,,_ntot_rxl_x,_nf_rxl_x+_ni_rxl_x+_np_rxl_x
+*,Total Rural X Lane RS+Intrsn Crashes,_tot_crashes_rxl,_ntot_rxl+_ntot_rxl_x
+*,,f_crashes_rxl,_nf_rxl+_nf_rxl_x
+*,,p_crashes_rxl,_npdo_rxl+_np_rxl_x
+*,,i_crashes_rxl,_ni_rxl+_ni_rxl_x
+# Rural 2 Lane Highways,,,
+,Rural two lane baseline crashes,_ntot_r2l,"np.where((_hsm_rural_2L==1),(_adt*_length*365*np.power(10.0,-6.0)*np.exp(-0.312)),0)"
+,,_cmfra,"np.where((_hsm_rural_2L==1),(1.05 + 0.000281*(_adt - 400)),0)"
+,,_cmfra,"np.where((_hsm_rural_2L==1) & (_adt>2000),1.5,_cmfra)"
+,,_cmfra,"np.where((_hsm_rural_2L==1) & (_adt<400),1.05,_cmfra)"
+,,_cmfra,"np.where((_hsm_rural_2L==1) & (LW_HWY>=10),(1.02 + 0.000175*(_adt - 400)),_cmfra)"
+,,_cmfra,"np.where((_hsm_rural_2L==1) & (LW_HWY>=10)  & (_adt>2000),1.3,_cmfra)"
+,,_cmfra,"np.where((_hsm_rural_2L==1) & (LW_HWY>=10)  & (_adt<400),1.02,_cmfra)"
+,,_cmfra,"np.where((_hsm_rural_2L==1) & (LW_HWY>=11),(1.01 + 0.000025*(_adt - 400)),_cmfra)"
+,,_cmfra,"np.where((_hsm_rural_2L==1) & (LW_HWY>=11)  & (_adt>2000),1.05,_cmfra)"
+,,_cmfra,"np.where((_hsm_rural_2L==1) & (LW_HWY>=11)  & (_adt<400),1.01,_cmfra)"
+,,_cmfra,"np.where((_hsm_rural_2L==1) & (LW_HWY>=12),1,_cmfra)"
+,CMF lane width,_cmflw_r2l,"np.where((_hsm_rural_2L==1), ((_cmfra - 1)*0.574 + 1),0)"
+,,_cmfwra,"np.where((_hsm_rural_2L==1),(1.10 + 0.00025000*(_adt - 400)),0)"
+,,_cmfwra,"np.where((_hsm_rural_2L==1) & (_adt>2000),1.5,_cmfwra)"
+,,_cmfwra,"np.where((_hsm_rural_2L==1) & (_adt<400),1.1,_cmfwra)"
+,,_cmfwra,"np.where((_hsm_rural_2L==1) & (OSW_HWY>=2),(1.07 + 0.00014300*(_adt - 400)),_cmfwra)"
+,,_cmfwra,"np.where((_hsm_rural_2L==1) & (OSW_HWY>=2) & (_adt>2000),1.3,_cmfwra)"
+,,_cmfwra,"np.where((_hsm_rural_2L==1) & (OSW_HWY>=2) & (_adt<400),1.07,_cmfwra)"
+,,_cmfwra,"np.where((_hsm_rural_2L==1) & (OSW_HWY>=4),(1.02 + 0.00008125*(_adt - 400)),_cmfwra)"
+,,_cmfwra,"np.where((_hsm_rural_2L==1) & (OSW_HWY>=4) & (_adt>2000),1.15,_cmfwra)"
+,,_cmfwra,"np.where((_hsm_rural_2L==1) & (OSW_HWY>=4) & (_adt<400),1.02,_cmfwra)"
+,,_cmfwra,"np.where((_hsm_rural_2L==1) & (OSW_HWY>=6),1,_cmfwra)"
+,,_cmfwra,"np.where((_hsm_rural_2L==1) & (OSW_HWY>=8),0.98 - 0.00006875*(_adt - 400),_cmfwra)"
+,,_cmfwra,"np.where((_hsm_rural_2L==1) & (OSW_HWY>=8) & (_adt>2000),0.87,_cmfwra)"
+,,_cmfwra,"np.where((_hsm_rural_2L==1) & (OSW_HWY>=8) & (_adt<400),0.98,_cmfwra)"
+,CMF outside shoulder width,_cmfrsw_r2l,"np.where((_hsm_rural_2L==1), ((_cmfwra * 1.00 - 1)*0.574 + 1),0)"
+,Divide by half since calculation is repeated for both directions,_ntot_r2l,0.5*_ntot_r2l*_cmflw_r2l*_cmfrsw_r2l
+,,_npdo_r2l,_ntot_r2l*R2L_PDO
+,,_nf_r2l,_ntot_r2l*R2L_F
+,,_ni_r2l,_ntot_r2l-_npdo_r2l-_nf_r2l
+,,_npdo_r2l,_npdo_r2l*Cr2l
+,,_nf_r2l,_nf_r2l*Cr2l
+,,_ni_r2l,_ni_r2l*Cr2l
+,Final Total Rural Two Lane Crashes,_ntot_r2l,_npdo_r2l+_nf_r2l+_ni_r2l
+,Total Rural Two Lane Intersection crashes,_ntot_r2l_x,"np.where((_hsm_rural_2L==1) & (_is_intersection==1) & (_num_legs==3) & (_stop==1),Cr2l3ST_X*(np.exp(-9.86 + 0.79*np.log(_max_vol + 1) + 0.49*np.log(_min_vol + 1)))*(1/_num_legs),0)"
+,Discount by number of legs since the calculation gets repeated for each to_node in the intersection,_ntot_r2l_x,"np.where((_hsm_rural_2L==1) & (_is_intersection==1) & (_num_legs==4) & (_stop==1),Cr2l4ST_X*(np.exp(-8.86 + 0.60*np.log(_max_vol + 1) + 0.61*np.log(_min_vol + 1)))*(1/_num_legs),_ntot_r2l_x)"
+,,_ntot_r2l_x,"np.where((_hsm_rural_2L==1) & (_is_intersection==1) & (_num_legs==4) & (_signal==1),Cr2l4SG_X*(np.exp(-5.13 + 0.60*np.log(_max_vol + 1) + 0.20*np.log(_min_vol + 1)))*(1/_num_legs),_ntot_r2l_x)"
+,Fatal Rural X Lane Intersection Crashes,_nf_r2l_x,"np.where((_hsm_rural_2L==1) & (_is_intersection==1) & (_signal==1),(Cr2l3ST_X*_ntot_r2l_x*0.009)*(1/_num_legs),0)"
+,,_nf_r2l_x,"np.where((_hsm_rural_2L==1) & (_is_intersection==1) & (_stop==1) & (_num_legs==3),(Cr2l4ST_X*_ntot_r2l_x*0.017)*(1/_num_legs),_nf_r2l_x)"
+,,_nf_r2l_x,"np.where((_hsm_rural_2L==1) & (_is_intersection==1) & (_stop==1) & (_num_legs==4),(Cr2l4SG_X*_ntot_r2l_x*0.018)*(1/_num_legs),_nf_r2l_x)"
+,PDO Rural X Lane Intersection Crashes,_np_r2l_x,"np.where((_hsm_rural_2L==1) & (_is_intersection==1) & (_signal==1),(Cr2l3ST_X*_ntot_r2l_x*0.660)*(1/_num_legs),0)"
+,,_np_r2l_x,"np.where((_hsm_rural_2L==1) & (_is_intersection==1) & (_stop==1) & (_num_legs==3),(Cr2l4ST_X*_ntot_r2l_x*0.585)*(1/_num_legs),_np_r2l_x)"
+,,_np_r2l_x,"np.where((_hsm_rural_2L==1) & (_is_intersection==1) & (_stop==1) & (_num_legs==4),(Cr2l4SG_X*_ntot_r2l_x*0.569)*(1/_num_legs),_np_r2l_x)"
+,,_ni_r2l_x,_ntot_r2l_x-_nf_r2l_x-_np_r2l_x
+,,_ntot_r2l_x,_nf_r2l_x+_ni_r2l_x+_np_r2l_x
+*,Total Rural X Lane RS+Intrsn Crashes,_tot_crashes_r2l,_ntot_r2l+_ntot_r2l_x
+*,,f_crashes_r2l,_nf_r2l+_nf_r2l_x
+*,,p_crashes_r2l,_npdo_r2l+_np_r2l_x
+*,,i_crashes_r2l,_ni_r2l+_ni_r2l_x
+# Urban/Suburban Arterials,,,
+,U2U - 2 Lane Undivided Arterials,_u2u,(_hsm_urb_Art==1) & (_divhwy==0) & (_num_lanes_original==1)
+,U3T - 3 lane arterials with center turning,_u3t,(_hsm_urb_Art==1) & (_num_lanes_original==1.5)
+,U4U - 4 lane undivided arterial,_u4u,(_hsm_urb_Art==1) & (_divhwy==0) & ((_num_lanes_original==2) | (_num_lanes_original==3) | (_num_lanes_original==4) | (_num_lanes_original==5))
+,U4D - 4 lane divided arterial,_u4d,(_hsm_urb_Art==1) & (_divhwy==1) & ((_num_lanes_original==2) | (_num_lanes_original==3) | (_num_lanes_original==4) | (_num_lanes_original==5))
+,U5T - 5 lane arterial with center turning,_u5t,(_hsm_urb_Art==1) & ((_num_lanes_original==2.5) | (_num_lanes_original==3.5))
+,,_nbrmv2u,"np.where((_u2u==1),(np.exp(-15.22+1.68*np.log(_adt)+np.log(_length))),0)"
+,,_nbrmv3t,"np.where((_u3t==1),(np.exp(-12.40+1.41*np.log(_adt)+np.log(_length))),0)"
+,,_nbrmv4u,"np.where((_u4u==1),(np.exp(-11.63+1.33*np.log(_adt)+np.log(_length))),0)"
+,,_nbrmv4d,"np.where((_u4d==1),(np.exp(-12.34+1.36*np.log(_adt)+np.log(_length))),0)"
+,,_nbrmv5t,"np.where((_u5t==1),(np.exp(-9.70+1.17*np.log(_adt)+np.log(_length))),0)"
+,,_nbrmvfi2u,"np.where((_u2u==1),(np.exp(-16.22+1.66*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrmvfi3t,"np.where((_u3t==1),(np.exp(-16.45+1.69*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrmvfi4u,"np.where((_u4u==1),(np.exp(-12.08+1.25*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrmvfi4d,"np.where((_u4d==1),(np.exp(-12.76+1.28*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrmvfi5t,"np.where((_u5t==1),(np.exp(-10.47+1.12*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrmvpdo2u,"np.where((_u2u==1),(np.exp(-15.62+1.69*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrmvpdo3t,"np.where((_u3t==1),(np.exp(-11.95+1.33*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrmvpdo4u,"np.where((_u4u==1),(np.exp(-12.53+1.38*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrmvpdo4d,"np.where((_u4d==1),(np.exp(-12.81+1.38*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrmvpdo5t,"np.where((_u5t==1),(np.exp(-9.97+1.17*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrmvfi2u,"np.where((_nbrmvfi2u>0) | (_nbrmvpdo2u>0),_nbrmv2u*_nbrmvfi2u/(_nbrmvfi2u+_nbrmvpdo2u),0)"
+,,_nbrmvfi3t,"np.where((_nbrmvfi3t>0) | (_nbrmvpdo3t>0),_nbrmv3t*_nbrmvfi3t/(_nbrmvfi3t+_nbrmvpdo3t),0)"
+,,_nbrmvfi4u,"np.where((_nbrmvfi4u>0) | (_nbrmvpdo4u>0),_nbrmv4u*_nbrmvfi4u/(_nbrmvfi4u+_nbrmvpdo4u),0)"
+,,_nbrmvfi4d,"np.where((_nbrmvfi4d>0) | (_nbrmvpdo4d>0),_nbrmv4d*_nbrmvfi4d/(_nbrmvfi4d+_nbrmvpdo4d),0)"
+,,_nbrmvfi5t,"np.where((_nbrmvfi5t>0) | (_nbrmvpdo5t>0),_nbrmv5t*_nbrmvfi5t/(_nbrmvfi5t+_nbrmvpdo5t),0)"
+,,_nbrmvpdo2u,_nbrmv2u-_nbrmvfi2u
+,,_nbrmvpdo3t,_nbrmv3t-_nbrmvfi3t
+,,_nbrmvpdo4u,_nbrmv4u-_nbrmvfi4u
+,,_nbrmvpdo4d,_nbrmv4d-_nbrmvfi4d
+,,_nbrmvpdo5t,_nbrmv5t-_nbrmvfi5t
+,,_nbrsv2u,"np.where((_u2u==1),(np.exp(-5.47+0.56*np.log(_adt)+np.log(_length))),0)"
+,,_nbrsv3t,"np.where((_u3t==1),(np.exp(-5.74+0.54*np.log(_adt)+np.log(_length))),0)"
+,,_nbrsv4u,"np.where((_u4u==1),(np.exp(-7.99+0.81*np.log(_adt)+np.log(_length))),0)"
+,,_nbrsv4d,"np.where((_u4d==1),(np.exp(-5.05+0.47*np.log(_adt)+np.log(_length))),0)"
+,,_nbrsv5t,"np.where((_u5t==1),(np.exp(-4.82+0.54*np.log(_adt)+np.log(_length))),0)"
+,,_nbrsvfi2u,"np.where((_u2u==1),(np.exp(-3.96+0.23*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrsvfi3t,"np.where((_u3t==1),(np.exp(-6.37+0.47*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrsvfi4u,"np.where((_u4u==1),(np.exp(-7.37+0.61*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrsvfi4d,"np.where((_u4d==1),(np.exp(-8.71+0.66*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrsvfi5t,"np.where((_u5t==1),(np.exp(-4.43+0.35*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrsvpdo2u,"np.where((_u2u==1),(np.exp(-6.51+0.64*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrsvpdo3t,"np.where((_u3t==1),(np.exp(-6.29+0.56*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrsvpdo4u,"np.where((_u4u==1),(np.exp(-8.5+0.84*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrsvpdo4d,"np.where((_u4d==1),(np.exp(-5.04+0.45*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrsvpdo5t,"np.where((_u5t==1),(np.exp(-5.83+0.61*np.log(_adt)+np.log(_length))),0.0000001)"
+,,_nbrsvfi2u,"np.where((_nbrsvfi2u>0) | (_nbrsvpdo2u>0),_nbrsv2u*_nbrsvfi2u/(_nbrsvfi2u+_nbrsvpdo2u),0)"
+,,_nbrsvfi3t,"np.where((_nbrsvfi3t>0) | (_nbrsvpdo3t>0),_nbrsv3t*_nbrsvfi3t/(_nbrsvfi3t+_nbrsvpdo3t),0)"
+,,_nbrsvfi4u,"np.where((_nbrsvfi4u>0) | (_nbrsvpdo4u>0),_nbrsv4u*_nbrsvfi4u/(_nbrsvfi4u+_nbrsvpdo4u),0)"
+,,_nbrsvfi4d,"np.where((_nbrsvfi4d>0) | (_nbrsvpdo4d>0),_nbrsv4d*_nbrsvfi4d/(_nbrsvfi4d+_nbrsvpdo4d),0)"
+,,_nbrsvfi5t,"np.where((_nbrsvfi5t>0) | (_nbrsvpdo5t>0),_nbrsv5t*_nbrsvfi5t/(_nbrsvfi5t+_nbrsvpdo5t),0)"
+,,_nbrsvpdo2u,_nbrsv2u-_nbrsvfi2u
+,,_nbrsvpdo3t,_nbrsv3t-_nbrsvfi3t
+,,_nbrsvpdo4u,_nbrsv4u-_nbrsvfi4u
+,,_nbrsvpdo4d,_nbrsv4d-_nbrsvfi4d
+,,_nbrsvpdo5t,_nbrsv5t-_nbrsvfi5t
+,,_nbrdwy2u,"np.where((_u2u==1),((0.158*DMJC + 0.050*DMNC + 0.172*DMJI + 0.023*DMNI + 0.083*DMJR + 0.016*DMNR)*np.power(_adt/15000,1.0)),0)"
+,,_nbrdwy3t,"np.where((_u3t==1),((0.102*DMJC + 0.032*DMNC + 0.110*DMJI + 0.015*DMNI + 0.053*DMJR + 0.010*DMNR)*np.power(_adt/15000,1.0)),0)"
+,,_nbrdwy4u,"np.where((_u4u==1),((0.182*DMJC + 0.058*DMNC + 0.198*DMJI + 0.026*DMNI + 0.096*DMJR + 0.018*DMNR)*np.power(_adt/15000,1.172)),0)"
+,,_nbrdwy4d,"np.where((_u4d==1),((0.033*DMJC + 0.011*DMNC + 0.036*DMJI + 0.005*DMNI + 0.018*DMJR + 0.003*DMNR)*np.power(_adt/15000,1.106)),0)"
+,,_nbrdwy5t,"np.where((_u5t==1),((0.165*DMJC + 0.053*DMNC + 0.181*DMJI + 0.024*DMNI + 0.087*DMJR + 0.016*DMNR)*np.power(_adt/15000,1.172)),0)"
+,,_nbrdwyfi2u,0.556*_nbrdwy2u
+,,_nbrdwyfi3t,0.467*_nbrdwy3t
+,,_nbrdwyfi4u,0.462*_nbrdwy4u
+,,_nbrdwyfi4d,0.778*_nbrdwy4d
+,,_nbrdwyfi5t,0.500*_nbrdwy5t
+,,_nbr2u,_nbrmv2u+_nbrsv2u+_nbrdwy2u
+,,_nbr3t,_nbrmv3t+_nbrsv3t+_nbrdwy3t
+,,_nbr4u,_nbrmv4u+_nbrsv4u+_nbrdwy4u
+,,_nbr4d,_nbrmv4d+_nbrsv4d+_nbrdwy4d
+,,_nbr5t,_nbrmv5t+_nbrsv5t+_nbrdwy5t
+,,_nbrfi2u,_nbrmvfi2u+_nbrsvfi2u+_nbrdwyfi2u
+,,_nbrfi3t,_nbrmvfi3t+_nbrsvfi3t+_nbrdwyfi3t
+,,_nbrfi4u,_nbrmvfi4u+_nbrsvfi4u+_nbrdwyfi4u
+,,_nbrfi4d,_nbrmvfi4d+_nbrsvfi4d+_nbrdwyfi4d
+,,_nbrfi5t,_nbrmvfi5t+_nbrsvfi5t+_nbrdwyfi5t
+,,_pinr,"np.where((_u2u==1), 0.424,0)"
+,,_pinr,"np.where((_u3t==1), 0.429,_pinr)"
+,,_pinr,"np.where((_u4u==1), 0.517,_pinr)"
+,,_pinr,"np.where((_u4d==1), 0.364,_pinr)"
+,,_pinr,"np.where((_u5t==1), 0.432,_pinr)"
+,,_ppnr,"np.where((_u2u==1), 0.576,0)"
+,,_ppnr,"np.where((_u3t==1), 0.571,_ppnr)"
+,,_ppnr,"np.where((_u4u==1), 0.438,_ppnr)"
+,,_ppnr,"np.where((_u4d==1), 0.636,_ppnr)"
+,,_ppnr,"np.where((_u5t==1), 0.568,_ppnr)"
+,,_pnr,"np.where((_u2u==1), 0.316,0)"
+,,_pnr,"np.where((_u3t==1), 0.304,_pnr)"
+,,_pnr,"np.where((_u4u==1), 0.365,_pnr)"
+,,_pnr,"np.where((_u4d==1), 0.410,_pnr)"
+,,_pnr,"np.where((_u5t==1), 0.274,_pnr)"
+,vehicle-pdestrian crash factor,_fpedr,"np.where((_u2u==1) & (_speed<=30), 0.034,0)"
+,,_fpedr,"np.where((_u3t==1) & (_speed<=30), 0.020,_fpedr)"
+,,_fpedr,"np.where((_u4u==1) & (_speed<=30), 0.016,_fpedr)"
+,,_fpedr,"np.where((_u4d==1) & (_speed<=30), 0.048,_fpedr)"
+,,_fpedr,"np.where((_u5t==1) & (_speed<=30), 0.010,_fpedr)"
+,,_fpedr,"np.where((_u2u==1) & (_speed>30), 0.012,_fpedr)"
+,,_fpedr,"np.where((_u3t==1) & (_speed>30), 0.014,_fpedr)"
+,,_fpedr,"np.where((_u4u==1) & (_speed>30), 0.004,_fpedr)"
+,,_fpedr,"np.where((_u4d==1) & (_speed>30), 0.013,_fpedr)"
+,,_fpedr,"np.where((_u5t==1) & (_speed>30), 0.021,_fpedr)"
+,,_npedr2u,_nbr2u*_fpedr
+,,_npedr3t,_nbr3t*_fpedr
+,,_npedr4u,_nbr4u*_fpedr
+,,_npedr4d,_nbr4d*_fpedr
+,,_npedr5t,_nbr5t*_fpedr
+,vehicle-bicycle crash factor,_fbiker,"np.where((_u2u==1) & (_speed<=30), 0.007,0)"
+,,_fbiker,"np.where((_u3t==1) & (_speed<=30), 0.016,_fbiker)"
+,,_fbiker,"np.where((_u4u==1) & (_speed<=30), 0.010,_fbiker)"
+,,_fbiker,"np.where((_u4d==1) & (_speed<=30), 0.024,_fbiker)"
+,,_fbiker,"np.where((_u5t==1) & (_speed<=30), 0.017,_fbiker)"
+,,_fbiker,"np.where((_u2u==1) & (_speed>30), 0.003,_fbiker)"
+,,_fbiker,"np.where((_u3t==1) & (_speed>30), 0.010,_fbiker)"
+,,_fbiker,"np.where((_u4u==1) & (_speed>30), 0.010,_fbiker)"
+,,_fbiker,"np.where((_u4d==1) & (_speed>30), 0.009,_fbiker)"
+,,_fbiker,"np.where((_u5t==1) & (_speed>30), 0.020,_fbiker)"
+,,_nbiker2u,_nbr2u*_fbiker
+,,_nbiker3t,_nbr3t*_fbiker
+,,_nbiker4u,_nbr4u*_fbiker
+,,_nbiker4d,_nbr4d*_fbiker
+,,_nbiker5t,_nbr5t*_fbiker
+,Total urban segment crashes,_nrs2u_urb,(_nbr2u+_npedr2u+_nbiker2u)*CU2U
+,,_nrs3t_urb,(_nbr3t+_npedr3t+_nbiker3t)*CU3T
+,,_nrs4u_urb,(_nbr4u+_npedr4u+_nbiker4u)*CU4D
+,,_nrs4d_urb,(_nbr4d+_npedr4d+_nbiker4d)*CU4U
+,,_nrs5t_urb,(_nbr5t+_npedr5t+_nbiker5t)*CU5T
+,Total urban segment FI crashes,_nrsfi2u_urb,(_nbrfi2u+_npedr2u+_nbiker2u)*CU2U
+,,_nrsfi3t_urb,(_nbrfi3t+_npedr3t+_nbiker3t)*CU3T
+,,_nrsfi4u_urb,(_nbrfi4u+_npedr4u+_nbiker4u)*CU4D
+,,_nrsfi4d_urb,(_nbrfi4d+_npedr4d+_nbiker4d)*CU4U
+,,_nrsfi5t_urb,(_nbrfi5t+_npedr5t+_nbiker5t)*CU5T
+,Divide by half since calculation is repeated for both directions,_nrs_urb,0.5*(_nrs2u_urb+_nrs3t_urb+_nrs4u_urb+_nrs4d_urb+_nrs5t_urb)
+,Divide by half since calculation is repeated for both directions,_nrsfi_urb,0.5*(_nrsfi2u_urb+_nrsfi3t_urb+_nrsfi4u_urb+_nrsfi4d_urb+_nrsfi5t_urb)
+,,_npdo_urb,_nrs_urb-_nrsfi_urb
+,,_nf_urb,_nrsfi_urb*PERCENT_FATAL
+,,_ni_urb,_nrsfi_urb-_nf_urb
+,Final Total Urban Arterial Crashes,_ntot_urb,_npdo_urb+_nf_urb+_ni_urb
+,Urban Intersection Types,_ui3st,(_hsm_urb_Art==1) & (_is_intersection==1) & (_stop==1) & (_num_legs==3)
+,,_ui4st,(_hsm_urb_Art==1) & (_is_intersection==1) & (_stop==1) & (_num_legs>=4)
+,,_ui3sg,(_hsm_urb_Art==1) & (_is_intersection==1) & (_signal==1) & (_num_legs==3)
+,,_ui4sg,(_hsm_urb_Art==1) & (_is_intersection==1) & (_signal==1) & (_num_legs>=4)
+,Total Urban Intersection crashes,_nbimv3st,"np.where((_ui3st==1),(np.exp(-13.36 + 1.11*np.log(_max_vol + 1) + 0.41*np.log(_min_vol + 1)))*(1/_num_legs),0)"
+,Discount by number of legs since the calculation gets repeated for each to_node in the intersection,_nbimv3sg,"np.where((_ui3sg==1),(np.exp(-12.13 + 1.11*np.log(_max_vol + 1) + 0.26*np.log(_min_vol + 1)))*(1/_num_legs),0)"
+,,_nbimv4st,"np.where((_ui4st==1),(np.exp(-8.90 + 0.82*np.log(_max_vol + 1) + 0.25*np.log(_min_vol + 1)))*(1/_num_legs),0)"
+,,_nbimv4sg,"np.where((_ui4sg==1),(np.exp(-10.99 + 1.07*np.log(_max_vol + 1) + 0.23*np.log(_min_vol + 1)))*(1/_num_legs),0)"
+,,_nbimvfi3st,"np.where((_ui3st==1),(np.exp(-14.01 + 1.16*np.log(_max_vol + 1) + 0.30*np.log(_min_vol + 1)))*(1/_num_legs),0.0000001)"
+,,_nbimvfi3sg,"np.where((_ui3sg==1),(np.exp(-11.58 + 1.02*np.log(_max_vol + 1) + 0.17*np.log(_min_vol + 1)))*(1/_num_legs),0.0000001)"
+,,_nbimvfi4st,"np.where((_ui4st==1),(np.exp(-11.13 + 0.93*np.log(_max_vol + 1) + 0.28*np.log(_min_vol + 1)))*(1/_num_legs),0.0000001)"
+,,_nbimvfi4sg,"np.where((_ui4sg==1),(np.exp(-13.14 + 1.18*np.log(_max_vol + 1) + 0.22*np.log(_min_vol + 1)))*(1/_num_legs),0.0000001)"
+,,_nbimvpdo3st,"np.where((_ui3st==1),(np.exp(-15.38 + 1.20*np.log(_max_vol + 1) + 0.51*np.log(_min_vol + 1)))*(1/_num_legs),0.0000001)"
+,,_nbimvpdo3sg,"np.where((_ui3sg==1),(np.exp(-13.24 + 1.14*np.log(_max_vol + 1) + 0.30*np.log(_min_vol + 1)))*(1/_num_legs),0.0000001)"
+,,_nbimvpdo4st,"np.where((_ui4st==1),(np.exp(-8.74 + 0.77*np.log(_max_vol + 1) + 0.23*np.log(_min_vol + 1)))*(1/_num_legs),0.0000001)"
+,,_nbimvpdo4sg,"np.where((_ui4sg==1),(np.exp(-11.02 + 1.02*np.log(_max_vol + 1) + 0.24*np.log(_min_vol + 1)))*(1/_num_legs),0.0000001)"
+,,_nbimvfi3st,"np.where((_nbimvfi3st>0) | (_nbimvpdo3st>0),_nbimv3st*_nbimvfi3st/(_nbimvfi3st+_nbimvpdo3st),0)"
+,,_nbimvfi3sg,"np.where((_nbimvfi3sg>0) | (_nbimvpdo3sg>0),_nbimv3sg*_nbimvfi3sg/(_nbimvfi3sg+_nbimvpdo3sg),0)"
+,,_nbimvfi4st,"np.where((_nbimvfi4st>0) | (_nbimvpdo4st>0),_nbimv4st*_nbimvfi4st/(_nbimvfi4st+_nbimvpdo4st),0)"
+,,_nbimvfi4sg,"np.where((_nbimvfi4sg>0) | (_nbimvpdo4sg>0),_nbimv4sg*_nbimvfi4sg/(_nbimvfi4sg+_nbimvpdo4sg),0)"
+,,_nbimvpdo3st,_nbimv3st-_nbimvfi3st
+,,_nbimvpdo3sg,_nbimv3sg-_nbimvfi3sg
+,,_nbimvpdo4st,_nbimv4st-_nbimvfi4st
+,,_nbimvpdo4sg,_nbimv4sg-_nbimvfi4sg
+,,_nbisv3st,"np.where((_ui3st==1),(np.exp(-6.81 + 0.16*np.log(_max_vol + 1) + 0.51*np.log(_min_vol + 1)))*(1/_num_legs),0)"
+,,_nbisv3sg,"np.where((_ui3sg==1),(np.exp(-9.02 + 0.42*np.log(_max_vol + 1) + 0.40*np.log(_min_vol + 1)))*(1/_num_legs),0)"
+,,_nbisv4st,"np.where((_ui4st==1),(np.exp(-5.33 + 0.33*np.log(_max_vol + 1) + 0.12*np.log(_min_vol + 1)))*(1/_num_legs),0)"
+,,_nbisv4sg,"np.where((_ui4sg==1),(np.exp(-10.21 + 0.68*np.log(_max_vol + 1) + 0.27*np.log(_min_vol + 1)))*(1/_num_legs),0)"
+,,_nbisvfi3st,"np.where((_ui3st==1),(0.9*_nbisv3st),0.0000001)"
+,,_nbisvfi3sg,"np.where((_ui3sg==1),(np.exp(-9.75 + 0.27*np.log(_max_vol + 1) + 0.51*np.log(_min_vol + 1)))*(1/_num_legs),0.0000001)"
+,,_nbisvfi4st,"np.where((_ui4st==1),(0.88*_nbisv4st),0.0000001)"
+,,_nbisvfi4sg,"np.where((_ui4sg==1),(np.exp(-9.25 + 0.43*np.log(_max_vol + 1) + 0.29*np.log(_min_vol + 1)))*(1/_num_legs),0.0000001)"
+,,_nbisvpdo3st,"np.where((_ui3st==1),(np.exp(-8.36 + 0.25*np.log(_max_vol + 1) + 0.55*np.log(_min_vol + 1)))*(1/_num_legs),0.0000001)"
+,,_nbisvpdo3sg,"np.where((_ui3sg==1),(np.exp(-9.08 + 0.45*np.log(_max_vol + 1) + 0.33*np.log(_min_vol + 1)))*(1/_num_legs),0.0000001)"
+,,_nbisvpdo4st,"np.where((_ui4st==1),(np.exp(-7.04 + 0.36*np.log(_max_vol + 1) + 0.25*np.log(_min_vol + 1)))*(1/_num_legs),0.0000001)"
+,,_nbisvpdo4sg,"np.where((_ui4sg==1),(np.exp(-11.34 + 0.78*np.log(_max_vol + 1) + 0.25*np.log(_min_vol + 1)))*(1/_num_legs),0.0000001)"
+,,_nbisvfi3st,"np.where((_nbisvfi3st>0) | (_nbisvpdo3st>0),_nbisv3st*_nbisvfi3st/(_nbisvfi3st+_nbisvpdo3st),0)"
+,,_nbisvfi3sg,"np.where((_nbisvfi3sg>0) | (_nbisvpdo3sg>0),_nbisv3sg*_nbisvfi3sg/(_nbisvfi3sg+_nbisvpdo3sg),0)"
+,,_nbisvfi4st,"np.where((_nbisvfi4st>0) | (_nbisvpdo4st>0),_nbisv4st*_nbisvfi4st/(_nbisvfi4st+_nbisvpdo4st),0)"
+,,_nbisvfi4sg,"np.where((_nbisvfi4sg>0) | (_nbisvpdo4sg>0),_nbisv4sg*_nbisvfi4sg/(_nbisvfi4sg+_nbisvpdo4sg),0)"
+,,_nbisvpdo3st,_nbisv3st-_nbisvfi3st
+,,_nbisvpdo3sg,_nbisv3sg-_nbisvfi3sg
+,,_nbisvpdo4st,_nbisv4st-_nbisvfi4st
+,,_nbisvpdo4sg,_nbisv4sg-_nbisvfi4sg
+,,_nbi3st,_nbimv3st+_nbisv3st
+,,_nbi3sg,_nbimv3sg+_nbisv3sg
+,,_nbi4st,_nbimv4st+_nbisv4st
+,,_nbi4sg,_nbimv4sg+_nbisv4sg
+,,_nbifi3st,_nbimvfi3st+_nbisvfi3st
+,,_nbifi3sg,_nbimvfi3sg+_nbisvfi3sg
+,,_nbifi4st,_nbimvfi4st+_nbisvfi4st
+,,_nbifi4sg,_nbimvfi4sg+_nbisvfi4sg
+,Pedestrian crashes,_npedi3st,"np.where((_ui3st==1),(0.025*_nbi3st),0)"
+,Discount by number of legs since the calculation gets repeated for each to_node in the intersection,_npedi3sg,"np.where((_ui3sg==1),(np.exp(-6.60 + 0.05*np.log(_max_vol+_min_vol + 1) + 0.24*np.log((_min_vol + 1)/(_max_vol + 1))+0.41*np.log(400)+0.09*_num_lanes_x))*(1/_num_legs),0)"
+,,_npedi4st,"np.where((_ui4st==1),(0.016*_nbisv4st),0)"
+,,_npedi4sg,"np.where((_ui4sg==1),(np.exp(-9.53 + 0.40*np.log(_max_vol+_min_vol + 1) + 0.26*np.log((_min_vol + 1)/(_max_vol + 1))+0.45*np.log(700)+0.04*_num_lanes_x))*(1/_num_legs),0)"
+,,_npedi,_npedi3st*CU3ST_X+_npedi3sg*CU4ST_X+_npedi4st*CU3SG_X+_npedi4sg*CU4SG_X
+,,_nbikei3st,"np.where((_ui3st==1),(0.022*_nbi3st),0)"
+,,_nbikei3sg,"np.where((_ui3sg==1),(0.016*_nbi3sg),0)"
+,,_nbikei4st,"np.where((_ui4st==1),(0.023*_nbi4st),0)"
+,,_nbikei4sg,"np.where((_ui4sg==1),(0.013*_nbi4sg),0)"
+,,_nbikei,_nbikei3st*CU3ST_X+_nbikei3sg*CU4ST_X+_nbikei4st*CU3SG_X+_nbikei4sg*CU4SG_X
+,,_ntot_urb_x,_nbi3st*CU3ST_X+_nbi3sg*CU4ST_X+_nbi4st*CU3SG_X+_nbi4sg*CU4SG_X+_npedi+_nbikei
+,,_nfi_urb_x,_nbifi3st*CU3ST_X+_nbifi3sg*CU4ST_X+_nbifi4st*CU3SG_X*CU4SG_X+_nbifi4sg+_npedi+_nbikei
+,,_nf_urb_x,_nfi_urb_x*PERCENT_FATAL
+,,_ni_urb_x,_nfi_urb_x-_nf_urb_x
+,,_np_urb_x,_ntot_urb_x-_nfi_urb_x
+,,_ntot_urb_x,_nf_urb_x+_ni_urb_x+_np_urb_x
+*,Total Urban Arterial RS+Intrsn Crashes,_tot_crashes_urb,_ntot_urb+_ntot_urb_x
+*,,f_crashes_urb,_nf_urb+_nf_urb_x
+*,,p_crashes_urb,_npdo_urb+_np_urb_x
+*,,i_crashes_urb,_ni_urb+_ni_urb_x
 # safety costs,,,
-, SPF - roadway segment,_rs_spf,np.exp(SPF_RS_A + SPF_RS_B * np.log(_total_volume_daily) + SPF_RS_Y * np.log(_length))
-, SPF - intersection,_int_spf,np.exp(SPF_INT_A + SPF_INT_B * np.log(_max_vol) + SPF_INT_Y * np.log(_min_vol))
-, number of RS crashes,_crashes_rs,CALIBRATION_RS * _rs_spf * CMF_RS
-, number of intersection crashes,_crashes_int,(CALIBRATION_INT * _int_spf * CMF_INT) * _is_intersection/_to_indegree
-, total RS PDO crash,_rs_crashes_pdo,_crashes_rs * RS_CRASH_PDO
-, total RS injury crash,_rs_crashes_inj,_crashes_rs * RS_CRASH_INJURY
-, total RS fatal crash,_rs_crashes_fat,_crashes_rs * RS_CRASH_FATAL
-, total INT PDO crash,_int_crashes_pdo,_crashes_int * INT_CRASH_PDO
-, total INT injury crash,_int_crashes_inj,_crashes_int * INT_CRASH_INJURY
-, total INT fatal crash,_int_crashes_fat,_crashes_int * INT_CRASH_FATAL
-, total annual  PDO crashes,total_pdo_crashes,_rs_crashes_pdo + _int_crashes_pdo
-, total annual injury crashes,total_inj_crashes,_rs_crashes_inj + _int_crashes_inj
-, total annual fatal crashes,total_fat_crashes,_rs_crashes_fat + _int_crashes_fat
-*, total crashes cost,cost_of_crashes_benefit,(total_pdo_crashes * CRASH_COST_PDO + total_inj_crashes * CRASH_COST_INJURY + total_fat_crashes * CRASH_COST_FATAL) * DISCOUNT_RATE
+*, total annual  PDO crashes,total_pdo_crashes,p_crashes_fwy+p_crashes_rxl+p_crashes_r2l+p_crashes_urb
+*, total annual injury crashes,total_inj_crashes,i_crashes_fwy+i_crashes_rxl+i_crashes_r2l+i_crashes_urb
+*, total annual fatal crashes,total_fat_crashes,f_crashes_fwy+f_crashes_rxl+f_crashes_r2l+f_crashes_urb
+*,roadway safety cost benefit,safety_cost_benefit,((total_pdo_crashes * CRASH_COST_PDO + total_inj_crashes * CRASH_COST_INJURY + total_fat_crashes * CRASH_COST_FATAL) * DISCOUNT_RATE) * -1
 #surface water,,,
-*,water pollution cost,water_pollution_cost,_waterf * _vmt_total * WATER_POLLUTION_COST * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+*,surface water pollution cost benefit,surface_water_pollution_cost_benefit,(_waterf * vmt_total * WATER_POLLUTION_COST * DISCOUNT_RATE * ANNUALIZATION_FACTOR) * -1
 #noise,,,
-, Auto freeway noise cost,_auto_noise_cost_fwy,(_freeway | _ramp ) * _auto_volume_daily * (NOISE_COST_AUTO_FREEWAY /1000)
-, Med trucks freeway noise cost,_mtrucks_noise_cost_fwy,(_freeway | _ramp )  *_med_truck_volume_daily * (NOISE_COST_MEDTRUCKS_FREEWAY/1000)
-, Heavy trucks freeway noise cost,_htrucks_noise_cost_fwy,(_freeway | _ramp )  *_heavy_truck_volume_daily * (NOISE_COST_HEVTRUCKS_FREEWAY/1000)
-, Auto arterial noise cost,_auto_noise_cost_art,_arterial * _auto_volume_daily * (NOISE_COST_AUTO_ARTERIAL/1000)
-, Med trucks arterial noise cost,_mtrucks_noise_cost_art,_arterial *_med_truck_volume_daily * (NOISE_COST_MEDTRUCKS_ARTERIAL/1000)
-, Heavy trucks arterial noise cost,_htrucks_noise_cost_art,_arterial *_heavy_truck_volume_daily * (NOISE_COST_HEVTRUCKS_ARTERIAL/1000)
-, Auto collector noise cost,_auto_noise_cost_col,_collector * _auto_volume_daily * (NOISE_COST_AUTO_COLLECTOR/1000)
-, Med trucks collector noise cost,_mtrucks_noise_cost_col,_collector *_med_truck_volume_daily * (NOISE_COST_MEDTRUCKS_COLLECTOR/1000)
-, Heavy trucks collector noise cost,_htrucks_noise_cost_col,_collector *_heavy_truck_volume_daily * (NOISE_COST_HEVTRUCKS_COLLECTOR/1000)
+, Auto freeway noise cost,_auto_noise_cost_fwy,(_freeway | _ramp ) * _auto_volume_daily * _length * (NOISE_COST_AUTO_FREEWAY /1000)
+, Med trucks freeway noise cost,_mtrucks_noise_cost_fwy,(_freeway | _ramp )  *_med_truck_volume_daily * _length *(NOISE_COST_MEDTRUCKS_FREEWAY/1000)
+, Heavy trucks freeway noise cost,_htrucks_noise_cost_fwy,(_freeway | _ramp )  *_heavy_truck_volume_daily * _length *(NOISE_COST_HEVTRUCKS_FREEWAY/1000)
+, Auto arterial noise cost,_auto_noise_cost_art,_arterial * _auto_volume_daily *_length *(NOISE_COST_AUTO_ARTERIAL/1000)
+, Med trucks arterial noise cost,_mtrucks_noise_cost_art,_arterial *_med_truck_volume_daily *_length * (NOISE_COST_MEDTRUCKS_ARTERIAL/1000)
+, Heavy trucks arterial noise cost,_htrucks_noise_cost_art,_arterial *_heavy_truck_volume_daily *_length *(NOISE_COST_HEVTRUCKS_ARTERIAL/1000)
+, Auto collector noise cost,_auto_noise_cost_col,_collector * _auto_volume_daily * _length *(NOISE_COST_AUTO_COLLECTOR/1000)
+, Med trucks collector noise cost,_mtrucks_noise_cost_col,_collector *_med_truck_volume_daily * _length *(NOISE_COST_MEDTRUCKS_COLLECTOR/1000)
+, Heavy trucks collector noise cost,_htrucks_noise_cost_col,_collector *_heavy_truck_volume_daily * _length *(NOISE_COST_HEVTRUCKS_COLLECTOR/1000)
 , ,_freeway_noise_cost,_auto_noise_cost_fwy + _mtrucks_noise_cost_fwy + _htrucks_noise_cost_fwy
 , ,_arterial_noise_cost,_auto_noise_cost_art + _mtrucks_noise_cost_art + _htrucks_noise_cost_art
 , ,_collector_noise_cost,_auto_noise_cost_col + _mtrucks_noise_cost_col + _htrucks_noise_cost_col
-*,noise pollution cost,total_noise_cost,_noisef * (_freeway_noise_cost + _arterial_noise_cost + _collector_noise_cost) * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+*,noise pollution cost benefit,noise_pollution_cost_benefit,(_noisef * (_freeway_noise_cost + _arterial_noise_cost + _collector_noise_cost) * DISCOUNT_RATE * ANNUALIZATION_FACTOR) * -1
 #emissions lookup table,,,
 ,set lookup index on table,_EMISSIONS_TABLE,EMISSIONS.set_index(EMISSIONS['Ltype'] + '_' +  EMISSIONS['Speed'].astype(str))
 ,,_ltype,_freeway * 1 + _arterial * 2 + _collector * 3 + _ramp * 4
@@ -95,18 +453,20 @@ Silos,Description,Target,Expression
 ,,_pm10_rate,_emissions_key.map(_EMISSIONS_TABLE['pollutantID_' + str(PM10_PTYPE)])
 ,,_nox_rate,_emissions_key.map(_EMISSIONS_TABLE['pollutantID_' + str(NOX_PTYPE)])
 ,,_vocs_rate,_emissions_key.map(_EMISSIONS_TABLE['pollutantID_' + str(VOCS_PTYPE)])
-,co2 emissions cost,emissions_co2,_co2_rate * _vmt_total * GRAMS_TO_METRIC_TONS * CO2_COST * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-,pm25 emissons cost,emissions_pm25,_pm25_rate * _vmt_total * GRAMS_TO_METRIC_TONS * PM25_COST *DISCOUNT_RATE * ANNUALIZATION_FACTOR
-,pm10 emissions cost,emissions_pm10,_pm10_rate * _vmt_total * GRAMS_TO_METRIC_TONS * PM10_COST * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-,nox emissions costs,emissions_nox,_nox_rate * _vmt_total * GRAMS_TO_METRIC_TONS * NOX_COST * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-,vocs emissions costs,emissions_vocs,_vocs_rate * _vmt_total * GRAMS_TO_METRIC_TONS * VOCS_COST * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-*,total emissions cost,emissions,emissions_co2 + emissions_pm25 + emissions_pm10 + emissions_nox + emissions_vocs
-#vehicle operating costs ,,,
-,,_fuelconsump_rate,_emissions_key.map(_EMISSIONS_TABLE['pollutantID_' + str(FUEL_CONSUMPTION_PTYPE)])
-,,auto_fuel_cost,_auto_volume_daily * _length * _fuelconsump_rate * GALLON_TO_BTU * GAS_COST
-,,truck_fuel_cost,_truck_volume_daily * _length * _fuelconsump_rate * GALLON_TO_BTU * TRUCK_GAS_COST
-*,fuel auto operating cost,fuel_cost,(auto_fuel_cost + truck_fuel_cost) * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+,co2 emissions cost,emissions_co2,_co2_rate * vmt_total * GRAMS_TO_METRIC_TONS * CO2_COST * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+,pm25 emissons cost,emissions_pm25,_pm25_rate * vmt_total * GRAMS_TO_METRIC_TONS * PM25_COST *DISCOUNT_RATE * ANNUALIZATION_FACTOR
+,pm10 emissions cost,emissions_pm10,_pm10_rate * vmt_total * GRAMS_TO_METRIC_TONS * PM10_COST * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+,nox emissions costs,emissions_nox,_nox_rate * vmt_total * GRAMS_TO_METRIC_TONS * NOX_COST * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+,vocs emissions costs,emissions_vocs,_vocs_rate * vmt_total * GRAMS_TO_METRIC_TONS * VOCS_COST * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+*,emissions cost benefit,emissions_cost_benefit,(emissions_co2 + emissions_pm25 + emissions_pm10 + emissions_nox + emissions_vocs) * -1
+#vehicle operating costs - fuel,,,
+,million BTUs per mile,_fuelconsump_rate,_emissions_key.map(_EMISSIONS_TABLE['pollutantID_' + str(FUEL_CONSUMPTION_PTYPE)])
+,,auto_fuel_cost,((_auto_volume_daily * _length * _fuelconsump_rate) * 1000000 / GALLON_TO_BTU) * GAS_COST
+,,truck_fuel_cost,((_truck_volume_daily * _length * _fuelconsump_rate) * 1000000 / GALLON_TO_BTU) * TRUCK_GAS_COST
+,fuel auto operating cost,fuel_cost,((auto_fuel_cost + truck_fuel_cost) * DISCOUNT_RATE * ANNUALIZATION_FACTOR) * -1
 #vehicle operating costs - non-fuel,,,
 ,,auto_nonfuel_cost,_auto_volume_daily * _length * CAR_COST_PER_MILE
 ,,truck_nonfuel_cost,_truck_volume_daily * _length * TRUCK_COST_PER_MILE
-*,nonfuel auto operating cost,nonfuel_cost,(auto_nonfuel_cost + truck_nonfuel_cost) * DISCOUNT_RATE * ANNUALIZATION_FACTOR
+,nonfuel auto operating cost,nonfuel_cost,((auto_nonfuel_cost + truck_nonfuel_cost) * DISCOUNT_RATE * ANNUALIZATION_FACTOR) * -1
+*,vehicle operating cost benefit,veh_operating_cost_benefit,fuel_cost + nonfuel_cost
+*,vmt for reporting,vmt_total,vmt_total

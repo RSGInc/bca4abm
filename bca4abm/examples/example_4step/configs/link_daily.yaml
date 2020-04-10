@@ -1,7 +1,29 @@
 
 link_daily_file_names:
-  "": linksMD1.csv
-  PM2: linksPM2.csv
+  h1: mce_input_links_0001.csv
+  h2: mce_input_links_0102.csv
+  h3: mce_input_links_0203.csv
+  h4: mce_input_links_0304.csv
+  h5: mce_input_links_0405.csv
+  h6: mce_input_links_0506.csv
+  h7: mce_input_links_0607.csv
+  h8: mce_input_links_0708.csv
+  h9: mce_input_links_0809.csv
+  h10: mce_input_links_0910.csv
+  h11: mce_input_links_1011.csv
+  h12: mce_input_links_1112.csv
+  h13: mce_input_links_1213.csv
+  h14: mce_input_links_1314.csv
+  h15: mce_input_links_1415.csv
+  h16: mce_input_links_1516.csv
+  h17: mce_input_links_1617.csv
+  h18: mce_input_links_1718.csv
+  h19: mce_input_links_1819.csv
+  h20: mce_input_links_1920.csv
+  h21: mce_input_links_2021.csv
+  h22: mce_input_links_2122.csv
+  h23: mce_input_links_2223.csv
+  h24: mce_input_links_2324.csv
 
 link_daily_index_fields:
   - i
@@ -10,46 +32,126 @@ link_daily_index_fields:
 link_daily_table_column_map:
   i: i
   j: j
-  "@hvol": hvol
-  "@svol": svol
-  "@zone": zone
-  "@mtvol": mtvol
-  "@htvol": htvol
-  "@speed": speed
-  length: length
-  num_lanes: num_lanes
-  volume_delay_func: volume_delay_func
-  "@urbrur": urbrur
-  "@divhwy": divhwy
-  "@waterf": waterf
-  "@noisef": noisef
+  "@amrmp" : amrmp
+  "@barrier" : barrier
+  "@cap" : cap
+  "@centerturn" : centerturn
+  "@divhwy" : divhwy
+  "@dwdist" : dwdist
+  "@fwcap" : fwcap
+  "@htkad" : htkad
+  "@htvol" : htvol
+  "@hvol" : hvol
+  "@lanes2" : lanes2
+  "@lanes3" : lanes3
+  "@lanes4" : lanes4
+  "@losc" : losc
+  "@loscart" : loscart
+  "@losd" : losd
+  "@lose" : lose
+  "@losfh" : losfh
+  "@losfl" : losfl
+  "@losflart" : losflart
+  "@mb" : mb
+  "@mdrmp" : mdrmp
+  "@mpa" : mpa
+  "@mtkad" : mtkad
+  "@mtvol" : mtvol
+  "@noisef" : noisef
+  "@pmrmp" : pmrmp
+  "@relvar" : relvar
+  "@signal" : signal
+  "@spd35" : spd35
+  "@spd40" : spd40
+  "@spd45" : spd45
+  "@spd50" : spd50
+  "@spd50p" : spd50p
+  "@spd70" : spd70
+  "@speed" : speed
+  "@stop" : stop
+  "@svol" : svol
+  "@tknet" : tknet
+  "@tkpth" : tkpth
+  "@trkad" : trkad
+  "@ttoll" : ttoll
+  "@ul3" : total link capacity
+  "@updist" : updist
+  "@waterf" : waterf
+  "@zone" : zone
+  #additional_volume : additional_volume
+  auto_time : auto_time
+  auto_volume : auto_volume
+  #aux_transit_volume : aux_transit_volume
+  #data1 : data1
+  #data2 : data2
+  #data3 : data3
+  length : length
+  num_lanes : num_lanes
+  type : type
+  volume_delay_func : volume_delay_func
 
 
 CONSTANTS:
-  LINK_PEAK_TOD_SHARE_AUTO: 3.0
-  LINK_OFFPEAK_TOD_SHARE_AUTO: 8.7
-  LINK_PEAK_TOD_SHARE_TRANSIT: 3.2
-  LINK_OFFPEAK_TOD_SHARE_TRANSIT: 6.1
-  #SPF coefficients
-  SPF_RS_A: -11.63
-  SPF_RS_B: 1.33
-  SPF_RS_Y: 1.00
-  SPF_INT_A: -10.99
-  SPF_INT_B: 1.07
-  SPF_INT_Y: 0.23
-  #CMF settings
-  CMF_RS: 1.0
-  CALIBRATION_RS: 1.0
-  CMF_INT: 1.0
-  CALIBRATION_INT: 1.0
-  # Distribution of RS crashes
-  RS_CRASH_PDO: 0.679
-  RS_CRASH_INJURY: 0.308
-  RS_CRASH_FATAL: 0.013
-  # Distribution of INT crashes
-  INT_CRASH_PDO: 0.679
-  INT_CRASH_INJURY: 0.308
-  INT_CRASH_FATAL: 0.013
+  #Average Lane width
+  LW_FWY: 12
+  LW_HWY: 11.5
+  LW_ART: 11.5
+  #Average Inside Shoulder Width
+  ISW_FWY: 8
+  ISW_HWY: 3
+  ISW_ART: 0
+  #Average Outside Shoulder Width
+  OSW_FWY: 11
+  OSW_HWY: 10
+  OSW_ART: 10
+  #Crash Type Calibration Constants
+  #Freeways
+  CfwyF: 1.0
+  CfwyI: 1.0
+  CfwyP: 1.0
+  #Rural Multi Lane
+  CrxlU: 0.37
+  CrxlD: 0.77
+  #Rural Multi Lane Intersections
+  Crxl3ST_X: 0.15
+  Crxl4ST_X: 0.39
+  Crxl4SG_X: 0.15
+  #Rural 2 Lane
+  Cr2l: 0.74
+  #Rural 2 Lane Intersections
+  Cr2l3ST_X: 0.31
+  Cr2l4ST_X: 0.31
+  Cr2l4SG_X: 0.45
+  #Urban Arterials
+  CU2U: 0.62
+  CU3T: 0.81
+  CU4D: 1.411
+  CU4U: 0.63
+  CU5T: 0.64
+  #Urban Arterials Intersections
+  CU3ST_X: 0.35
+  CU4ST_X: 0.45
+  CU3SG_X: 0.73
+  CU4SG_X: 1.05
+  # Proportion of fatal in F/I crashes from ODOT 2004-06 (http://www.oregon.gov/ODOT/Data/Pages/Crash.aspx)
+  PERCENT_FATAL: 0.0212
+  #Distribution of crashes on rural 2 lane highways
+  R2L_PDO: 0.46
+  R2L_I: 0.509
+  R2L_F: 0.031
+  #Number of driveways within roadway segment of driveway type
+  #Major Commercial
+  DMJC: 0.01
+  #Minor Commercial
+  DMNC: 0.01
+  #Major Industrial/Institutional
+  DMJI: 0.01
+  #Minor Industrial/Institutional
+  DMNI: 0.01
+  #Major Residential
+  DMJR: 0.01
+  #Minor Residential
+  DMNR: 0.01
   # Crash costs in Dollars
   CRASH_COST_PDO: 1522
   CRASH_COST_INJURY: 441800
@@ -91,4 +193,4 @@ TABLES:
 
 # specify column name to enable zone tracing for both the o and the d zone
 # (if not specified, just trace first link)
-od_column: zone
+od_column: zone_h1
