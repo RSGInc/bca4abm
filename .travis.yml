@@ -1,14 +1,13 @@
+os: linux
 language: python
-
-sudo: false
 
 python:
 - '3.7'
 
 install:
-- wget http://repo.continuum.io/miniconda/Miniconda3-3.7.0-Linux-x86_64.sh -O miniconda.sh
+- wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
 - bash miniconda.sh -b -p $HOME/miniconda
-- export PATH="$HOME/miniconda/bin:$PATH"
+- source "$HOME/miniconda/etc/profile.d/conda.sh"
 - hash -r
 - conda config --set always_yes yes --set changeps1 no
 - conda update -q conda
@@ -33,10 +32,9 @@ after_success:
 - touch _build/html/.nojekyll
 
 deploy:
-  provider: pages
+  provider: pages:git
   local_dir: docs/_build/html
-  skip_cleanup: true
-  github_token: $GH_TOKEN
+  token: $GH_TOKEN
   keep_history: true
   on:
     branch: master
