@@ -1,4 +1,3 @@
-
 .. _examples:
 
 Examples
@@ -15,7 +14,7 @@ Each example may be run via
   ::
 
     bca4abm create --example [example name]
-    bca4abm run [example name]
+    bca4abm run --working_dir [example name]
 
 Basic Setup
 -----------
@@ -216,22 +215,19 @@ The ``data`` folder contains the input data for the base and build scenario.
 
   * Link
 
-    * linksMD1.csv - link MD1 period assignment results
-    * linksPM2.csv - link PM2 assignment results
+    * mce_input_links_[time bin] files - hourly link period assignment results
 
   * OD
 
-    * assign_mfs.omx - assignment matrices
-    * skims_mfs.omx - skims matrices
-    * mode_choice_pa.omx - mode choice production-attraction matrices
-    * parking_cost.omx - parking costs at the destination
+    * mce_input_skims.omx - skims matrices
+    * mode_choice_pa_[segment].omx - mode choice production-attraction matrices
+    * mce_input_transit_fares.omx - transit cost matrices
 
   * Zone
 
-    * mf.cval.csv - see above
+    * mce_input_cval.csv - see above
     * cocs.csv - externally defined COC share of households by zone
-    * Productions files such as ma.hboprh.csv (hbo high inc)
-    * Destination choice logsums files such as ma.hbohdcls.csv (hbo high inc)
+    * mce_zone_vectors.csv - production and destination attribute vectors, including parking costs
 
   * zone_districts.csv - zone district scheme for district-to-district O-D processor aggregate report and for zone labels if zones non-sequential
   * moves_2010_summer_running_rates.csv - EPA MOVES emissions rate table lookup file

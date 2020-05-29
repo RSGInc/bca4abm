@@ -145,3 +145,4 @@ Release Notes
 
   * v0.4 - first release
   * v0.5 - add Python 3.5+ support
+  * v0.6 - update 4step example
