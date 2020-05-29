@@ -6,5 +6,5 @@ from . import defaults
 from . import tables
 from . import processors
 
-__version__ = '0.5'
+__version__ = '0.6'
 __doc__ = 'Benefit Calculations for Travel Models'
