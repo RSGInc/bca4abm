@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Examples &mdash; bca4abm 0.5 documentation</title>
+  <title>Examples &mdash; bca4abm 0.6 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -179,7 +179,7 @@ matrices, etc. all need to be the same.  The outputs need to be in open data for
 <p>Each example may be run via</p>
 <blockquote>
 <div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bca4abm</span> <span class="n">create</span> <span class="o">--</span><span class="n">example</span> <span class="p">[</span><span class="n">example</span> <span class="n">name</span><span class="p">]</span>
-<span class="n">bca4abm</span> <span class="n">run</span> <span class="p">[</span><span class="n">example</span> <span class="n">name</span><span class="p">]</span>
+<span class="n">bca4abm</span> <span class="n">run</span> <span class="o">--</span><span class="n">working_dir</span> <span class="p">[</span><span class="n">example</span> <span class="n">name</span><span class="p">]</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -472,24 +472,21 @@ since the mapping defines which fields are loaded into memory.</p>
 <div><ul class="simple">
 <li><p>Link</p>
 <ul>
-<li><p>linksMD1.csv - link MD1 period assignment results</p></li>
-<li><p>linksPM2.csv - link PM2 assignment results</p></li>
+<li><p>mce_input_links_[time bin] files - hourly link period assignment results</p></li>
 </ul>
 </li>
 <li><p>OD</p>
 <ul>
-<li><p>assign_mfs.omx - assignment matrices</p></li>
-<li><p>skims_mfs.omx - skims matrices</p></li>
-<li><p>mode_choice_pa.omx - mode choice production-attraction matrices</p></li>
-<li><p>parking_cost.omx - parking costs at the destination</p></li>
+<li><p>mce_input_skims.omx - skims matrices</p></li>
+<li><p>mode_choice_pa_[segment].omx - mode choice production-attraction matrices</p></li>
+<li><p>mce_input_transit_fares.omx - transit cost matrices</p></li>
 </ul>
 </li>
 <li><p>Zone</p>
 <ul>
-<li><p>mf.cval.csv - see above</p></li>
+<li><p>mce_input_cval.csv - see above</p></li>
 <li><p>cocs.csv - externally defined COC share of households by zone</p></li>
-<li><p>Productions files such as ma.hboprh.csv (hbo high inc)</p></li>
-<li><p>Destination choice logsums files such as ma.hbohdcls.csv (hbo high inc)</p></li>
+<li><p>mce_zone_vectors.csv - production and destination attribute vectors, including parking costs</p></li>
 </ul>
 </li>
 <li><p>zone_districts.csv - zone district scheme for district-to-district O-D processor aggregate report and for zone labels if zones non-sequential</p></li>

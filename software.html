@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Software Implementation &mdash; bca4abm 0.5 documentation</title>
+  <title>Software Implementation &mdash; bca4abm 0.6 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.5
+                0.6
               </div>
             
           
@@ -243,9 +243,9 @@ being implemented in the ActivitySim framework means:</p>
 <p>Software components common to both ABM and four-step model usage.</p>
 <div class="section" id="module-bca4abm.bca4abm">
 <span id="bca4abm"></span><h3>bca4abm<a class="headerlink" href="#module-bca4abm.bca4abm" title="Permalink to this headline">¶</a></h3>
-<dl class="function">
+<dl class="py function">
 <dt id="bca4abm.bca4abm.calc_rows_per_chunk">
-<code class="sig-prename descclassname">bca4abm.bca4abm.</code><code class="sig-name descname">calc_rows_per_chunk</code><span class="sig-paren">(</span><em class="sig-param">chunk_size</em>, <em class="sig-param">df</em>, <em class="sig-param">spec</em>, <em class="sig-param">extra_columns=0</em>, <em class="sig-param">trace_label=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.calc_rows_per_chunk" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.bca4abm.</code><code class="sig-name descname">calc_rows_per_chunk</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">chunk_size</span></em>, <em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">spec</span></em>, <em class="sig-param"><span class="n">extra_columns</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">trace_label</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.calc_rows_per_chunk" title="Permalink to this definition">¶</a></dt>
 <dd><p>simple rows_per_chunk calculator for chunking calls to assign_variables</p>
 <p>ActivitySim’s chunk.rows_per_chunk method handles the main logic, including
 a missing/zero chunk size</p>
@@ -268,9 +268,9 @@ a missing/zero chunk size</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="bca4abm.bca4abm.eval_and_sum">
-<code class="sig-prename descclassname">bca4abm.bca4abm.</code><code class="sig-name descname">eval_and_sum</code><span class="sig-paren">(</span><em class="sig-param">assignment_expressions</em>, <em class="sig-param">df</em>, <em class="sig-param">locals_dict</em>, <em class="sig-param">group_by_column_names=None</em>, <em class="sig-param">df_alias=None</em>, <em class="sig-param">chunk_size=0</em>, <em class="sig-param">trace_rows=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.eval_and_sum" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.bca4abm.</code><code class="sig-name descname">eval_and_sum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">assignment_expressions</span></em>, <em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">locals_dict</span></em>, <em class="sig-param"><span class="n">group_by_column_names</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">df_alias</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">chunk_size</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">trace_rows</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.eval_and_sum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate assignment_expressions against df, and sum the results
 (sum by group if list of group_by_column_names is specified.
 e.g. group by coc column names and return sums grouped by community of concern.)</p>
@@ -292,9 +292,9 @@ e.g. group by coc column names and return sums grouped by community of concern.)
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="bca4abm.bca4abm.read_assignment_spec">
-<code class="sig-prename descclassname">bca4abm.bca4abm.</code><code class="sig-name descname">read_assignment_spec</code><span class="sig-paren">(</span><em class="sig-param">fname</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.read_assignment_spec" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.bca4abm.</code><code class="sig-name descname">read_assignment_spec</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.read_assignment_spec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a CSV model specification into a Pandas DataFrame or Series.</p>
 <p>The CSV is expected to have columns for component descriptions
 targets, and expressions,</p>
@@ -319,9 +319,9 @@ expression values are set as the table index.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="bca4abm.bca4abm.scalar_assign_variables">
-<code class="sig-prename descclassname">bca4abm.bca4abm.</code><code class="sig-name descname">scalar_assign_variables</code><span class="sig-paren">(</span><em class="sig-param">assignment_expressions</em>, <em class="sig-param">locals_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.scalar_assign_variables" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.bca4abm.</code><code class="sig-name descname">scalar_assign_variables</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">assignment_expressions</span></em>, <em class="sig-param"><span class="n">locals_dict</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.bca4abm.scalar_assign_variables" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate a set of variable expressions from a spec in the context
 of a given data table.</p>
 <p>Python expressions are evaluated in the context of this function using
@@ -349,9 +349,9 @@ for an evaluation of an expression that begins with &#64;</p>
 </div>
 <div class="section" id="module-bca4abm.processors.aggregate_trips">
 <span id="aggregate-trips"></span><h3>aggregate_trips<a class="headerlink" href="#module-bca4abm.processors.aggregate_trips" title="Permalink to this headline">¶</a></h3>
-<dl class="function">
+<dl class="py function">
 <dt id="bca4abm.processors.aggregate_trips.aggregate_trips_processor">
-<code class="sig-prename descclassname">bca4abm.processors.aggregate_trips.</code><code class="sig-name descname">aggregate_trips_processor</code><span class="sig-paren">(</span><em class="sig-param">aggregate_trips_spec</em>, <em class="sig-param">settings</em>, <em class="sig-param">data_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.aggregate_trips.aggregate_trips_processor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.aggregate_trips.</code><code class="sig-name descname">aggregate_trips_processor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">aggregate_trips_spec</span></em>, <em class="sig-param"><span class="n">settings</span></em>, <em class="sig-param"><span class="n">data_dir</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.aggregate_trips.aggregate_trips_processor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute aggregate trips benefits</p>
 <p>The data manifest contains a list of trip count files (one for base, one for build)
 along with their their corresponding in-vehicle-time (ivt), operating cost (aoc),
@@ -360,7 +360,7 @@ and toll skims.</p>
 vector computations in the aggregate_trips_spec</p>
 </dd></dl>
 
-<dl class="data">
+<dl class="py data">
 <dt id="bca4abm.processors.aggregate_trips.logger">
 <code class="sig-prename descclassname">bca4abm.processors.aggregate_trips.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.aggregate_trips (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.aggregate_trips.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Aggregate trips processor</p>
@@ -369,7 +369,7 @@ vector computations in the aggregate_trips_spec</p>
 </div>
 <div class="section" id="module-bca4abm.processors.link">
 <span id="link"></span><h3>link<a class="headerlink" href="#module-bca4abm.processors.link" title="Permalink to this headline">¶</a></h3>
-<dl class="data">
+<dl class="py data">
 <dt id="bca4abm.processors.link.logger">
 <code class="sig-prename descclassname">bca4abm.processors.link.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.link (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.link.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Link processor</p>
@@ -385,13 +385,13 @@ vector computations in the aggregate_trips_spec</p>
 </div>
 <div class="section" id="module-bca4abm.processors.abm.auto_ownership">
 <span id="auto-ownership"></span><h3>auto_ownership<a class="headerlink" href="#module-bca4abm.processors.abm.auto_ownership" title="Permalink to this headline">¶</a></h3>
-<dl class="function">
+<dl class="py function">
 <dt id="bca4abm.processors.abm.auto_ownership.auto_ownership_processor">
-<code class="sig-prename descclassname">bca4abm.processors.abm.auto_ownership.</code><code class="sig-name descname">auto_ownership_processor</code><span class="sig-paren">(</span><em class="sig-param">persons_merged</em>, <em class="sig-param">auto_ownership_spec</em>, <em class="sig-param">auto_ownership_settings</em>, <em class="sig-param">coc_column_names</em>, <em class="sig-param">chunk_size</em>, <em class="sig-param">trace_hh_id</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.abm.auto_ownership.auto_ownership_processor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.abm.auto_ownership.</code><code class="sig-name descname">auto_ownership_processor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">persons_merged</span></em>, <em class="sig-param"><span class="n">auto_ownership_spec</span></em>, <em class="sig-param"><span class="n">auto_ownership_settings</span></em>, <em class="sig-param"><span class="n">coc_column_names</span></em>, <em class="sig-param"><span class="n">chunk_size</span></em>, <em class="sig-param"><span class="n">trace_hh_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.abm.auto_ownership.auto_ownership_processor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute auto ownership benefits</p>
 </dd></dl>
 
-<dl class="data">
+<dl class="py data">
 <dt id="bca4abm.processors.abm.auto_ownership.logger">
 <code class="sig-prename descclassname">bca4abm.processors.abm.auto_ownership.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.abm.auto_ownership (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.abm.auto_ownership.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>auto ownership processor</p>
@@ -400,7 +400,7 @@ vector computations in the aggregate_trips_spec</p>
 </div>
 <div class="section" id="module-bca4abm.processors.abm.demographics">
 <span id="demographics"></span><h3>demographics<a class="headerlink" href="#module-bca4abm.processors.abm.demographics" title="Permalink to this headline">¶</a></h3>
-<dl class="data">
+<dl class="py data">
 <dt id="bca4abm.processors.abm.demographics.logger">
 <code class="sig-prename descclassname">bca4abm.processors.abm.demographics.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.abm.demographics (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.abm.demographics.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Demographics processor</p>
@@ -409,30 +409,30 @@ vector computations in the aggregate_trips_spec</p>
 </div>
 <div class="section" id="module-bca4abm.processors.abm.person_trips">
 <span id="person-trips"></span><h3>person_trips<a class="headerlink" href="#module-bca4abm.processors.abm.person_trips" title="Permalink to this headline">¶</a></h3>
-<dl class="data">
+<dl class="py data">
 <dt id="bca4abm.processors.abm.person_trips.logger">
 <code class="sig-prename descclassname">bca4abm.processors.abm.person_trips.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.abm.person_trips (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.abm.person_trips.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Person trips processor</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="bca4abm.processors.abm.person_trips.person_trips_processor">
-<code class="sig-prename descclassname">bca4abm.processors.abm.person_trips.</code><code class="sig-name descname">person_trips_processor</code><span class="sig-paren">(</span><em class="sig-param">trips_with_demographics</em>, <em class="sig-param">person_trips_spec</em>, <em class="sig-param">person_trips_settings</em>, <em class="sig-param">coc_column_names</em>, <em class="sig-param">settings</em>, <em class="sig-param">chunk_size</em>, <em class="sig-param">trace_hh_id</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.abm.person_trips.person_trips_processor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.abm.person_trips.</code><code class="sig-name descname">person_trips_processor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trips_with_demographics</span></em>, <em class="sig-param"><span class="n">person_trips_spec</span></em>, <em class="sig-param"><span class="n">person_trips_settings</span></em>, <em class="sig-param"><span class="n">coc_column_names</span></em>, <em class="sig-param"><span class="n">settings</span></em>, <em class="sig-param"><span class="n">chunk_size</span></em>, <em class="sig-param"><span class="n">trace_hh_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.abm.person_trips.person_trips_processor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute disaggregate trips benefits</p>
 </dd></dl>
 
 </div>
 <div class="section" id="module-bca4abm.processors.abm.physical_activity">
 <span id="physical-activity"></span><h3>physical_activity<a class="headerlink" href="#module-bca4abm.processors.abm.physical_activity" title="Permalink to this headline">¶</a></h3>
-<dl class="data">
+<dl class="py data">
 <dt id="bca4abm.processors.abm.physical_activity.logger">
 <code class="sig-prename descclassname">bca4abm.processors.abm.physical_activity.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.abm.physical_activity (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.abm.physical_activity.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>physical activity processor</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="bca4abm.processors.abm.physical_activity.physical_activity_processor">
-<code class="sig-prename descclassname">bca4abm.processors.abm.physical_activity.</code><code class="sig-name descname">physical_activity_processor</code><span class="sig-paren">(</span><em class="sig-param">trips_with_demographics</em>, <em class="sig-param">persons_merged</em>, <em class="sig-param">physical_activity_trip_spec</em>, <em class="sig-param">physical_activity_person_spec</em>, <em class="sig-param">physical_activity_settings</em>, <em class="sig-param">coc_column_names</em>, <em class="sig-param">settings</em>, <em class="sig-param">chunk_size</em>, <em class="sig-param">trace_hh_id</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.abm.physical_activity.physical_activity_processor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.abm.physical_activity.</code><code class="sig-name descname">physical_activity_processor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trips_with_demographics</span></em>, <em class="sig-param"><span class="n">persons_merged</span></em>, <em class="sig-param"><span class="n">physical_activity_trip_spec</span></em>, <em class="sig-param"><span class="n">physical_activity_person_spec</span></em>, <em class="sig-param"><span class="n">physical_activity_settings</span></em>, <em class="sig-param"><span class="n">coc_column_names</span></em>, <em class="sig-param"><span class="n">settings</span></em>, <em class="sig-param"><span class="n">chunk_size</span></em>, <em class="sig-param"><span class="n">trace_hh_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.abm.physical_activity.physical_activity_processor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute physical benefits</p>
 <p>Physical activity benefits generally accrue if the net physical activity for an individual
 exceeds a certain threshold. We calculate individual physical activity based on trips,
@@ -447,9 +447,9 @@ We chunk trips by household id to ensure that all of a persons trips are in the 
 <p>Software components for four-step model usage.</p>
 <div class="section" id="module-bca4abm.processors.four_step.aggregate_demographics">
 <span id="aggregate-demographics"></span><h3>aggregate_demographics<a class="headerlink" href="#module-bca4abm.processors.four_step.aggregate_demographics" title="Permalink to this headline">¶</a></h3>
-<dl class="function">
+<dl class="py function">
 <dt id="bca4abm.processors.four_step.aggregate_demographics.aggregate_demographics_processor">
-<code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_demographics.</code><code class="sig-name descname">aggregate_demographics_processor</code><span class="sig-paren">(</span><em class="sig-param">zone_hhs</em>, <em class="sig-param">aggregate_demographics_spec</em>, <em class="sig-param">settings</em>, <em class="sig-param">trace_od</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_demographics.aggregate_demographics_processor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_demographics.</code><code class="sig-name descname">aggregate_demographics_processor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">zone_hhs</span></em>, <em class="sig-param"><span class="n">aggregate_demographics_spec</span></em>, <em class="sig-param"><span class="n">settings</span></em>, <em class="sig-param"><span class="n">trace_od</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_demographics.aggregate_demographics_processor" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
@@ -460,7 +460,7 @@ We chunk trips by household id to ensure that all of a persons trips are in the 
 </dl>
 </dd></dl>
 
-<dl class="data">
+<dl class="py data">
 <dt id="bca4abm.processors.four_step.aggregate_demographics.logger">
 <code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_demographics.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.four_step.aggregate_demographics (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_demographics.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Aggregate demographics processor</p>
@@ -471,15 +471,15 @@ calculates communities of concern (COC) / market segments based on mf.cval.csv</
 </div>
 <div class="section" id="module-bca4abm.processors.four_step.aggregate_zone">
 <span id="aggregate-zone"></span><h3>aggregate_zone<a class="headerlink" href="#module-bca4abm.processors.four_step.aggregate_zone" title="Permalink to this headline">¶</a></h3>
-<dl class="function">
+<dl class="py function">
 <dt id="bca4abm.processors.four_step.aggregate_zone.aggregate_zone_processor">
-<code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_zone.</code><code class="sig-name descname">aggregate_zone_processor</code><span class="sig-paren">(</span><em class="sig-param">zones</em>, <em class="sig-param">trace_od</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_zone.aggregate_zone_processor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_zone.</code><code class="sig-name descname">aggregate_zone_processor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">zones</span></em>, <em class="sig-param"><span class="n">trace_od</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_zone.aggregate_zone_processor" title="Permalink to this definition">¶</a></dt>
 <dd><p>zones: orca table</p>
 <p>zone data for base and build scenario dat files combined into a single dataframe
 with columns names prefixed with <a href="#id1"><span class="problematic" id="id2">base_</span></a> or <a href="#id3"><span class="problematic" id="id4">build_</span></a> indexed by ZONE</p>
 </dd></dl>
 
-<dl class="data">
+<dl class="py data">
 <dt id="bca4abm.processors.four_step.aggregate_zone.logger">
 <code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_zone.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.four_step.aggregate_zone (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_zone.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Aggregate zone processor</p>
@@ -493,9 +493,9 @@ mf.cval.csv before input to the bca tool?</p>
 </div>
 <div class="section" id="module-bca4abm.processors.four_step.aggregate_od">
 <span id="aggregate-od"></span><h3>aggregate_od<a class="headerlink" href="#module-bca4abm.processors.four_step.aggregate_od" title="Permalink to this headline">¶</a></h3>
-<dl class="class">
+<dl class="py class">
 <dt id="bca4abm.processors.four_step.aggregate_od.ODSkims">
-<em class="property">class </em><code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_od.</code><code class="sig-name descname">ODSkims</code><span class="sig-paren">(</span><em class="sig-param">omx_file_path</em>, <em class="sig-param">name</em>, <em class="sig-param">zone_index</em>, <em class="sig-param">transpose=False</em>, <em class="sig-param">cache_skims=True</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_od.ODSkims" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_od.</code><code class="sig-name descname">ODSkims</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">omx_file_path</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">zone_index</span></em>, <em class="sig-param"><span class="n">transpose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">cache_skims</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_od.ODSkims" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper for skim arrays to facilitate use of skims by aggregate_od_processor</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -514,15 +514,15 @@ array is correct shape to match (flattened) O-D tiled columns in the od datafram
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="bca4abm.processors.four_step.aggregate_od.create_zone_matrices">
-<code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_od.</code><code class="sig-name descname">create_zone_matrices</code><span class="sig-paren">(</span><em class="sig-param">model_settings</em>, <em class="sig-param">zones</em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_od.create_zone_matrices" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_od.</code><code class="sig-name descname">create_zone_matrices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model_settings</span></em>, <em class="sig-param"><span class="n">zones</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_od.create_zone_matrices" title="Permalink to this definition">¶</a></dt>
 <dd><p>ODSkims look-alikes that have identical values for all zone origins/dests</p>
 <p>i.e. we either repeat (origin_zone_matrices) or tile (dest_zone_matrices) zone values
 to expand zones columns into ODSkims-style flattened arrays</p>
 </dd></dl>
 
-<dl class="data">
+<dl class="py data">
 <dt id="bca4abm.processors.four_step.aggregate_od.logger">
 <code class="sig-prename descclassname">bca4abm.processors.four_step.aggregate_od.</code><code class="sig-name descname">logger</code><em class="property"> = &lt;Logger bca4abm.processors.four_step.aggregate_od (WARNING)&gt;</em><a class="headerlink" href="#bca4abm.processors.four_step.aggregate_od.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Aggregate OD processor</p>
@@ -546,6 +546,7 @@ assign_mfs.omx, inputs and results of the zone aggregate processor, and skims_mf
 <div><ul class="simple">
 <li><p>v0.4 - first release</p></li>
 <li><p>v0.5 - add Python 3.5+ support</p></li>
+<li><p>v0.6 - update 4step example</p></li>
 </ul>
 </div></blockquote>
 </div>
