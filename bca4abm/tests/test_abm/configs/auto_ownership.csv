@@ -1,4 +1,0 @@
-Description,Target,Expression
-base scenario auto ownership cost,base_auto_ownership_cost, persons.hh_expansion_factor * persons.base_vehicles * ANNUAL_COST_PER_VEHICLE / persons.hh_size
-build scenario auto ownership cost,build_auto_ownership_cost, persons.hh_expansion_factor * persons.build_vehicles * ANNUAL_COST_PER_VEHICLE / persons.hh_size
-auto ownership cost benefit,diff_auto_ownership_cost, build_auto_ownership_cost - base_auto_ownership_cost

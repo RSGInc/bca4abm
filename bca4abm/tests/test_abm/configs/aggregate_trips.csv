@@ -1,8 +1,0 @@
-Description,Target,Expression
-# assign here so vot appears in results
-value of time,vot, vot
-# benefits broken down by benefit category
-in vehicle time benefit,ivt_benefit, 0.5 * ((base_trips + build_trips) * (base_ivt-build_ivt)).sum() * vot/60.0 * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-auto ownership cost benefit,aoc_benefit, 0.5 * ((base_trips + build_trips) * aoc_units * AOC_COST_COUNTING_FACTOR * (base_aoc-build_aoc)).sum() * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-toll benefit,toll_benefit, 0.5 * ((base_trips + build_trips) * toll_units * TOLL_COST_COUNTING_FACTOR * (base_toll-build_toll)).sum() * DISCOUNT_RATE * ANNUALIZATION_FACTOR
-total aggregate trip benefit,total_benefit, ivt_benefit + aoc_benefit + toll_benefit
